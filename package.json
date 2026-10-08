@@ -1,0 +1,5 @@
+{
+  "name": "worldmirror-study",
+  "private": true,
+  "engines": { "node": ">=18" }
+}

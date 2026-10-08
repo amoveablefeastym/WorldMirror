@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WorldMirror</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>:root{
+  --bg:#E4E9EC; --paper:#F7F9FA; --ink:#1C2733; --muted:#56666F; --line:#C9D2D8;
+  --accent:#9A6608; --accent-soft:#F3E3BF; --btn:#1C2733; --btn-ink:#F7F9FA;
+  --serif:"Literata", Georgia, "Times New Roman", serif;
+  --sans:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141B21;--paper:#1C252D;--ink:#E4EAEE;--muted:#95A5B0;--line:#2E3A44;--accent:#E8B64A;--accent-soft:#3A3120;--btn:#E4EAEE;--btn-ink:#141B21}}
+:root[data-theme="dark"]{--bg:#141B21;--paper:#1C252D;--ink:#E4EAEE;--muted:#95A5B0;--line:#2E3A44;--accent:#E8B64A;--accent-soft:#3A3120;--btn:#E4EAEE;--btn-ink:#141B21}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
+.brand{font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:28px}
+.brand span{color:var(--muted);font-weight:400}
+.hidden{display:none!important}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5.4vw,58px);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:17ch}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3.6vw,38px);line-height:1.15;letter-spacing:-.01em;margin:0 0 10px}
+.lede{font-size:18px;color:var(--muted);max-width:54ch;margin:0 0 28px}
+.small{font-size:13px;color:var(--muted)}
+textarea,input[type=text]{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--paper);font-family:var(--serif);font-size:17px;line-height:1.55}
+textarea{resize:vertical}
+textarea:focus,input:focus{outline:none;border-color:var(--ink)}
+#problem{min-height:140px;font-size:20px;max-width:720px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border-radius:999px;padding:10px 18px;border:1px solid var(--line);background:transparent;font-size:15px}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.btn:disabled{opacity:.4;cursor:default}
+.textbtn{background:none;border:0;padding:6px 0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:14px}
+.textbtn:hover{color:var(--ink)}
+.statement{font-family:var(--serif);font-style:italic;font-size:19px;line-height:1.55;color:var(--muted);max-width:60ch;margin:0 0 28px}
+
+/* loading */
+#loading{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
+#loading .statement{margin:0}
+.orbit{width:46px;height:46px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent)}
+@media (prefers-reduced-motion:no-preference){.orbit{animation:spin 1.4s linear infinite}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* reveal */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:26px}
+.pcard{text-align:left;padding:0;border:1px solid var(--line);background:var(--paper);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.pcard:hover{border-color:var(--ink)}
+.thumb{aspect-ratio:16/10;background:#2A3546}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pc-body{padding:14px 16px 18px;display:flex;flex-direction:column;gap:2px}
+.pc-body b{font-weight:500;font-size:18px}
+.pc-body small{color:var(--muted);font-size:13px}
+.pc-body span{font-family:var(--serif);font-size:16px;margin-top:6px}
+
+/* walk */
+.walkhead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font-size:14px;display:flex;align-items:center;gap:7px}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seen{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:26px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--paper);border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+.viewer{position:relative;aspect-ratio:16/9;background:#1E2836;user-select:none;-webkit-user-select:none}
+@media (max-width:640px){.viewer{aspect-ratio:4/3}}
+.viewer canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.viewer canvas.gl:active{cursor:grabbing}
+.viewer.no3d::after{content:"The 3D view couldn't load in this browser.";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cdd6de;font-size:14px}
+.ov{position:absolute;color:#fff;font-size:13px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.vplace{left:16px;top:12px;font-weight:500}
+.vcount{left:16px;top:30px;opacity:.85}
+.hint3d{left:16px;bottom:14px;background:rgba(10,14,24,.55);padding:7px 12px;border-radius:10px;text-shadow:none;transition:opacity .6s}
+.hint3d.gone{opacity:0;pointer-events:none}
+.vbtn{position:absolute;border:0;background:rgba(10,14,24,.5);color:#fff;border-radius:10px;width:40px;height:40px;font-size:16px;display:flex;align-items:center;justify-content:center;touch-action:none}
+.vbtn:hover{background:rgba(10,14,24,.75)}
+#recenter{right:12px;top:12px;width:auto;padding:0 12px;font-size:13px}
+.pad{position:absolute;right:12px;bottom:12px;width:132px;height:90px}
+.pad .vbtn[data-move=f]{left:46px;top:0}.pad .vbtn[data-move=l]{left:0;top:46px}.pad .vbtn[data-move=b]{left:46px;top:46px}.pad .vbtn[data-move=r]{left:92px;top:46px}
+.mbody{padding:22px 24px 24px}
+.mtitle{font-size:14px;font-weight:500;color:var(--accent);margin:0 0 6px}
+.mscene{font-family:var(--serif);font-size:clamp(19px,2.2vw,23px);line-height:1.5;margin:0 0 14px;max-width:62ch}
+.meaning{font-family:var(--serif);font-size:16px;line-height:1.65;color:var(--muted);border-left:2px solid var(--accent);padding-left:14px;margin:0 0 14px;max-width:62ch}
+.ask{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.ask h3,.thoughts h3{font-size:15px;font-weight:500;margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:14px;text-align:left}
+.chip:hover{border-color:var(--ink)}
+.qa{margin-bottom:14px}
+.qa .q{font-weight:500;margin:0 0 4px;font-size:15px}
+.qa .a{font-family:var(--serif);margin:0;line-height:1.6;max-width:64ch}
+.qa .a.pending{color:var(--muted);font-style:italic}
+#askForm{display:flex;gap:8px}
+#askForm input{font-family:var(--sans);font-size:15px;padding:10px 14px;border-radius:999px;background:var(--bg)}
+.thoughts{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.thoughts textarea{min-height:80px;background:var(--bg);font-size:16px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+
+.side{display:flex;flex-direction:column;gap:22px}
+@media (min-width:901px){.side{position:sticky;top:calc(20px + env(safe-area-inset-top,0px))}}
+.side h3{font-size:14px;font-weight:500;margin:0 0 6px;color:var(--muted)}
+.orig{font-family:var(--serif);font-size:15px;color:var(--muted);margin:0}
+.ref{font-family:var(--serif);font-size:18px;line-height:1.5;margin:0}
+#refBlock{padding:14px 16px;border-radius:12px;background:var(--accent-soft)}
+#refBlock.pulse{animation:pulse 1.4s ease}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 10px transparent}}
+.shift{font-size:13px;color:var(--muted);margin:6px 0 0}
+.notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.notes li{font-family:var(--serif);font-size:15px;line-height:1.5;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.notes li small{display:block;font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:2px}
+.notes .empty{color:var(--muted);font-style:italic;border:0}
+.research{font-size:13px;color:var(--muted)}
+.research summary{cursor:pointer}
+.research dt{font-weight:500;color:var(--ink);margin-top:10px}
+.research dd{margin:2px 0 0;font-family:var(--serif);font-size:14px}
+
+/* checkin */
+.narrow{max-width:760px}
+.cmp{display:grid;gap:16px;margin:22px 0 30px}
+.cmp label{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
+.cmp .orig{font-size:17px}
+#ciNow{font-size:20px;min-height:96px;background:var(--accent-soft);border-color:transparent}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:16px 18px}
+.opt:hover{border-color:var(--ink)}
+.opt b{display:block;font-weight:500;font-size:17px}
+.opt span{color:var(--muted);font-family:var(--serif);font-size:15px}
+#missingWrap{margin-top:14px}
+#missingWrap textarea{min-height:80px}
+
+/* reflect/final */
+.observation{font-family:var(--serif);font-size:21px;line-height:1.6;margin:0 0 24px}
+.threads{list-style:none;padding:0;margin:0 0 26px;display:flex;flex-direction:column;gap:12px}
+.threads b{font-weight:500;font-size:15px;display:block}
+.threads span{font-family:var(--serif);color:var(--muted);font-size:15px}
+.question{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.5;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 0 20px}
+.thinking{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:19px}
+.note-label{display:block;font-size:14px;color:var(--muted);margin:0 0 6px}
+.final-line{font-family:var(--serif);font-size:clamp(26px,3.6vw,38px);line-height:1.35;margin:6px 0 30px;letter-spacing:-.01em}
+.sec{font-size:14px;font-weight:500;color:var(--muted);margin:30px 0 12px}
+.causes{display:grid;gap:12px}
+.cause{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--paper)}
+.ctext{font-family:var(--serif);font-size:19px;line-height:1.5;margin:0}
+.verdicts .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ccomment{margin-top:10px;font-family:var(--sans);font-size:15px;padding:9px 13px;background:var(--bg)}
+.tries{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.tries li{background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-family:var(--serif);font-size:17px;line-height:1.5}
+.tries .from{display:block;font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:2px}
+.err{color:var(--muted);font-size:14px;margin-top:10px}
+details.log{margin-top:40px;font-size:14px;color:var(--muted)}
+details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:360px;overflow:auto;font-size:12px;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">WorldMirror <span>prototype</span></div>
+
+  <section id="intro">
+    <h1>What's been on your mind?</h1>
+    <p class="lede">Write it however it comes out. It doesn't need to be clear yet. We'll show you a few places in the world that might have something to say about it, and you can walk through them.</p>
+    <label for="problem" class="small" style="display:block;margin-bottom:6px">In your own words</label>
+    <textarea id="problem" placeholder="Lately I've been..."></textarea>
+    <div id="codeWrap" class="hidden" style="margin-top:14px;max-width:260px">
+      <label for="studyCode" class="small" style="display:block;margin-bottom:6px">Study code</label>
+      <input type="text" id="studyCode" autocomplete="off">
+    </div>
+    <div class="row" style="margin-top:16px">
+      <button class="btn primary" id="startBtn" disabled>Show me places</button>
+      <button class="textbtn" id="exampleBtn">Use an example</button>
+    </div>
+    <p class="small" style="margin-top:26px;max-width:62ch">What you write here and while walking is sent to Anthropic's Claude AI through this study's server, so it can choose places, answer your questions, and notice what's shifting. Your session, including your notes and questions, is saved for the research team.</p>
+  </section>
+
+  <section id="loading" class="hidden">
+    <div class="orbit" aria-hidden="true"></div>
+    <p id="loadingMsg" style="font-size:18px;margin:0;max-width:46ch"></p>
+    <p class="statement" id="loadingStatement"></p>
+    <p class="small" style="margin:0">This can take up to a minute.</p>
+    <button class="btn" id="stopGen">Stop</button>
+    <div id="loadingErr"></div>
+  </section>
+
+  <section id="reveal" class="hidden">
+    <h2 id="revealTitle"></h2>
+    <p class="statement" id="revealStatement"></p>
+    <div class="cards" id="cards"></div>
+    <div class="row"><button class="btn primary" id="walkBtn">Start walking</button><span class="small">Or pick a place to begin there.</span></div>
+  </section>
+
+  <section id="walk" class="hidden">
+    <div class="walkhead"><div class="tabs" id="tabs"></div><button class="textbtn" id="restartTop">Start over</button></div>
+    <div class="grid">
+      <article class="card">
+        <div class="viewer" id="viewer">
+          <div class="ov vplace" id="placeName"></div>
+          <div class="ov vcount" id="mcount"></div>
+          <div class="ov hint3d">Drag to look around. Use W A S D or the arrows to walk.</div>
+          <button class="vbtn" id="recenter">Recenter</button>
+          <div class="pad">
+            <button class="vbtn" data-move="f" aria-label="Walk forward">↑</button>
+            <button class="vbtn" data-move="l" aria-label="Turn left">←</button>
+            <button class="vbtn" data-move="b" aria-label="Walk back">↓</button>
+            <button class="vbtn" data-move="r" aria-label="Turn right">→</button>
+          </div>
+        </div>
+        <div class="mbody">
+          <p class="mtitle" id="mtitle"></p>
+          <p class="mscene" id="mscene"></p>
+          <p class="meaning hidden" id="mmeaning"></p>
+          <button class="btn" id="closerBtn">Look closer</button>
+          <div class="ask">
+            <h3>Ask about this</h3>
+            <div class="chips" id="suggest"></div>
+            <div id="chatlog" aria-live="polite"></div>
+            <form id="askForm"><input type="text" id="askInput" placeholder="Ask anything about this moment or place" autocomplete="off"><button class="btn" id="askBtn">Ask</button></form>
+          </div>
+          <div class="thoughts">
+            <h3><label for="thoughts">Your thoughts</label></h3>
+            <textarea id="thoughts" placeholder="What's catching you here, and what is it bringing up?"></textarea>
+          </div>
+          <div class="nav"><button class="btn" id="prevM">Back</button><button class="btn primary" id="nextM">Next moment</button></div>
+        </div>
+      </article>
+      <aside class="side">
+        <div>
+          <h3>What you came in with</h3>
+          <p class="orig" id="origStmt"></p>
+        </div>
+        <div id="refBlock" class="hidden">
+          <h3 style="color:inherit">How it's taking shape</h3>
+          <p class="ref" id="refStmt"></p>
+          <p class="shift" id="refShift"></p>
+        </div>
+        <p class="small" id="refStatus" aria-live="polite" style="margin:-10px 0 0"></p>
+        <div>
+          <h3>Your thoughts so far</h3>
+          <ul class="notes" id="notes"></ul>
+        </div>
+        <button class="btn primary hidden" id="checkSide">Pause and check in</button>
+        <details class="research"><summary>Researcher view</summary><dl id="readout"></dl></details>
+      </aside>
+    </div>
+  </section>
+
+  <section id="checkin" class="hidden narrow">
+    <h2>Let's check in</h2>
+    <p class="lede" style="margin-bottom:0">Here's where you started, and how it reads now based on what you noticed and asked. Edit it if it's not quite right.</p>
+    <div class="cmp">
+      <div><label>You started with</label><p class="orig" id="ciOrig"></p></div>
+      <div><label for="ciNow">Now it sounds like</label><textarea id="ciNow"></textarea><p class="small hidden" id="ciUpdating">Still updating from your last place...</p></div>
+    </div>
+    <div class="opts">
+      <button class="opt" id="optSatisfied"><b>I feel satisfied</b><span>This says it. Help me make sense of what I noticed.</span></button>
+      <button class="opt" id="optMore"><b>I want to keep exploring</b><span>This is helping, but I'm not there yet.</span></button>
+      <button class="opt" id="optNone"><b>None of these reflect my problem</b><span>The places so far missed it.</span></button>
+    </div>
+    <div id="missingWrap" class="hidden">
+      <label class="note-label" for="missing">What's missing? Even a rough sense helps.</label>
+      <textarea id="missing" placeholder="It's less about... and more about..."></textarea>
+      <div class="row" style="margin-top:12px"><button class="btn primary" id="pivotBtn">Show me different places</button></div>
+    </div>
+    <p style="margin-top:22px"><button class="textbtn" id="backToWalk">Go back to the places</button></p>
+  </section>
+
+  <section id="reflect" class="hidden narrow">
+    <h2>What your walk is pointing to</h2>
+    <p class="lede">This isn't an answer yet. It's a working read of what you noticed, and you can push back on any of it.</p>
+    <div id="reflectBody"></div>
+  </section>
+
+  <section id="final" class="hidden narrow">
+    <h2>Your working summary</h2>
+    <p class="lede">Where things stand for now. You can keep exploring from here whenever you want.</p>
+    <div id="summaryBody"></div>
+    <div class="row" style="margin-top:28px">
+      <button class="btn primary" id="finalExplore">Explore places for this</button>
+      <button class="btn" id="restart">Start a new walk</button>
+    </div>
+    <details class="log"><summary>Session log (for the research team)</summary><pre id="log"></pre></details>
+  </section>
+</div>
+
+<script>
+/* ================= 3D scene engine ================= */
+const HAS3D = typeof THREE !== "undefined";
+const SKIES={
+  dawn:{top:"#7F93B8",bot:"#F2C4A2",sun:"#FFD9B0",amb:.62,sunI:.85,fog:"#E3C3AE",sunPos:[-30,8,-40]},
+  day:{top:"#5F9FD3",bot:"#DCEBF2",sun:"#FFF4DD",amb:.78,sunI:1.0,fog:"#D3E2EC",sunPos:[20,40,10]},
+  dusk:{top:"#2D3866",bot:"#E68A65",sun:"#FFB070",amb:.5,sunI:.7,fog:"#B07A6C",sunPos:[30,6,-40]},
+  night:{top:"#060B1C",bot:"#1C2A48",sun:"#9FB4E0",amb:.28,sunI:.22,fog:"#0F1729",sunPos:[-20,30,-30]}
+};
+const SKIN=["#F1D3B8","#E0B48F","#C68E62","#9E6B45","#7A4E30","#5A3922"];
+const CLOTH=["#B5473A","#2F5D8A","#E0A526","#3E7D5A","#7B4E8C","#D9D3C7","#2B2B2B","#C2603A","#4F7FA8","#8E3B5A"];
+const KINDS=["person","table_long","table_small","bench","stool","stall","lanterns","bunting","lantern","candles","fire","tree","maple_tree","building","pagoda","gate","drum","bicycle","motorbike","car","boat","bowl","crates","umbrella","petals","kite","steps","water","fountain","wall","raked_gravel","rock"];
+function hex(c,d){return /^#[0-9a-fA-F]{6}$/.test(c||"")?c:d}
+function srng(seed){let h=2166136261;for(const ch of String(seed)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+
+function buildScene(spec, seed){
+  const T=THREE, r=srng(seed||"x");
+  const scene=new T.Scene(), anim=[], lights=[];
+  const time=SKIES[spec.time]?spec.time:"day", sky=SKIES[time], night=time==="night", dusk=time==="dusk";
+  const pal={ground:hex(spec.palette?.ground,"#8C7B66"),walls:hex(spec.palette?.walls,"#C9B79C"),accent:hex(spec.palette?.accent,"#C9852E")};
+  const M=(c,o={})=>new T.MeshStandardMaterial({color:c,roughness:.92,metalness:0,flatShading:true,...o});
+  const glow=c=>new T.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:night?1.6:dusk?1.1:.5});
+  const mesh=(g,m,x=0,y=0,z=0)=>{const o=new T.Mesh(g,m);o.position.set(x,y,z);return o};
+  const box=(w,h,d,c)=>mesh(new T.BoxGeometry(w,h,d),typeof c==="string"?M(c):c);
+  const cyl=(a,b,h,c,s=10)=>mesh(new T.CylinderGeometry(a,b,h,s),typeof c==="string"?M(c):c);
+  const sph=(rad,c,s=10)=>mesh(new T.SphereGeometry(rad,s,Math.max(6,s-2)),typeof c==="string"?M(c):c);
+  const pick=a=>a[Math.floor(r()*a.length)];
+  const shade=(c,k)=>{const o=new T.Color(c);o.multiplyScalar(k);return"#"+o.getHexString()};
+  const addLight=(color,x,y,z,i=1.2,d=8)=>{if(lights.length>=5)return;const l=new T.PointLight(color,night||dusk?i:i*.3,d,2);l.position.set(x,y,z);scene.add(l);lights.push(l)};
+
+  /* sky */
+  const interior=spec.setting==="interior";
+  if(!interior){
+    const sg=new T.SphereGeometry(120,24,12);
+    const sm=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{top:{value:new T.Color(sky.top)},bot:{value:new T.Color(sky.bot)}},
+      vertexShader:"varying float h;void main(){h=normalize(position).y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+      fragmentShader:"uniform vec3 top;uniform vec3 bot;varying float h;void main(){gl_FragColor=vec4(mix(bot,top,clamp(h*1.6,0.,1.)),1.);}"});
+    scene.add(new T.Mesh(sg,sm));
+    if(night){const g=new T.BufferGeometry(),p=[];for(let i=0;i<500;i++){const th=r()*Math.PI*2,ph=r()*1.2+.15;p.push(110*Math.cos(th)*Math.cos(ph),110*Math.sin(ph),110*Math.sin(th)*Math.cos(ph))}g.setAttribute("position",new T.Float32BufferAttribute(p,3));scene.add(new T.Points(g,new T.PointsMaterial({color:0xffffff,size:.5})))}
+    const sunM=sph(night?2.5:4,new T.MeshBasicMaterial({color:sky.sun}));sunM.position.set(...sky.sunPos.map(v=>v*2.2));scene.add(sunM);
+    scene.fog=new T.Fog(sky.fog,18,70);
+  } else { scene.background=new T.Color(shade(pal.walls,.4)); }
+  scene.add(new T.HemisphereLight(sky.top,shade(pal.ground,.8),interior?.55:sky.amb));
+  const sun=new T.DirectionalLight(sky.sun,interior?.25:sky.sunI);sun.position.set(...sky.sunPos);scene.add(sun);
+
+  /* ground */
+  const ground=mesh(new T.PlaneGeometry(200,200),M(pal.ground));ground.rotation.x=-Math.PI/2;scene.add(ground);
+
+  /* setting */
+  const wallCols=[pal.walls,shade(pal.walls,.85),shade(pal.walls,1.12),pal.accent];
+  const building=(x,z,w,h,d,c,lit=true)=>{const g=new T.Group();g.add(box(w,h,d,c).translateY(h/2));
+    if(lit){const wm=night||dusk?glow("#FFC46B"):M(shade(c,.55));const rows=Math.floor(h/1.6),cols=Math.max(1,Math.floor(w/1.4));
+      for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){if(r()<(night?.45:.7)){const win=box(.5,.75,.05,wm);win.position.set(-w/2+.7+j*(w-1)/Math.max(1,cols-1||1),1.2+i*1.6,d/2+.03);g.add(win)}}}
+    g.position.set(x,0,z);scene.add(g);return g};
+  const s=spec.setting;
+  if(s==="street"||s==="market"){for(const side of[-1,1]){let z=-22;while(z<14){const w=3+r()*3,h=4+r()*6;const b=building(side*7.5,z+w/2,4,h,w,pick(wallCols));b.rotation.y=-side*Math.PI/2;z+=w+.1}}
+    if(s==="market"){for(let i=0;i<4;i++)addStall(-5+i*3.3,-7.5,pick(CLOTH))}}
+  else if(s==="plaza"){for(let a=0;a<14;a++){const th=a/14*Math.PI*2;const b=building(Math.cos(th)*15,Math.sin(th)*15,5+r()*3,5+r()*7,4,pick(wallCols));b.rotation.y=-th-Math.PI/2}}
+  else if(s==="waterfront"||s==="riverside"){
+    const edge=s==="riverside"?-3:-5.3, wy=s==="riverside"?-1.5:-.4;
+    ground.geometry.dispose();ground.geometry=new T.PlaneGeometry(200,100);ground.position.z=edge+50;
+    const water=mesh(new T.PlaneGeometry(200,100),M(night?"#1B2A44":"#4E7FA0",{roughness:.3,metalness:.1}));water.rotation.x=-Math.PI/2;water.position.set(0,wy,edge-50);scene.add(water);
+    anim.push(t=>{water.position.y=wy+Math.sin(t*.8)*.03});
+    if(s==="riverside"){for(let i=0;i<6;i++){const st=box(200,.25,1,shade(pal.ground,1-i*.05));st.position.set(0,-.125-i*.25,edge-.5-i);scene.add(st)}
+      for(let i=0;i<6;i++){building(-20+i*8,edge+8+r()*3,5,6+r()*6,4,pick(wallCols))}
+      for(let i=0;i<6;i++)building(-25+i*10,edge-45,6,4+r()*4,4,shade(pal.ground,.7),false)}
+    else{const quay=box(200,.6,.8,shade(pal.ground,.75));quay.position.set(0,-.1,edge+.4);scene.add(quay);
+      for(let i=0;i<9;i++)building(-28+i*7+r(),edge-40-r()*8,5,4+r()*8,4,pick(wallCols));
+      for(let i=0;i<6;i++){const b=building(-16+i*6.5,13,5,5+r()*6,4,pick(wallCols));b.rotation.y=Math.PI}}}
+  else if(s==="garden"||s==="courtyard"){const wc=s==="garden"?"#7D6A55":pal.walls;const back=box(40,2.2,.6,wc);back.position.set(0,1.1,-11);scene.add(back);
+    if(s==="courtyard"){for(const x of[-11,11]){const sw=box(.6,4,30,wc);sw.position.set(x,2,0);scene.add(sw)}back.scale.y=1.8;back.position.y=2}
+    else{for(let i=0;i<8;i++)addTree(-14+r()*28,-13-r()*6,1+r()*.8,r()>.6?"#B5452A":"#4E6B3A")}}
+  else if(s==="hillside"){for(let i=0;i<6;i++){const h=sph(10+r()*10,shade(pal.ground,.85+r()*.2),12);h.scale.y=.35;h.position.set(-40+i*16,-1,-35-r()*15);scene.add(h)}}
+  else if(s==="interior"){const room=box(16,4,16,M(pal.walls,{side:T.BackSide}));room.position.set(0,2,1);scene.add(room);const beams=new T.Group();for(let i=-3;i<=3;i++){beams.add(box(16,.2,.25,shade(pal.walls,.5)).translateZ(i*2.2).translateY(3.85))}scene.add(beams);addLight("#FFD39A",0,3.3,0,1.4,14);ground.material=M(shade(pal.ground,1))}
+
+  /* helpers for objects */
+  function addTree(x,z,k=1,leaf="#4E6B3A"){const g=new T.Group();g.add(cyl(.12*k,.18*k,1.8*k,"#5A4330").translateY(.9*k));for(let i=0;i<3;i++){const c=sph((.8+r()*.4)*k,leaf,7);c.position.set((r()-.5)*.8*k,(1.9+r()*.8)*k,(r()-.5)*.8*k);g.add(c)}g.position.set(x,0,z);scene.add(g);return g}
+  function addStall(x,z,c){const g=new T.Group();for(const dx of[-1.1,1.1])for(const dz of[-.6,.6])g.add(cyl(.05,.05,2.2,"#5A4330").translateX(dx).translateZ(dz).translateY(1.1));g.add(box(2.4,.9,1.1,"#7A5A3C").translateY(.45));const aw=box(2.7,.08,1.6,c);aw.position.y=2.25;aw.rotation.x=.12;g.add(aw);for(let i=0;i<5;i++)g.add(box(.3,.25,.3,pick(["#D9822B","#C23B2E","#7FA03A","#E4C44A"])).translateX(-.9+i*.45).translateY(1.02));g.position.set(x,0,z);scene.add(g);return g}
+
+  function person(pose,color){
+    const g=new T.Group(), skin=pick(SKIN), cloth=color||pick(CLOTH), seated=pose==="seated";
+    const body=new T.Group();g.add(body);
+    if(!seated){body.add(cyl(.09,.09,.8,"#2E2B2A",6).translateX(-.1).translateY(.4));body.add(cyl(.09,.09,.8,"#2E2B2A",6).translateX(.1).translateY(.4))}
+    else{const l1=box(.18,.16,.55,"#2E2B2A");l1.position.set(-.1,.48,.22);const l2=l1.clone();l2.position.x=.1;body.add(l1,l2);body.add(cyl(.07,.07,.45,"#2E2B2A",6).translateX(-.1).translateY(.22).translateZ(.48));body.add(cyl(.07,.07,.45,"#2E2B2A",6).translateX(.1).translateY(.22).translateZ(.48))}
+    const base=seated?.5:.8;
+    body.add(cyl(.2,.26,.62,cloth,8).translateY(base+.31));
+    const head=sph(.13,skin,8);head.position.y=base+.78;body.add(head);
+    if(r()>.5){const hair=sph(.135,pick(["#1E1A17","#3B2A1E","#6B4A2E","#B9B2A6"]),8);hair.scale.y=.6;hair.position.y=base+.86;body.add(hair)}
+    const armL=new T.Group(),armR=new T.Group();armL.position.set(-.25,base+.58,0);armR.position.set(.25,base+.58,0);
+    armL.add(box(.09,.5,.09,cloth).translateY(-.25));armR.add(box(.09,.5,.09,cloth).translateY(-.25));body.add(armL,armR);
+    const ph=r()*6;
+    if(pose==="drumming"){armL.rotation.x=-1.1;armR.rotation.x=-1.1;anim.push(t=>{armL.rotation.x=-1.1+Math.sin(t*9+ph)*.35;armR.rotation.x=-1.1+Math.sin(t*9+ph+Math.PI)*.35})}
+    else if(pose==="dancing"){anim.push(t=>{body.rotation.y=Math.sin(t*1.8+ph)*.6;body.position.y=Math.abs(Math.sin(t*3.6+ph))*.08;armL.rotation.z=.6+Math.sin(t*3.6+ph)*.5;armR.rotation.z=-.6-Math.sin(t*3.6+ph)*.5})}
+    else if(pose==="working"){armL.rotation.x=-.9;armR.rotation.x=-.9;body.rotation.x=.15;anim.push(t=>{armR.rotation.x=-.9+Math.sin(t*2+ph)*.25})}
+    else if(pose==="seated"){armL.rotation.x=-.7;armR.rotation.x=-.7;anim.push(t=>{head.rotation.y=Math.sin(t*.7+ph)*.4;armR.rotation.x=-.7+Math.max(0,Math.sin(t*.9+ph))*.4})}
+    else{anim.push(t=>{head.rotation.y=Math.sin(t*.5+ph)*.35;body.position.y=Math.sin(t*1.2+ph)*.008})}
+    return g;
+  }
+  const builders={
+    table_long:o=>{const L=o.length||4,g=new T.Group();g.add(box(L,.08,1,"#7A5636").translateY(.76));for(const x of[-L/2+.2,L/2-.2])for(const z of[-.4,.4])g.add(box(.08,.76,.08,"#5A3F27").translateX(x).translateZ(z).translateY(.38));for(const z of[-.85,.85])g.add(box(L,.06,.3,"#6A4A2E").translateZ(z).translateY(.45));return g},
+    table_small:()=>{const g=new T.Group();g.add(cyl(.55,.55,.06,"#7A5636",14).translateY(.76));g.add(cyl(.05,.05,.76,"#3A2C20",6).translateY(.38));return g},
+    bench:o=>{const L=o.length||2,g=new T.Group();g.add(box(L,.08,.4,"#6A4A2E").translateY(.45));for(const x of[-L/2+.1,L/2-.1])g.add(box(.08,.45,.35,"#4A3420").translateX(x).translateY(.22));return g},
+    stool:()=>{const g=new T.Group();g.add(cyl(.18,.15,.35,pick(["#C23B2E","#2F6FB0","#3E8E5A"]),8).translateY(.18));return g},
+    lanterns:o=>{const L=o.length||8,g=new T.Group(),n=Math.round(L/.8);for(let i=0;i<n;i++){const b=sph(.13,glow(i%2?hex(o.color,"#FF9F43"):"#FFD27A"),8);b.position.set(-L/2+i*L/n,3.2+Math.sin(i/n*Math.PI)*-.4,0);g.add(b)}addLight("#FFB566",o.x||0,3,o.z||0,1.5,10);return g},
+    bunting:o=>{const L=o.length||8,g=new T.Group(),n=Math.round(L/.5);for(let i=0;i<n;i++){const f=mesh(new T.ConeGeometry(.16,.35,3),M(pick(CLOTH)));f.rotation.x=Math.PI;f.position.set(-L/2+i*L/n,3.4+Math.sin(i/n*Math.PI)*-.5,0);g.add(f)}const ph=r()*5;anim.push(t=>{g.rotation.x=Math.sin(t*1.3+ph)*.05});return g},
+    lantern:o=>{const g=new T.Group();g.add(cyl(.01,.01,.8,"#222",4).translateY(3.1));const l=cyl(.2,.2,.45,glow(hex(o.color,"#F2B35A")),10);l.position.y=2.5;g.add(l);addLight("#FFB566",o.x||0,2.4,o.z||0,1.2,7);return g},
+    candles:o=>{const g=new T.Group();const c=cyl(.03,.03,.14,"#F2EDE0",6);c.position.y=.07;const f=sph(.025,glow("#FFC35A"),6);f.position.y=.17;f.scale.y=1.8;g.add(c,f);const ph=r()*9;anim.push(t=>{f.scale.y=1.6+Math.sin(t*14+ph)*.3});if(r()>.5)addLight("#FFB566",(o.x||0),(o.y||0)+.6,(o.z||0),.9,4);return g},
+    fire:o=>{const g=new T.Group();for(let i=0;i<5;i++)g.add(box(.6,.08,.08,"#4A3420").rotateY(i*1.2).translateY(.05));const f=mesh(new T.ConeGeometry(.35,.9,7),glow("#FF8A2A"));f.position.y=.45;g.add(f);anim.push(t=>{f.scale.set(1+Math.sin(t*11)*.08,1+Math.sin(t*7)*.15,1)});addLight("#FF8A2A",o.x||0,1,o.z||0,2,10);return g},
+    tree:o=>{const g=addTree(0,0,o.size||1,hex(o.color,"#4E6B3A"));scene.remove(g);return g},
+    maple_tree:o=>{const g=addTree(0,0,o.size||1.1,hex(o.color,pick(["#C2402A","#D9622B","#B8322A"])));scene.remove(g);return g},
+    building:o=>{const g=building(0,0,o.width||5,(o.size||1)*6,4,hex(o.color,pick(wallCols)));scene.remove(g);g.position.set(0,0,0);return g},
+    pagoda:o=>{const g=new T.Group(),c=hex(o.color,"#7A3B2A");for(let i=0;i<4;i++){const w=3.2-i*.6;g.add(box(w,1,w,"#C9B79C").translateY(.5+i*1.25));const roof=box(w+1.2,.18,w+1.2,c);roof.position.y=1.08+i*1.25;g.add(roof)}g.add(cyl(.05,.05,1.4,"#9A7A3A",4).translateY(5.6));return g},
+    gate:o=>{const g=new T.Group(),c=hex(o.color,"#C23B22");for(const x of[-1.4,1.4])g.add(cyl(.15,.18,3.6,c,10).translateX(x).translateY(1.8));g.add(box(4.2,.22,.35,"#2B2B2B").translateY(3.7));g.add(box(3.4,.18,.25,c).translateY(3.2));return g},
+    drum:o=>{const g=new T.Group();g.add(cyl(.22,.17,1,hex(o.color,"#8A5A35"),12).translateY(.5));g.add(cyl(.225,.225,.03,"#E8DCC4",12).translateY(1.01));return g},
+    bicycle:o=>{const g=new T.Group(),c=hex(o.color,pick(CLOTH));for(const x of[-.5,.5]){const w=mesh(new T.TorusGeometry(.33,.03,6,16),M("#222"));w.position.set(x,.33,0);g.add(w)}g.add(box(1,.05,.05,c).translateY(.6));g.add(box(.05,.5,.05,c).translateY(.55).translateX(.35).rotateZ(.3));g.add(box(.05,.5,.05,c).translateY(.5).translateX(-.25).rotateZ(-.4));g.add(box(.25,.05,.12,"#222").translateY(.85).translateX(-.3));g.add(box(.05,.05,.45,"#222").translateY(.95).translateX(.45));return g},
+    motorbike:o=>{const g=builders.bicycle({color:hex(o.color,"#2F5D8A")});g.add(box(.7,.3,.3,hex(o.color,"#2F5D8A")).translateY(.55));return g},
+    car:o=>{const g=new T.Group(),c=hex(o.color,pick(["#5FA8C9","#D9534F","#E8C547","#7DB46C","#E6E1D3"]));g.add(box(3.8,.6,1.7,c).translateY(.6));g.add(box(2,.55,1.5,c).translateY(1.15).translateX(-.2));for(const x of[-1.2,1.2])for(const z of[-.85,.85]){const w=cyl(.35,.35,.25,"#1E1E1E",12);w.rotation.x=Math.PI/2;w.position.set(x,.35,z);g.add(w)}return g},
+    boat:o=>{const g=new T.Group(),c=hex(o.color,"#8A5A35");const h=box(3.2,.45,1.1,c);h.position.y=.25;g.add(h);const p=mesh(new T.ConeGeometry(.55,.9,4),M(c));p.rotation.z=-Math.PI/2;p.position.set(2,.25,0);p.scale.z=.9;g.add(p);const ph=r()*6;anim.push(t=>{g.rotation.z=Math.sin(t*1.1+ph)*.04;g.position.y=(o.y||0)+Math.sin(t*1.3+ph)*.04});return g},
+    bowl:o=>{const g=new T.Group(),k=o.size||1;const b=mesh(new T.SphereGeometry(.16*k,16,8,0,Math.PI*2,Math.PI/2,Math.PI/2),M(hex(o.color,"#3B2F2A"),{side:T.DoubleSide}));b.position.y=.16*k;g.add(b);
+      const gold=new T.MeshStandardMaterial({color:"#E8C04A",emissive:"#8A6A10",emissiveIntensity:.6,metalness:.8,roughness:.3});
+      for(let i=0;i<3;i++){const seam=mesh(new T.TorusGeometry(.155*k,.008*k,4,20,Math.PI*.6),gold);seam.rotation.set(Math.PI/2+r()*.6,r()*6,r()*6);seam.position.y=.12*k;g.add(seam)}
+      anim.push(t=>{g.rotation.y=t*.15});return g},
+    crates:o=>{const g=new T.Group();g.add(box(.6,.45,.45,hex(o.color,"#8A6A45")).translateY(.23));g.add(box(.5,.12,.4,pick(["#D9822B","#C23B2E","#7FA03A"])).translateY(.5));return g},
+    umbrella:o=>{const g=new T.Group();g.add(cyl(.03,.03,2.3,"#444",5).translateY(1.15));const c=mesh(new T.ConeGeometry(1.3,.6,10),M(hex(o.color,pick(CLOTH))));c.position.y=2.4;g.add(c);return g},
+    petals:o=>{const g=new T.Group(),L=o.length||6;for(let i=0;i<L*14;i++){const p=box(.08,.01,.08,pick(["#F39A1E","#F2B530","#E8731A"]));p.position.set((r()-.5)*.7,.01,-i/14);p.rotation.y=r()*3;g.add(p)}return g},
+    kite:o=>{const g=new T.Group();const k=mesh(new T.PlaneGeometry(.8,.8),M(hex(o.color,"#D94A3A"),{side:T.DoubleSide}));k.rotation.z=Math.PI/4;g.add(k);g.position.y=8;const ph=r()*5;anim.push(t=>{g.position.y=(o.y||8)+Math.sin(t*.9+ph)*.5;g.rotation.y=Math.sin(t*.6)*.4});return g},
+    steps:o=>{const g=new T.Group(),L=o.length||6;for(let i=0;i<5;i++){g.add(box(L,.25,.8,shade(pal.ground,1-i*.05)).translateY(.12+i*.25).translateZ(-i*.8))}return g},
+    water:o=>{const w=mesh(new T.PlaneGeometry((o.size||1)*6,(o.size||1)*4),M(night?"#1B2A44":"#4E7FA0",{roughness:.3}));w.rotation.x=-Math.PI/2;w.position.y=.03;return w},
+    fountain:()=>{const g=new T.Group();g.add(cyl(1.4,1.5,.5,"#B8AE9C",16).translateY(.25));const w=cyl(1.3,1.3,.05,M("#5E8FB0",{roughness:.2}),16);w.position.y=.48;g.add(w);g.add(cyl(.15,.2,1.4,"#B8AE9C",8).translateY(.7));return g},
+    wall:o=>box(o.length||6,2,.4,hex(o.color,pal.walls)).translateY(1),
+    raked_gravel:o=>{const g=new T.Group(),R=o.spread||3;for(let i=1;i<=7;i++){const ring=mesh(new T.TorusGeometry(R*i/7+.6,.025,3,40),M("#E9E4DA"));ring.rotation.x=Math.PI/2;ring.position.y=.02;g.add(ring)}return g},
+    rock:o=>{const k=o.size||1;const m=mesh(new T.DodecahedronGeometry(.6*k,0),M(hex(o.color,"#6E6A64")));m.scale.y=.6;m.position.y=.25*k;m.rotation.y=r()*3;return m}
+  };
+  builders.stall=o=>{const g=addStall(0,0,hex(o.color,pick(CLOTH)));scene.remove(g);g.position.set(0,0,0);return g};
+
+  /* place objects */
+  const objs=(spec.objects||[]).slice(0,14);
+  for(const o of objs){
+    const kind=KINDS.includes(o.kind)?o.kind:"crates";
+    const n=Math.max(1,Math.min(14,Math.round(o.count||1)));
+    const cx=clamp(+o.x||0,-10,10), cz=clamp(+o.z||0,-9,7), sp=o.spread||(n>1?1.5:0), arr=o.arrange||(n>1?"circle":"single");
+    for(let i=0;i<n;i++){
+      let x=cx,z=cz,face=(o.rot||0)*Math.PI/180;
+      if(n>1){
+        if(arr==="circle"){const a=i/n*Math.PI*2;x=cx+Math.cos(a)*sp;z=cz+Math.sin(a)*sp;face=Math.atan2(cx-x,cz-z)}
+        else if(arr==="row"){x=cx-sp+(2*sp)*i/(n-1);}
+        else if(arr==="both_sides"){const half=Math.ceil(n/2),j=i%half,side=i<half?-1:1;x=cx-sp+(2*sp)*(half>1?j/(half-1):.5);z=cz+side*.95;face=side<0?0:Math.PI}
+        else {x=cx+(r()-.5)*2*sp;z=cz+(r()-.5)*2*sp;face=r()*Math.PI*2}
+      }
+      let g;
+      if(kind==="person"){const pose=["standing","seated","walking","drumming","dancing","working"].includes(o.pose)?o.pose:"standing";g=person(pose,o.color?hex(o.color):null);
+        if(pose==="walking"){const sx=x,dir=r()>.5?1:-1,sp2=.6+r()*.5,off=r()*20;g.rotation.y=dir>0?Math.PI/2:-Math.PI/2;anim.push(t=>{g.position.x=((sx+dir*(t*sp2+off))%16+24)%16-8;g.children[0].position.y=Math.abs(Math.sin(t*6+off))*.04})}
+        else g.rotation.y=face;
+        if(pose==="seated"&&arr==="both_sides")g.position.z=0;
+      } else {g=builders[kind](o);if(!g)continue;if(arr==="circle"&&n>1)g.rotation.y=face;else g.rotation.y=face}
+      if(o.size&&kind!=="bowl"&&kind!=="rock"&&kind!=="water"&&kind!=="tree"&&kind!=="maple_tree"&&kind!=="building")g.scale.multiplyScalar(clamp(o.size,.4,3));
+      g.position.x=x;g.position.z=z;g.position.y=(+o.y||0)+(kind==="person"&&o.pose==="walking"?0:0);
+      scene.add(g);
+    }
+  }
+  return{scene,anim};
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function disposeScene(sc){sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose())}})}
+
+/* viewer with walk + look controls */
+const Viewer=(()=>{
+  let renderer,camera,cur=null,host,raf=null,visible=true,clock,keys={},yaw=0,pitch=-.05,pos=null,drag=null,hold={};
+  const START={x:0,y:1.6,z:8.5};
+  function init(el){
+    host=el;
+    try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){return false}
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    camera=new THREE.PerspectiveCamera(62,16/9,.1,300);
+    host.prepend(renderer.domElement);renderer.domElement.className="gl";renderer.domElement.tabIndex=0;
+    renderer.domElement.setAttribute("aria-label","3D scene. Drag to look around. Use W A S D or the arrow buttons to walk.");
+    new ResizeObserver(size).observe(host);size();
+    clock=new THREE.Clock();
+    const c=renderer.domElement;
+    c.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};c.setPointerCapture(e.pointerId);hideHint()});
+    c.addEventListener("pointermove",e=>{if(!drag)return;yaw-=(e.clientX-drag.x)*.005;pitch=clamp(pitch-(e.clientY-drag.y)*.004,-1,.8);drag={x:e.clientX,y:e.clientY}});
+    c.addEventListener("pointerup",()=>drag=null);c.addEventListener("pointercancel",()=>drag=null);
+    window.addEventListener("keydown",e=>{if(/TEXTAREA|INPUT/.test(e.target.tagName)||!host.offsetParent)return;const k=e.key.toLowerCase();if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){keys[k]=true;e.preventDefault();hideHint()}});
+    window.addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false});
+    new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible)loop()}).observe(host);
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden)loop()});
+    return true;
+  }
+  function size(){if(!renderer)return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  function hideHint(){const h=host.querySelector(".hint3d");if(h)h.classList.add("gone")}
+  function load(spec,seed){
+    if(cur){disposeScene(cur.scene)}
+    cur=buildScene(spec,seed);
+    reset();loop();
+  }
+  function reset(){pos={...START};const interior=cur&&cur.scene.background&&!cur.scene.fog;if(interior)pos.z=4.5;yaw=0;pitch=-.08}
+  function setHold(dir,on){hold[dir]=on}
+  function loop(){if(raf||!cur)return;raf=requestAnimationFrame(frame)}
+  function frame(){
+    raf=null; if(!visible||document.hidden||!host.offsetParent)return;
+    const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
+    const f=(keys.w||keys.arrowup||hold.f?1:0)-(keys.s||keys.arrowdown||hold.b?1:0);
+    const turn=(keys.a||keys.arrowleft||hold.l?1:0)-(keys.d||keys.arrowright||hold.r?1:0);
+    yaw+=turn*1.6*dt;
+    pos.x=clamp(pos.x-Math.sin(yaw)*f*2.6*dt,-12,12);pos.z=clamp(pos.z-Math.cos(yaw)*f*2.6*dt,-12,12);
+    camera.position.set(pos.x,pos.y+(f?Math.sin(t*9)*.025:0),pos.z);
+    camera.rotation.order="YXZ";camera.rotation.set(pitch,yaw,0);
+    cur.anim.forEach(a=>a(t));
+    renderer.render(cur.scene,camera);
+    raf=requestAnimationFrame(frame);
+  }
+  return{init,load,reset,setHold};
+})();
+
+let thumbR=null;
+function thumbnail(spec,seed){
+  if(!HAS3D)return"";
+  try{
+    if(!thumbR){thumbR=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});thumbR.setSize(480,300,false);thumbR.outputEncoding=THREE.sRGBEncoding}
+    const {scene}=buildScene(spec,seed);const cam=new THREE.PerspectiveCamera(60,480/300,.1,300);
+    const interior=!!(scene.background&&!scene.fog);cam.position.set(0,1.7,interior?4.5:8.5);cam.lookAt(0,1.1,0);
+    thumbR.render(scene,cam);const url=thumbR.domElement.toDataURL("image/jpeg",.82);disposeScene(scene);return url;
+  }catch(e){return""}
+}
+/* Built-in places, used only when the AI isn't available in this view */
+const FALLBACK=[
+ {name:"Kyoto",country:"Japan",teaser:"A city that keeps its cracks visible.",why:"Built-in example",
+  moments:[
+   {title:"The kintsugi workshop",scene:"A craftsman bends over a cracked tea bowl, tracing the break with lacquer. Later the seam will be dusted with gold. The bowl goes back into daily use.",meaning:"Kintsugi repairs broken pottery with lacquer mixed with powdered gold. The repair becomes part of the object's history instead of something hidden.",questions:["Why use gold instead of hiding the crack?","How long does a repair take?"],
+    scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}},
+   {title:"The raked gravel garden",scene:"Before the gates open, a monk rakes the gravel into lines around the stones. Tomorrow he will rake it again.",meaning:"Zen gardens are tended daily. The care is the practice itself, not a task that ever gets finished.",questions:["What do the stones represent?","Why rake it every day?"],
+    scene3d:{setting:"garden",time:"dawn",palette:{ground:"#D8D2C4",walls:"#7D6A55",accent:"#4E6B3A"},objects:[{kind:"raked_gravel",x:0,z:-1,spread:3},{kind:"rock",x:0,z:-1,size:1.6},{kind:"rock",x:1.2,z:-1.6,size:.8},{kind:"person",pose:"working",x:-3.4,z:1.5,color:"#3B3B3B"},{kind:"pagoda",x:6,z:-8},{kind:"maple_tree",x:-6,z:-5}]}},
+   {title:"Maple viewing at dusk",scene:"People gather under the red leaves, photographing them, knowing the color will be gone in two weeks. Nobody seems to be in a hurry.",meaning:"Momijigari, autumn leaf viewing, is an old tradition. It's tied to mono no aware, a gentle awareness that things don't last.",questions:["How old is this tradition?","What does mono no aware mean?"],
+    scene3d:{setting:"hillside",time:"dusk",palette:{ground:"#6E6A4A",walls:"#C9B79C",accent:"#C2402A"},objects:[{kind:"maple_tree",x:0,z:-2,size:1.6},{kind:"maple_tree",x:-3.5,z:-3,size:1.3},{kind:"maple_tree",x:3.5,z:-3.5,size:1.4},{kind:"gate",x:0,z:-6},{kind:"person",count:6,arrange:"scatter",x:0,z:0,spread:3},{kind:"lanterns",x:0,z:-1,length:8}]}}
+  ]},
+ {name:"Pelourinho, Salvador",country:"Brazil",teaser:"Old streets where music starts without asking.",why:"Built-in example",
+  moments:[
+   {title:"The atabaque drum circle",scene:"Street corners in the old town. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
+    scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}},
+   {title:"The Mercado Modelo tables",scene:"Long communal tables outside the market. Strangers sit together mid-meal, passing the hot sauce down the line.",meaning:"Mercado Modelo sits by the old port. Shared tables at the market restaurants mean you eat with whoever is there.",questions:["What do people eat here?","Why was the market built here?"],
+    scene3d:{setting:"market",time:"day",palette:{ground:"#9A8A74",walls:"#E6D2A8",accent:"#C23B2E"},objects:[{kind:"table_long",x:0,z:0,length:5},{kind:"person",pose:"seated",count:8,arrange:"both_sides",spread:2,x:0,z:0},{kind:"umbrella",x:-3.5,z:-1},{kind:"stall",x:4.5,z:-3,color:"#2F6FB0"},{kind:"person",pose:"walking",count:4,arrange:"scatter",x:0,z:3,spread:4}]}},
+   {title:"The capoeira circle",scene:"A ring of people clapping and singing. Two players move in the middle, then step out so someone else can enter. Beginners take their turn too.",meaning:"Capoeira was developed by enslaved Africans in Brazil, blending fighting, dance, and music. The roda, the circle, holds the game together.",questions:["How did capoeira begin?","What are they singing?"],
+    scene3d:{setting:"plaza",time:"night",palette:{ground:"#7C6E5E",walls:"#D9A86A",accent:"#E0A526"},objects:[{kind:"person",count:10,arrange:"circle",spread:2.6,x:0,z:0},{kind:"person",pose:"dancing",count:2,arrange:"circle",spread:.6,x:0,z:0},{kind:"lanterns",x:0,z:-3,length:10},{kind:"lantern",x:4,z:1}]}}
+  ]},
+ {name:"Copenhagen",country:"Denmark",teaser:"A city that makes warmth on purpose.",why:"Built-in example",
+  moments:[
+   {title:"Candles at 4 p.m.",scene:"It's already dark in December. In the café, every table has a candle, and two friends lean in over theirs.",meaning:"Danes burn more candles per person than almost anyone. Warmth, or hygge, is something people make on purpose in the long winter.",questions:["What does hygge actually mean?","Why so many candles?"],
+    scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}},
+   {title:"The harbour bath",scene:"Lunchtime. Office workers walk out onto the wooden deck and jump into the harbor, then climb out laughing.",meaning:"The harbor was too polluted to swim in for decades. After a long cleanup, public harbor baths opened in the city center.",questions:["How did they clean the harbor?","Is the water cold all year?"],
+    scene3d:{setting:"waterfront",time:"day",palette:{ground:"#9A8C78",walls:"#C96A4A",accent:"#E0A526"},objects:[{kind:"person",count:5,arrange:"scatter",spread:3,x:0,z:-3},{kind:"person",pose:"walking",count:3,arrange:"scatter",x:0,z:1,spread:4},{kind:"bench",x:-3,z:0,length:2.5},{kind:"boat",x:5,z:-9}]}},
+   {title:"The morning bike lane",scene:"Rush hour on a bike lane wider than the car lane. Parents with kids in cargo boxes, a man in a suit, someone carrying a plant.",meaning:"The city spent decades redesigning streets around cycling. A huge share of people now get to work and school by bike.",questions:["When did this start?","Do people bike in winter?"],
+    scene3d:{setting:"street",time:"dawn",palette:{ground:"#7A7672",walls:"#D9C9A8",accent:"#2F6FB0"},objects:[{kind:"bicycle",count:7,arrange:"row",spread:4,x:0,z:-.5,rot:90},{kind:"person",pose:"walking",count:5,arrange:"scatter",spread:4,x:0,z:2},{kind:"bicycle",count:5,arrange:"row",spread:3,x:0,z:-3,rot:90},{kind:"tree",x:-4.5,z:-4},{kind:"tree",x:4.5,z:-6}]}}
+  ]}
+];
+/* ================= App ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S;
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},notes:{},chats:{},closer:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false}}
+S=fresh();
+const SCREENS=["intro","loading","reveal","walk","checkin","reflect","final"];
+function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0})}
+const mk=(r,p,m)=>`${r}.${p}.${m}`;
+let tStart=null,curKey=null;
+function tick(){if(curKey&&tStart!=null)S.dwell[curKey]=(S.dwell[curKey]||0)+(Date.now()-tStart);tStart=document.hidden?null:Date.now()}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){tick();tStart=null}else tStart=Date.now()});
+
+/* ---------- AI access ---------- */
+let samplePromise=null, aiOff=false;
+/* Self-hosted: AI requests go to this site's own /api/claude endpoint, which holds the API key. */
+const URLP=new URLSearchParams(location.search);
+const PID=(URLP.get("pid")||"").slice(0,64);
+let STUDY_CODE=URLP.get("code")||"";
+const SESSION_ID=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
+function parseJSONText(t){
+  const clean=String(t||"").replace(/```json|```/g,"").trim();
+  try{return JSON.parse(clean)}catch(e){}
+  const a=clean.indexOf("{"),b=clean.lastIndexOf("}");
+  if(a>=0&&b>a){try{return JSON.parse(clean.slice(a,b+1))}catch(e){}}
+  throw{code:"bad_json"};
+}
+function apiSample(){
+  async function call(prompt,opts,json){
+    let res;
+    try{res=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json","x-study-code":STUDY_CODE},body:JSON.stringify({prompt,tier:opts.modelTier==="quick"?"quick":"default",json:!!json}),signal:opts.signal})}
+    catch(e){if(e&&e.name==="AbortError")throw{code:"cancelled"};throw{code:"network"}}
+    if(res.status===401)throw{code:"bad_code"};
+    if(res.status===429)throw{code:"rate_limited"};
+    if(!res.ok)throw{code:"upstream"};
+    const d=await res.json();return d.text||"";
+  }
+  const f=async(prompt,opts={})=>{const t=await call(prompt,opts,false);if(opts.onText)opts.onText({text:t,delta:t});return{text:t}};
+  f.json=async(prompt,opts={})=>parseJSONText(await call(prompt,opts,true));
+  return f;
+}
+function getSample(){if(!samplePromise)samplePromise=Promise.resolve(apiSample());return samplePromise}
+getSample().then(s=>{if(!s)aiOff=true});
+
+/* ---------- Session summary for prompts ---------- */
+function journey(){
+  tick();
+  const out=[];
+  S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>{if(!S.visited[`${ri}.${pi}`])return;
+    out.push({place:`${P.name}, ${P.country}`,moments:P.moments.map((m,mi)=>{const k=mk(ri,pi,mi);return{moment:m.title,seen:S.dwell[k]!==undefined,seconds:Math.round((S.dwell[k]||0)/1000),looked_closer:!!S.closer[k],thoughts:(S.notes[k]||"").trim(),questions_asked:(S.chats[k]||[]).map(c=>c.q)}}).filter(x=>x.seen)})}));
+  return out;
+}
+
+/* ---------- Intro ---------- */
+$("problem").addEventListener("input",()=>{$("startBtn").disabled=$("problem").value.trim().length<8});
+$("startBtn").onclick=()=>{if(!$("codeWrap").classList.contains("hidden"))STUDY_CODE=$("studyCode").value.trim();S=fresh();S.problem=$("problem").value.trim();S.refined=S.problem;makeRound("initial","")};
+$("exampleBtn").onclick=()=>{$("problem").value="I keep putting off starting things until I feel ready, and I'm starting to feel like everyone around me is further along.";$("startBtn").disabled=false;$("problem").focus()};
+
+/* ---------- Generate a round of places ---------- */
+const VOCAB=`"scene3d": {
+  "setting": one of "street","plaza","market","waterfront","riverside","garden","courtyard","interior","hillside",
+  "time": "dawn" | "day" | "dusk" | "night",
+  "palette": {"ground":"#hex","walls":"#hex","accent":"#hex"},
+  "objects": up to 10 of {"kind": see list, "x": -8 to 8, "z": -6 to 6 (the viewer stands at z=8.5 looking toward z=0; negative z is farther away), "count": 1 to 12, "arrange": "circle" | "row" | "both_sides" (people seated along a table) | "scatter", "spread": meters, "pose": "standing" | "seated" | "walking" | "drumming" | "dancing" | "working" (people only), "color": "#hex", "length": meters (tables, lanterns, bunting, petals, benches, steps), "size": 0.5 to 3, "rot": degrees, "y": height (0.79 puts small things on a table)}
+}
+Object kinds: person, table_long, table_small, bench, stool, stall, lanterns, bunting, lantern, candles, fire, tree, maple_tree, building, pagoda, gate, drum, bicycle, motorbike, car, boat, bowl, crates, umbrella, petals, kite, steps, water, fountain, wall, raked_gravel, rock.
+Put the heart of the moment at x=0, z=0 so the viewer sees it first. When a moment involves people, show them doing the thing (drummers in a circle, people seated both sides of a long table). Pick the setting and time that match the moment.`;
+
+function roundPrompt(mode,missing){
+  const visited=[];S.rounds.forEach(R=>R.places.forEach(P=>visited.push(`${P.name}, ${P.country}`)));
+  return `You are the guide inside WorldMirror. A person has written what's on their mind. You choose real places around the world whose everyday moments might make contact with it. They will walk through each moment in a simple 3D scene, note their thoughts, and ask questions.
+
+What they wrote at the start: "${S.problem}"
+How it reads now, after exploring: "${S.refined}"
+${S.causes.length||S.feedback.length?`Together you've been working out what's underneath. Their answers to possible causes so far: ${JSON.stringify(allFeedback())}. Guesses they haven't answered yet: ${JSON.stringify(S.causes.filter(c=>!c.verdict).map(c=>c.cause))}
+${S.synth&&S.synth.summary?`Current read of where it points: "${S.synth.summary}"`:""}
+`:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed, and that let them see the way forward in practice. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on their thoughts and questions below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Take clearly different angles from before.`}
+Already visited (don't repeat): ${JSON.stringify(visited)}
+Their journey so far: ${JSON.stringify(journey())}
+
+Choose 3 real places (a specific neighborhood, market, square, or town), each with 3 moments.
+- Each moment is a defining, real element of that place with historical or cultural meaning that a visitor could actually find there (like bikes in Copenhagen, or the Easter market in Prague). Favor people interacting: shared tables, rituals, markets, games, work done together.
+- Each moment should make contact with their problem: answer it, offer another way to see it, or show people living a version of it. Be indirect. Never name their problem in the scene text and never preach.
+- The three places should approach it from different angles.
+- Only use places and practices you're confident are real and accurately described.
+- Write "scene" in present tense, 2 to 3 short concrete sentences. "meaning" is 1 to 2 sentences of real cultural or historical background. Plain language. No em dashes.
+
+Style example, for someone afraid to start things until they're good enough:
+title "The atabaque drum circle", scene "Street corners in Salvador's Pelourinho district. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough."
+
+Each moment also needs a 3D scene description:
+${VOCAB}
+
+Respond with ONLY JSON, no markdown:
+{"places":[{"name":"...","country":"...","teaser":"one evocative line that doesn't mention their problem","why":"for the research team: how this place connects to what they wrote","moments":[{"title":"...","scene":"...","meaning":"...","questions":["two short questions a curious visitor might ask"],"scene3d":{...}}]}]}`;
+}
+function cleanRound(r){
+  if(!r||!Array.isArray(r.places))return null;
+  const places=r.places.filter(p=>p&&p.name&&Array.isArray(p.moments)&&p.moments.length).slice(0,3).map(p=>({name:String(p.name),country:String(p.country||""),teaser:String(p.teaser||""),why:String(p.why||""),
+    moments:p.moments.slice(0,4).filter(m=>m&&m.scene).map(m=>({title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]}}))})).filter(p=>p.moments.length);
+  return places.length>=2?places:null;
+}
+let genCtl=null;
+async function makeRound(mode,missing){
+  show("loading");
+  $("loadingStatement").textContent=`"${S.refined}"`;
+  $("loadingMsg").textContent=mode==="tailored"?"Finding places for what you've worked out so far...":mode==="pivot"?"Looking in a different direction...":"Looking for places that might have something to say about this...";
+  $("loadingErr").innerHTML="";
+  const sample=aiOff?null:await getSample();
+  let places=null, err="";
+  if(sample){
+    genCtl=new AbortController();
+    try{places=cleanRound(await sample.json(roundPrompt(mode,missing),{signal:genCtl.signal,modelTier:"default",cache:false}));if(!places)err="The places that came back were incomplete."}
+    catch(e){if(e&&e.code==="cancelled"){show(S.synth?"reflect":S.rounds.length?"checkin":"intro");return}
+      if(e&&e.code==="not_granted")aiOff=true;
+      err=e&&e.code==="rate_limited"?"Too many requests right now. Wait a minute and try again.":e&&e.code==="bad_code"?"That study code wasn't accepted. Check it and start again.":"Finding places didn't work this time."}
+  } else err="The AI isn't available in this view, so places can't be chosen for you.";
+  if(!places){
+    $("loadingMsg").textContent=err;
+    $("loadingErr").innerHTML=`<div class="row" style="justify-content:center">${aiOff?"":`<button class="btn primary" id="retryGen">Try again</button>`}${S.usedFallback?"":`<button class="btn" id="useFallback">Walk through example places</button>`}<button class="btn" id="backGen">Back</button></div>`;
+    $("retryGen")&&($("retryGen").onclick=()=>makeRound(mode,missing));
+    $("useFallback")&&($("useFallback").onclick=()=>{S.usedFallback=true;startRound(mode,FALLBACK.map(p=>JSON.parse(JSON.stringify(p))))});
+    $("backGen").onclick=()=>show(S.rounds.length?"checkin":"intro");
+    return;
+  }
+  startRound(mode,places,missing);
+}
+$("stopGen").onclick=()=>genCtl&&genCtl.abort();
+
+function startRound(mode,places,missing){
+  S.rounds.push({mode,missing:missing||"",places,refinedAtStart:S.refined});
+  renderReveal();show("reveal");
+}
+
+/* ---------- Reveal ---------- */
+function renderReveal(){
+  const ri=S.rounds.length-1,R=S.rounds[ri];
+  $("revealTitle").textContent=ri===0?"A few places that might have something to say about this":R.mode==="pivot"?"Somewhere different this time":R.mode==="tailored"?"Places for what you've found so far":"A little further in";
+  $("revealStatement").textContent=S.refined;
+  $("cards").innerHTML=R.places.map((P,pi)=>{const th=thumbnail(P.moments[0].scene3d,P.name+P.moments[0].title);
+    return`<button class="pcard" data-p="${pi}"><div class="thumb">${th?`<img src="${th}" alt="">`:""}</div><div class="pc-body"><b>${esc(P.name)}</b><small>${esc(P.country)}</small><span>${esc(P.teaser)}</span></div></button>`}).join("");
+}
+$("cards").addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c)enterPlace(S.rounds.length-1,+c.dataset.p,0)});
+$("walkBtn").onclick=()=>enterPlace(S.rounds.length-1,0,0);
+
+/* ---------- Walk ---------- */
+let viewerOK=false;
+function enterPlace(ri,pi,mi){
+  const prev=S.cur;
+  if(prev&&(prev.r!==ri||prev.p!==pi))refine(prev.r,prev.p);
+  S.cur={r:ri,p:pi,m:mi};S.visited[`${ri}.${pi}`]=true;
+  show("walk");
+  if(!viewerOK&&HAS3D){viewerOK=Viewer.init($("viewer"))}
+  renderWalk(true);
+}
+function curPlace(){return S.rounds[S.cur.r].places[S.cur.p]}
+function curMoment(){return curPlace().moments[S.cur.m]}
+function renderWalk(newScene){
+  tick();
+  const {r:ri,p:pi,m:mi}=S.cur,R=S.rounds[ri],P=curPlace(),M=curMoment(),k=mk(ri,pi,mi);curKey=k;tStart=Date.now();
+  $("tabs").innerHTML=R.places.map((p,j)=>`<button class="tab${j===pi?" on":""}" data-p="${j}">${S.visited[`${ri}.${j}`]&&j!==pi?'<span class="seen" aria-label="visited"></span>':""}${esc(p.name)}</button>`).join("");
+  $("placeName").textContent=`${P.name}, ${P.country}`;
+  $("mcount").textContent=`Moment ${mi+1} of ${P.moments.length}`;
+  if(newScene){if(viewerOK){Viewer.load(M.scene3d,P.name+M.title);$("viewer").classList.remove("no3d")}else{$("viewer").classList.add("no3d")}
+    const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")}
+  $("mtitle").textContent=M.title;$("mscene").textContent=M.scene;$("mmeaning").textContent=M.meaning;
+  $("mmeaning").classList.toggle("hidden",!S.closer[k]);$("closerBtn").textContent=S.closer[k]?"Hide background":"Look closer";
+  $("thoughts").value=S.notes[k]||"";
+  renderChat();
+  const last=mi===P.moments.length-1, allSeen=R.places.every((_,j)=>S.visited[`${ri}.${j}`]);
+  $("prevM").disabled=mi===0;
+  const nb=$("nextM");
+  if(!last){nb.textContent="Next moment";nb.dataset.act="next"}
+  else if(!allSeen){nb.textContent="Next place";nb.dataset.act="place"}
+  else{nb.textContent="Pause and check in";nb.dataset.act="check"}
+  $("checkSide").classList.toggle("hidden",!allSeen||nb.dataset.act==="check");
+  renderSide();
+}
+$("tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(!t)return;const pi=+t.dataset.p;if(pi!==S.cur.p)enterPlace(S.cur.r,pi,0)});
+$("prevM").onclick=()=>{S.cur.m--;renderWalk(true)};
+$("nextM").onclick=()=>{const a=$("nextM").dataset.act;
+  if(a==="next"){S.cur.m++;renderWalk(true)}
+  else if(a==="place"){const R=S.rounds[S.cur.r];let n=R.places.findIndex((_,j)=>!S.visited[`${S.cur.r}.${j}`]);if(n<0)n=(S.cur.p+1)%R.places.length;enterPlace(S.cur.r,n,0)}
+  else goCheckin()};
+$("checkSide").onclick=goCheckin;
+$("closerBtn").onclick=()=>{S.closer[curKey]=!S.closer[curKey];$("mmeaning").classList.toggle("hidden",!S.closer[curKey]);$("closerBtn").textContent=S.closer[curKey]?"Hide background":"Look closer"};
+$("thoughts").addEventListener("input",e=>{S.notes[curKey]=e.target.value;renderNotes()});
+$("recenter").onclick=()=>Viewer.reset();
+document.querySelectorAll("[data-move]").forEach(b=>{const d=b.dataset.move;const on=e=>{e.preventDefault();Viewer.setHold(d,true);const h=$("viewer").querySelector(".hint3d");h&&h.classList.add("gone")},off=()=>Viewer.setHold(d,false);
+  b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off)});
+
+/* ---------- Side panel ---------- */
+function renderSide(){
+  $("origStmt").textContent=S.problem;
+  const changed=S.refined!==S.problem;
+  $("refBlock").classList.toggle("hidden",!changed);
+  $("refStmt").textContent=S.refined;
+  const last=S.refHistory[S.refHistory.length-1];$("refShift").textContent=last&&last.shift?last.shift:"";
+  renderNotes();renderResearch();
+}
+function renderNotes(){
+  const items=[];S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>P.moments.forEach((M,mi)=>{const k=mk(ri,pi,mi),t=(S.notes[k]||"").trim();if(t)items.push(`<li><small>${esc(P.name)}, ${esc(M.title)}</small>${esc(t)}</li>`)})));
+  $("notes").innerHTML=items.length?items.join(""):`<li class="empty">Nothing yet. Jot down whatever comes up as you look around.</li>`;
+}
+function renderResearch(){
+  const R=S.rounds[S.cur?S.cur.r:S.rounds.length-1];if(!R)return;
+  $("readout").innerHTML=R.places.map(p=>`<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>`).join("")+(S.refHistory.length?`<dt>Refinements</dt>`+S.refHistory.map(h=>`<dd>${esc(h.refined)}${h.shift?` <em>(${esc(h.shift)})</em>`:""}</dd>`).join(""):"");
+}
+
+/* ---------- Background refinement after each place ---------- */
+let refining=null;
+function refine(ri,pi){
+  if(aiOff)return;
+  const P=S.rounds[ri].places[pi];
+  const touched=P.moments.some((_,mi)=>{const k=mk(ri,pi,mi);return(S.notes[k]||"").trim()||(S.chats[k]||[]).length});
+  if(!touched)return;
+  const sig=JSON.stringify(P.moments.map((_,mi)=>[S.notes[mk(ri,pi,mi)]||"",(S.chats[mk(ri,pi,mi)]||[]).map(c=>c.q)]));
+  S.refSig=S.refSig||{};if(S.refSig[`${ri}.${pi}`]===sig)return;S.refSig[`${ri}.${pi}`]=sig;
+  const run=async()=>{const sample=await getSample();if(!sample){aiOff=true;return}
+    $("refStatus").textContent="Updating as you go...";
+    try{
+      const res=await sample.json(`You help a person in WorldMirror sharpen what's on their mind. They started by writing: "${S.problem}"
+The current version is: "${S.refined}"
+They just walked through ${P.name}, ${P.country}. Their whole journey so far, with their own thoughts and the questions they asked: ${JSON.stringify(journey())}
+
+Rewrite the statement so it reflects what their thoughts and questions suggest they're really getting at. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. If nothing new emerged, return the current version unchanged. No em dashes.
+Respond with ONLY JSON: {"refined":"...","shift":"a few words on what changed, or empty string"}`,{modelTier:"default",cache:false});
+      if(res&&res.refined&&typeof res.refined==="string"){if(res.refined.trim()!==S.refined){S.refined=res.refined.trim();S.refHistory.push({refined:S.refined,shift:String(res.shift||""),after:P.name});const b=$("refBlock");b.classList.remove("pulse");void b.offsetWidth;b.classList.add("pulse")}}
+    }catch(e){if(e&&e.code==="not_granted")aiOff=true}
+    finally{$("refStatus").textContent="";if(!$("walk").classList.contains("hidden"))renderSide();if(!$("checkin").classList.contains("hidden"))renderCheckin()}};
+  refining=(refining||Promise.resolve()).then(run);
+  const mine=refining;mine.then(()=>{if(refining===mine)refining=null});
+}
+
+/* ---------- Ask about the moment ---------- */
+function renderChat(){
+  const M=curMoment(),log=S.chats[curKey]||[];
+  $("suggest").innerHTML=M.questions.filter(q=>!log.some(c=>c.q===q)).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("");
+  $("chatlog").innerHTML=log.map(c=>`<div class="qa"><p class="q">${esc(c.q)}</p><p class="a">${esc(c.a)}</p></div>`).join("");
+}
+$("suggest").addEventListener("click",e=>{const c=e.target.closest(".chip");if(c)ask(c.dataset.q)});
+$("askForm").addEventListener("submit",e=>{e.preventDefault();const q=$("askInput").value.trim();if(q){$("askInput").value="";ask(q)}});
+let asking=false;
+async function ask(q){
+  if(asking)return;asking=true;
+  const key=curKey,P=curPlace(),M=curMoment(),log=(S.chats[key]=S.chats[key]||[]);
+  const entry={q,a:""};log.push(entry);renderChat();
+  const ansEl=$("chatlog").lastElementChild.querySelector(".a");ansEl.textContent="Thinking...";ansEl.classList.add("pending");
+  $("askBtn").disabled=true;
+  const sample=aiOff?null:await getSample();
+  if(!sample){entry.a="Asking questions needs the AI, which isn't available in this view.";ansEl.textContent=entry.a;ansEl.classList.remove("pending");$("askBtn").disabled=false;asking=false;return}
+  const convo=log.slice(0,-1).map(c=>`Q: ${c.q}\nA: ${c.a}`).join("\n");
+  try{
+    await sample(`You are a knowledgeable, warm local guide inside WorldMirror. The person is standing in this moment:
+Place: ${P.name}, ${P.country}
+Moment: ${M.title}. ${M.scene}
+Background: ${M.meaning}
+They came to WorldMirror with this on their mind: "${S.refined}". Don't bring that up unless their question invites it, and never lecture or give life advice.
+${convo?`Conversation so far:\n${convo}\n`:""}Their question: ${q}
+
+Answer in 2 to 4 sentences of plain conversational prose. Be accurate; if you're not sure of something, say so. No lists, no markdown, no em dashes.`,
+      {modelTier:"quick",cache:false,onText:({text})=>{entry.a=text;if(curKey===key){ansEl.textContent=text;ansEl.classList.remove("pending")}}});
+  }catch(e){entry.a=e&&e.text?e.text:(e&&e.code==="rate_limited"?"Too many questions at once. Try again in a moment.":e&&e.code==="bad_code"?"The study code wasn't accepted.":"That question didn't go through. Try asking again.");if(e&&e.code==="not_granted")aiOff=true;if(curKey===key)ansEl.textContent=entry.a}
+  ansEl.classList.remove("pending");$("askBtn").disabled=false;asking=false;if(curKey===key)renderChat();
+}
+
+/* ---------- Check in ---------- */
+async function goCheckin(){
+  tick();refine(S.cur.r,S.cur.p);curKey=null;
+  show("checkin");$("missingWrap").classList.add("hidden");renderCheckin();
+}
+function renderCheckin(){
+  $("ciOrig").textContent=S.problem;
+  $("ciNow").value=S.refined;
+  $("ciUpdating").classList.toggle("hidden",!refining);
+}
+$("ciNow").addEventListener("input",e=>{S.refined=e.target.value});
+$("optSatisfied").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"satisfied",statement:S.refined});show("reflect");runSynthesis()};
+$("optMore").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"keep exploring",statement:S.refined});makeRound("deeper","")};
+$("optNone").onclick=()=>{$("missingWrap").classList.remove("hidden");$("missing").focus()};
+$("pivotBtn").onclick=()=>{const m=$("missing").value.trim();S.choices.push({after_round:S.rounds.length,choice:"none of these",missing:m});makeRound("pivot",m)};
+$("backToWalk").onclick=()=>{enterPlace(S.cur.r,S.cur.p,S.cur.m)};
+
+/* ---------- Synthesis: observations -> possible causes -> where it points ---------- */
+function synthPrompt(){
+  const fb=allFeedback();
+  return `You are the companion inside WorldMirror, helping a person make sense of their walk. Their problem is NOT solved. Your job is to work out with them what might be causing it, and where their observations point.
+
+What they wrote at the start: "${S.problem}"
+How it reads now: "${S.refined}"
+Their journey (places, moments, their own thoughts, questions they asked, time spent): ${JSON.stringify(journey())}
+${fb.length?`They already responded to earlier guesses about the cause. Keep what they confirmed, drop what they rejected, and revise what was partly right using their comments: ${JSON.stringify(fb)}`:""}
+
+Do three things:
+1. Observations: pick the 3 to 5 most telling things they noticed or asked. For each, say plainly what it might suggest about them. Quote their words when you can.
+2. Possible causes: offer 2 or 3 tentative guesses at what might be underneath the problem, each tied to specific observations. Everyday language, second person. No clinical labels or diagnoses.
+3. Where this points: a short summary (3 to 5 sentences) explaining how the observations point toward a way forward, then 2 or 3 small, concrete things they could try, each drawing on a specific moment from the walk. Practical and kind, not preachy.
+
+Be honest that this is a working read. No em dashes.
+Respond with ONLY JSON:
+{"observations":[{"where":"place: moment","noticed":"what they noticed or asked","suggests":"what it might say about them"}],
+"causes":[{"cause":"...","evidence":"which observations point here"}],
+"summary":"...",
+"suggestions":[{"from":"place: moment","try":"..."}]}`;
+}
+function allFeedback(){const cur=S.causes.filter(c=>c.verdict).map(c=>({cause:c.cause,their_answer:c.verdict,their_comment:c.comment||""}));const seen=new Set(cur.map(c=>c.cause));return[...S.feedback.filter(f=>!seen.has(f.cause)),...cur]}
+function localSynth(){
+  const obs=[];journey().forEach(p=>p.moments.forEach(m=>{if(m.thoughts||m.questions_asked.length)obs.push({where:`${p.place.split(",")[0]}: ${m.moment}`,noticed:m.thoughts||`You asked: ${m.questions_asked[0]}`,suggests:""})}));
+  return{observations:obs.slice(0,5),causes:[],summary:"Working out what might be underneath, and where it points, needs the AI, which isn't available in this view. Here's what you noticed along the way.",suggestions:[],local:true};
+}
+async function runSynthesis(){
+  const body=$("reflectBody");body.innerHTML=`<p class="thinking">Going back through what you noticed...</p>`;
+  const sample=aiOff?null:await getSample();let r=null,msg="";
+  if(sample){try{r=await sample.json(synthPrompt(),{modelTier:"default",cache:false})}catch(e){if(e&&e.code==="not_granted")aiOff=true;msg=e&&e.code==="rate_limited"?"Too many requests right now. Try again in a minute.":"The full read didn't come through this time."}}
+  if(!r||!Array.isArray(r.observations))r=localSynth();
+  S.feedback=allFeedback();
+  const kept=S.causes.filter(c=>c.verdict==="right"||c.verdict==="partly");
+  S.causes=(r.causes||[]).slice(0,3).map(c=>{const prev=kept.find(k=>k.cause===c.cause);return{cause:String(c.cause||""),evidence:String(c.evidence||""),verdict:prev?prev.verdict:"",comment:prev?prev.comment:""}});
+  S.synth=r;S.synths.push({...r,causes:S.causes.map(c=>({...c}))});
+  drawSynth(msg);
+}
+function obsList(r){return `<ul class="threads">${(r.observations||[]).map(o=>`<li><b>${esc(o.where)}</b><span>${esc(o.noticed)}${o.suggests?`. ${esc(o.suggests)}`:""}</span></li>`).join("")}</ul>`}
+function pointsHtml(r){return `<p class="observation">${esc(r.summary)}</p>${(r.suggestions||[]).length?`<ul class="tries">${r.suggestions.map(t=>`<li><span class="from">${esc(t.from)}</span>${esc(t.try)}</li>`).join("")}</ul>`:""}`}
+function drawSynth(msg){
+  const r=S.synth;
+  $("reflectBody").innerHTML=`
+    <h3 class="sec">What you noticed</h3>${obsList(r)}
+    ${S.causes.length?`<h3 class="sec">What might be underneath</h3>
+    <p class="small" style="margin:-4px 0 14px">Tell me how close each guess is. Your answers shape the summary and the next places.</p>
+    <div class="causes">${S.causes.map((c,i)=>`<div class="cause" data-i="${i}">
+      <p class="ctext">${esc(c.cause)}</p><p class="small" style="margin:4px 0 10px">${esc(c.evidence)}</p>
+      <div class="row verdicts">${[["right","Sounds right"],["partly","Partly"],["no","Not really"]].map(([v,l])=>`<button class="chip" data-v="${v}" aria-pressed="${c.verdict===v}">${l}</button>`).join("")}</div>
+      <input type="text" class="ccomment${c.verdict&&c.verdict!=="right"?"":" hidden"}" placeholder="What's closer to it?" value="${esc(c.comment)}">
+    </div>`).join("")}</div>
+    <div class="row" style="margin:14px 0 6px"><button class="btn" id="updateSynth" disabled>Update with my answers</button></div>`:""}
+    <h3 class="sec">Where this points</h3>${pointsHtml(r)}
+    ${msg?`<p class="err">${esc(msg)}</p>`:""}
+    <div class="row" style="margin-top:26px">
+      <button class="btn primary" id="tailored">Explore places for this</button>
+      <button class="btn" id="saveSummary">Save as my working summary</button>
+      <button class="textbtn" id="backCheck">Back to check-in</button>
+    </div>`;
+  const body=$("reflectBody");
+  body.querySelectorAll(".cause").forEach(el=>{const c=S.causes[+el.dataset.i];
+    el.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{c.verdict=b.dataset.v;el.querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b));el.querySelector(".ccomment").classList.toggle("hidden",c.verdict==="right");$("updateSynth").disabled=false});
+    el.querySelector(".ccomment").oninput=e=>{c.comment=e.target.value;$("updateSynth").disabled=false};});
+  $("updateSynth")&&($("updateSynth").onclick=()=>runSynthesis());
+  $("tailored").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"explore places for this",causes:S.causes.map(c=>({...c}))});makeRound("tailored","")};
+  $("saveSummary").onclick=finish;
+  $("backCheck").onclick=()=>{show("checkin");renderCheckin()};
+}
+function finish(){
+  const r=S.synth||localSynth();
+  const agreed=S.causes.filter(c=>c.verdict==="right"||c.verdict==="partly"), open=S.causes.filter(c=>!c.verdict);
+  $("summaryBody").innerHTML=`
+    <h3 class="sec">You came in with</h3><p class="orig" style="font-size:17px">${esc(S.problem)}</p>
+    <h3 class="sec">How it reads now</h3><p class="ref" style="font-size:20px">${esc(S.refined)}</p>
+    ${agreed.length||open.length?`<h3 class="sec">What might be underneath</h3><ul class="threads">${[...agreed,...open].map(c=>`<li><b>${c.verdict==="right"?"You said this sounds right":c.verdict==="partly"?"Partly":"Not yet weighed in"}</b><span>${esc(c.cause)}${c.comment?`. You added: "${esc(c.comment)}"`:""}</span></li>`).join("")}</ul>`:""}
+    <h3 class="sec">Where this points</h3>${pointsHtml(r)}
+    <h3 class="sec">What you noticed</h3>${obsList(r)}`;
+  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why}))})),journey:journey(),chats:S.chats,minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
+  show("final");
+}
+$("finalExplore").onclick=()=>makeRound("tailored","");
+$("restart").onclick=()=>{S=fresh();$("problem").value="";$("startBtn").disabled=true;show("intro")};
+$("restartTop").onclick=()=>$("restart").onclick();
+
+/* ---------- Self-hosted extras: study code + session logging ---------- */
+fetch("/api/config").then(r=>r.json()).then(c=>{if(c&&c.codeRequired&&!STUDY_CODE)$("codeWrap").classList.remove("hidden")}).catch(()=>{});
+function sessionLog(event){
+  return{session_id:SESSION_ID,participant_id:PID,event,sent_at:new Date().toISOString(),
+    initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
+    rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why,moments:p.moments.map(m=>m.title)}))})),
+    journey:S.rounds.length?journey():[],chats:S.chats,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
+}
+function sendLog(event,beacon){
+  if(!S.problem)return;
+  const body=JSON.stringify({code:STUDY_CODE,log:sessionLog(event)});
+  if(beacon&&navigator.sendBeacon){navigator.sendBeacon("/api/log",new Blob([body],{type:"application/json"}));return}
+  fetch("/api/log",{method:"POST",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
+}
+["optSatisfied","optMore","pivotBtn","finalExplore"].forEach(id=>$(id).addEventListener("click",()=>sendLog(id)));
+document.addEventListener("click",e=>{const t=e.target.closest("#saveSummary,#tailored,#updateSynth,#backCheck");if(t)sendLog(t.id)});
+window.addEventListener("pagehide",()=>sendLog("pagehide",true));
+</script>
+</body>
+</html>
