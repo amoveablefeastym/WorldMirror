@@ -779,6 +779,13 @@ function journey(){
     out.push({place:`${P.name}, ${P.country}`,moments:P.moments.map((m,mi)=>{const k=mk(ri,pi,mi);return{moment:m.title,seen:S.dwell[k]!==undefined,seconds:Math.round((S.dwell[k]||0)/1000),questions_asked:(S.chats[k]||[]).map(c=>c.q)}}).filter(x=>x.seen)})}));
   return out;
 }
+function qaLog(){
+  const out=[];
+  S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>P.moments.forEach((M,mi)=>{
+    (S.chats[mk(ri,pi,mi)]||[]).forEach(c=>out.push({place:`${P.name}, ${P.country}`,moment:M.title,question:c.q,answer:c.a}));
+  })));
+  return out;
+}
 
 /* ---------- Intro ---------- */
 $("problem").addEventListener("input",()=>{$("startBtn").disabled=$("problem").value.trim().length<8});
@@ -1158,7 +1165,7 @@ function finish(){
     ${challengesHtml()}
     <h3 class="sec">Where this points</h3>${pointsHtml(r)}
     <h3 class="sec">What you noticed</h3>${obsList(r)}`;
-  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why}))})),journey:journey(),chats:S.chats,stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
+  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why}))})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
   show("final");
 }
 $("summaryBody").addEventListener("click",e=>{const c=e.target.closest(".relive");if(!c)return;S.returnToFinal=true;enterPlace(+c.dataset.r,+c.dataset.p,+c.dataset.m)});
@@ -1172,7 +1179,7 @@ function sessionLog(event){
   return{session_id:SESSION_ID,participant_id:PID,event,sent_at:new Date().toISOString(),
     initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
     rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,lat:p.lat,lon:p.lon,why:p.why,moments:p.moments.map(m=>m.title)}))})),
-    journey:S.rounds.length?journey():[],chats:S.chats,journal:S.journal,elaboration:S.elaboration,stats:S.rounds.length?computeStats():null,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
+    journey:S.rounds.length?journey():[],qa:qaLog(),journal:S.journal,elaboration:S.elaboration,stats:S.rounds.length?computeStats():null,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
 }
 function sendLog(event,beacon){
   if(!S.problem)return;
