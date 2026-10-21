@@ -971,6 +971,31 @@ Respond with ONLY JSON: {"refined":"...","shift":"a few words on what changed, o
   const mine=refining;mine.then(()=>{if(refining===mine)refining=null});
 }
 
+/* ---------- Fold in "what went wrong" before asking for new places ---------- */
+async function refineFromContext(context){
+  if(!context||aiOff)return;
+  const sample=await getSample();if(!sample){aiOff=true;return}
+  try{
+    const res=await sample.json(`You help a person in WorldMirror sharpen what's on their mind. They started by writing: "${S.problem}"
+The current version is: "${S.refined}"
+They just said the places so far didn't reflect their problem, and gave this extra context about what's going on or what was missing: "${context}"
+
+Rewrite the statement so it incorporates what they just said, staying as close as possible to their own words. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. No em dashes.
+Respond with ONLY JSON: {"refined":"...","shift":"a few words on what changed, or empty string"}`,{modelTier:"default",cache:false});
+    if(res&&res.refined&&typeof res.refined==="string"&&res.refined.trim()){
+      S.refined=res.refined.trim();
+      S.refHistory.push({refined:S.refined,shift:String(res.shift||""),after:"what you added"});
+    }
+  }catch(e){if(e&&e.code==="not_granted")aiOff=true}
+}
+async function pivotWithContext(context){
+  show("loading");
+  $("loadingMsg").textContent="Taking in what you added...";
+  $("loadingStatement").textContent=`"${S.refined}"`;
+  await refineFromContext(context);
+  makeRound("pivot",context);
+}
+
 /* ---------- Ask about the moment ---------- */
 function renderChat(){
   const M=curMoment(),log=S.chats[curKey]||[];
@@ -1017,7 +1042,7 @@ $("ciNow").addEventListener("input",e=>{S.refined=e.target.value});
 $("optSatisfied").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"satisfied",statement:S.refined});show("reflect");runSynthesis()};
 $("optMore").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"keep exploring",statement:S.refined});makeRound("deeper","")};
 $("optNone").onclick=()=>{$("missingWrap").classList.remove("hidden");$("missing").focus()};
-$("pivotBtn").onclick=()=>{const m=$("missing").value.trim();S.choices.push({after_round:S.rounds.length,choice:"none of these",missing:m});makeRound("pivot",m)};
+$("pivotBtn").onclick=()=>{const m=$("missing").value.trim();S.choices.push({after_round:S.rounds.length,choice:"none of these",missing:m});pivotWithContext(m)};
 $("backToWalk").onclick=()=>{enterPlace(S.cur.r,S.cur.p,S.cur.m)};
 
 /* ---------- Synthesis: observations -> possible causes -> where it points ---------- */
@@ -1098,7 +1123,7 @@ function drawSynth(msg){
   $("elaborateInput").value=S.elaboration||"";
   $("elaborateInput").oninput=e=>{S.elaboration=e.target.value};
   $("elaborateUpdate").onclick=()=>runSynthesis();
-  $("wrongPlaces").onclick=()=>{const m=S.elaboration;S.choices.push({after_round:S.rounds.length,choice:"places were a wrong interpretation",missing:m});makeRound("pivot",m)};
+  $("wrongPlaces").onclick=()=>{const m=S.elaboration;S.choices.push({after_round:S.rounds.length,choice:"places were a wrong interpretation",missing:m});pivotWithContext(m)};
   $("tailored").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"explore places for this",causes:S.causes.map(c=>({...c}))});makeRound("tailored","")};
   $("saveSummary").onclick=finish;
   $("backCheck").onclick=()=>{show("checkin");renderCheckin()};
