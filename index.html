@@ -236,7 +236,7 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
             <div id="chatlog" aria-live="polite"></div>
             <form id="askForm"><input type="text" id="askInput" placeholder="Ask anything about this moment or place" autocomplete="off"><button class="btn" id="askBtn">Ask</button></form>
           </div>
-          <div class="nav"><button class="btn" id="prevM">Back</button><button class="btn primary" id="nextM">Next moment →</button></div>
+          <div class="nav" id="navRow"><button class="btn" id="prevM">Back</button><button class="btn primary" id="nextM">Next moment →</button></div>
           <div class="transition hidden" id="transitionCard">
             <p class="small" id="transitionMsg"></p>
             <button class="btn primary" id="transitionBtn"></button>
@@ -674,35 +674,19 @@ const FALLBACK=[
   moments:[
    {title:"The kintsugi workshop",scene:"A craftsman bends over a cracked tea bowl, tracing the break with lacquer. Later the seam will be dusted with gold. The bowl goes back into daily use.",meaning:"Kintsugi repairs broken pottery with lacquer mixed with powdered gold. The repair becomes part of the object's history instead of something hidden.",questions:["Why use gold instead of hiding the crack?","How long does a repair take?"],
     terms:[{term:"Kintsugi",definition:"A Japanese technique for mending broken pottery with lacquer mixed with powdered gold, so the repair becomes part of the object's history instead of something to hide."},{term:"lacquer",definition:"A hard, glossy coating, traditionally made from tree sap, used here to glue and seal the broken pieces before the gold is added."}],
-    scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}},
-   {title:"The raked gravel garden",scene:"Before the gates open, a monk rakes the gravel into lines around the stones. Tomorrow he will rake it again.",meaning:"Zen gardens are tended daily. The care is the practice itself, not a task that ever gets finished.",questions:["What do the stones represent?","Why rake it every day?"],
-    terms:[{term:"Zen gardens",definition:"A style of Japanese garden using rocks and raked gravel instead of plants, meant to be looked at and tended rather than walked through."}],
-    scene3d:{setting:"garden",time:"dawn",palette:{ground:"#D8D2C4",walls:"#7D6A55",accent:"#4E6B3A"},objects:[{kind:"raked_gravel",x:0,z:-1,spread:3},{kind:"rock",x:0,z:-1,size:1.6},{kind:"rock",x:1.2,z:-1.6,size:.8},{kind:"person",pose:"working",x:-3.4,z:1.5,color:"#3B3B3B"},{kind:"pagoda",x:6,z:-8},{kind:"maple_tree",x:-6,z:-5}]}},
-   {title:"Maple viewing at dusk",scene:"People gather under the red leaves, photographing them, knowing the color will be gone in two weeks. Nobody seems to be in a hurry.",meaning:"Momijigari, autumn leaf viewing, is an old tradition. It's tied to mono no aware, a gentle awareness that things don't last.",questions:["How old is this tradition?","What does mono no aware mean?"],
-    terms:[{term:"Momijigari",definition:"The Japanese tradition of traveling out specifically to view autumn leaves, much like cherry blossom viewing in spring."},{term:"mono no aware",definition:"A Japanese term for a gentle, wistful awareness that beautiful things are temporary, and that this is part of what makes them beautiful."}],
-    scene3d:{setting:"hillside",time:"dusk",palette:{ground:"#6E6A4A",walls:"#C9B79C",accent:"#C2402A"},objects:[{kind:"maple_tree",x:0,z:-2,size:1.6},{kind:"maple_tree",x:-3.5,z:-3,size:1.3},{kind:"maple_tree",x:3.5,z:-3.5,size:1.4},{kind:"gate",x:0,z:-6},{kind:"person",count:6,arrange:"scatter",x:0,z:0,spread:3},{kind:"lanterns",x:0,z:-1,length:8}]}}
+    scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}}
   ]},
  {name:"Pelourinho, Salvador",country:"Brazil",lat:-12.9714,lon:-38.5014,teaser:"Old streets where music starts without asking.",why:"Built-in example",
   moments:[
    {title:"The atabaque drum circle",scene:"Street corners in the old town. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
     terms:[{term:"atabaque",definition:"A tall, hand-played drum central to Afro-Brazilian music and to Candomblé religious ceremonies."},{term:"Candomblé",definition:"An Afro-Brazilian religion blending West African traditions with elements absorbed during colonization, in which drumming and music play a central role."}],
-    scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}},
-   {title:"The Mercado Modelo tables",scene:"Long communal tables outside the market. Strangers sit together mid-meal, passing the hot sauce down the line.",meaning:"Mercado Modelo sits by the old port. Shared tables at the market restaurants mean you eat with whoever is there.",questions:["What do people eat here?","Why was the market built here?"],
-    terms:[{term:"Mercado Modelo",definition:"A historic market building on Salvador's old waterfront, now home to restaurants and craft stalls."}],
-    scene3d:{setting:"market",time:"day",palette:{ground:"#9A8A74",walls:"#E6D2A8",accent:"#C23B2E"},objects:[{kind:"table_long",x:0,z:0,length:5},{kind:"person",pose:"seated",count:8,arrange:"both_sides",spread:2,x:0,z:0},{kind:"umbrella",x:-3.5,z:-1},{kind:"stall",x:4.5,z:-3,color:"#2F6FB0"},{kind:"person",pose:"walking",count:4,arrange:"scatter",x:0,z:3,spread:4}]}},
-   {title:"The capoeira circle",scene:"A ring of people clapping and singing. Two players move in the middle, then step out so someone else can enter. Beginners take their turn too.",meaning:"Capoeira was developed by enslaved Africans in Brazil, blending fighting, dance, and music. The roda, the circle, holds the game together.",questions:["How did capoeira begin?","What are they singing?"],
-    terms:[{term:"Capoeira",definition:"A Brazilian martial art blending fighting, dance, music, and acrobatics, developed by enslaved Africans in Brazil."},{term:"roda",definition:"The circle of participants, clapping and singing, that surrounds and musically drives a capoeira game."}],
-    scene3d:{setting:"plaza",time:"night",palette:{ground:"#7C6E5E",walls:"#D9A86A",accent:"#E0A526"},objects:[{kind:"person",count:10,arrange:"circle",spread:2.6,x:0,z:0},{kind:"person",pose:"dancing",count:2,arrange:"circle",spread:.6,x:0,z:0},{kind:"lanterns",x:0,z:-3,length:10},{kind:"lantern",x:4,z:1}]}}
+    scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}}
   ]},
  {name:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683,teaser:"A city that makes warmth on purpose.",why:"Built-in example",
   moments:[
    {title:"Candles at 4 p.m.",scene:"It's already dark in December. In the café, every table has a candle, and two friends lean in over theirs.",meaning:"Danes burn more candles per person than almost anyone. Warmth, or hygge, is something people make on purpose in the long winter.",questions:["What does hygge actually mean?","Why so many candles?"],
     terms:[{term:"hygge",definition:"A Danish word for a deliberate, cozy sense of warmth and contentment, often built around candles, company, and simple comforts."}],
-    scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}},
-   {title:"The harbour bath",scene:"Lunchtime. Office workers walk out onto the wooden deck and jump into the harbor, then climb out laughing.",meaning:"The harbor was too polluted to swim in for decades. After a long cleanup, public harbor baths opened in the city center.",questions:["How did they clean the harbor?","Is the water cold all year?"],
-    scene3d:{setting:"waterfront",time:"day",palette:{ground:"#9A8C78",walls:"#C96A4A",accent:"#E0A526"},objects:[{kind:"person",count:5,arrange:"scatter",spread:3,x:0,z:-3},{kind:"person",pose:"walking",count:3,arrange:"scatter",x:0,z:1,spread:4},{kind:"bench",x:-3,z:0,length:2.5},{kind:"boat",x:5,z:-9}]}},
-   {title:"The morning bike lane",scene:"Rush hour on a bike lane wider than the car lane. Parents with kids in cargo boxes, a man in a suit, someone carrying a plant.",meaning:"The city spent decades redesigning streets around cycling. A huge share of people now get to work and school by bike.",questions:["When did this start?","Do people bike in winter?"],
-    scene3d:{setting:"street",time:"dawn",palette:{ground:"#7A7672",walls:"#D9C9A8",accent:"#2F6FB0"},objects:[{kind:"bicycle",count:7,arrange:"row",spread:4,x:0,z:-.5,rot:90},{kind:"person",pose:"walking",count:5,arrange:"scatter",spread:4,x:0,z:2},{kind:"bicycle",count:5,arrange:"row",spread:3,x:0,z:-3,rot:90},{kind:"tree",x:-4.5,z:-4},{kind:"tree",x:4.5,z:-6}]}}
+    scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}}
   ]}
 ];
 /* ================= App ================= */
@@ -816,10 +800,10 @@ Already visited (don't repeat): ${JSON.stringify(visited)}
 Their journey so far: ${JSON.stringify(journey())}
 ${S.journal?`Their running journal from the walk so far, written freely as they went: "${S.journal}"`:""}
 
-Choose 3 real places (a specific neighborhood, market, square, or town), each with 3 moments.
-- Each moment is a defining, real element of that place with historical or cultural meaning that a visitor could actually find there (like bikes in Copenhagen, or the Easter market in Prague). Favor people interacting: shared tables, rituals, markets, games, work done together.
-- Each moment should make contact with their problem: answer it, offer another way to see it, or show people living a version of it. Be indirect. Never name their problem in the scene text and never preach.
-- The three places should approach it from different angles.
+Choose 3 real places (a specific neighborhood, market, square, or town). Give each place exactly one moment, so pick hard: of everything that place could offer, choose the single moment that makes the most direct, surprising contact with what they're carrying. Not a decent one, the best one.
+- The moment is a defining, real element of that place with historical or cultural meaning that a visitor could actually find there (like bikes in Copenhagen, or the Easter market in Prague). Favor people interacting: shared tables, rituals, markets, games, work done together.
+- The moment should make contact with their problem: answer it, offer another way to see it, or show people living a version of it. Be indirect. Never name their problem in the scene text and never preach.
+- The three places should approach it from different angles, so that between them the three moments cover real range, not three versions of the same idea.
 - Only use places and practices you're confident are real and accurately described.
 - Write "scene" in present tense, 2 to 3 short concrete sentences. "meaning" is 1 to 2 sentences of real cultural or historical background. Plain language. No em dashes.
 - Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, and never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences themselves should already read clearly on their own, even before anyone hovers anything.
@@ -828,10 +812,10 @@ Choose 3 real places (a specific neighborhood, market, square, or town), each wi
 Style example, for someone afraid to start things until they're good enough:
 title "The atabaque drum circle", scene "Street corners in Salvador's Pelourinho district. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough."
 
-Each moment also needs a 3D scene description:
+The moment also needs a 3D scene description:
 ${VOCAB}
 
-Respond with ONLY JSON, no markdown:
+Respond with ONLY JSON, no markdown. "moments" must contain exactly one entry:
 {"places":[{"name":"...","country":"...","lat":0,"lon":0,"teaser":"one evocative line that doesn't mention their problem","why":"for the research team: how this place connects to what they wrote","moments":[{"title":"...","scene":"...","meaning":"...","questions":["two short questions a curious visitor might ask"],"terms":[{"term":"a specific word or short phrase exactly as it appears in scene or meaning","definition":"one plain sentence explaining it to someone who's never heard of it"}],"scene3d":{...}}]}]}`;
 }
 function cleanRound(r){
@@ -839,7 +823,7 @@ function cleanRound(r){
   const places=r.places.filter(p=>p&&p.name&&Array.isArray(p.moments)&&p.moments.length).slice(0,3).map(p=>({name:String(p.name),country:String(p.country||""),
     lat:clamp(Number(p.lat)||0,-90,90),lon:clamp(Number(p.lon)||0,-180,180),
     teaser:String(p.teaser||""),why:String(p.why||""),
-    moments:p.moments.slice(0,4).filter(m=>m&&m.scene).map(m=>({title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),
+    moments:p.moments.slice(0,1).filter(m=>m&&m.scene).map(m=>({title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),
       terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
       scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]}}))})).filter(p=>p.moments.length);
   return places.length>=2?places:null;
@@ -906,13 +890,14 @@ function renderWalk(newScene){
   $("tabsHint").textContent=R.places.length>1?`${R.places.length} places to explore in this set — tap a tab above to jump to any of them, anytime.`:"";
   $("backToSummary").classList.toggle("hidden",!S.returnToFinal);
   $("placeName").textContent=`${P.name}, ${P.country}`;
-  $("mcount").textContent=`Moment ${mi+1} of ${P.moments.length}`;
+  $("mcount").textContent=P.moments.length>1?`Moment ${mi+1} of ${P.moments.length}`:"";
   Globe3D.attach($("sideGlobe"));Globe3D.point(P.lat,P.lon);$("sideGlobeLabel").textContent=`${P.name}, ${P.country}`;
   if(newScene){if(viewerOK){Viewer.load(M.scene3d,P.name+M.title);$("viewer").classList.remove("no3d")}else{$("viewer").classList.add("no3d")}
     const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")}
   $("mtitle").textContent=M.title;$("mscene").innerHTML=highlightTerms(M.scene,M.terms);$("mmeaning").innerHTML=highlightTerms(M.meaning,M.terms);
   renderChat();
   const last=mi===P.moments.length-1, allSeen=R.places.every((_,j)=>S.visited[`${ri}.${j}`]);
+  $("navRow").classList.toggle("hidden",P.moments.length<=1);
   $("prevM").disabled=mi===0;
   const tc=$("transitionCard");
   if(!last){
