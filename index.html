@@ -47,9 +47,12 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 /* loading */
 #loading{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
 #loading .statement{margin:0}
-.orbit{width:46px;height:46px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent)}
-@media (prefers-reduced-motion:no-preference){.orbit{animation:spin 1.4s linear infinite}}
-@keyframes spin{to{transform:rotate(360deg)}}
+.loadglobe{width:120px;height:120px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#17293a,#060b12)}
+.loadglobe canvas{width:100%!important;height:100%!important;display:block;cursor:grab;touch-action:none}
+.loadglobe canvas:active{cursor:grabbing}
+.factbox{min-height:42px;max-width:46ch}
+.factbox p{margin:0;font-size:14px;color:var(--muted);transition:opacity .5s ease}
+.factbox p.fade{opacity:0}
 
 /* reveal */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:26px}
@@ -90,6 +93,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .mtitle{font-size:14px;font-weight:500;color:var(--accent);margin:0 0 6px}
 .mscene{font-family:var(--serif);font-size:clamp(19px,2.2vw,23px);line-height:1.5;margin:0 0 14px;max-width:62ch}
 .meaning{font-family:var(--serif);font-size:16px;line-height:1.65;color:var(--muted);border-left:2px solid var(--accent);padding-left:14px;margin:0 0 14px;max-width:62ch}
+.term{position:relative;border-bottom:1px dotted var(--accent);cursor:help}
+.term .termtip{display:none;position:absolute;left:0;bottom:100%;margin-bottom:6px;width:230px;max-width:70vw;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:10px;font-family:var(--sans);font-size:13px;line-height:1.45;font-style:normal;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.term:hover .termtip,.term:focus .termtip,.term.pinned .termtip{display:block}
 .ask{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .ask h3{font-size:15px;font-weight:500;margin:0 0 8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
@@ -108,6 +114,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .side{display:flex;flex-direction:column;gap:22px}
 @media (min-width:901px){.side{position:sticky;top:calc(20px + env(safe-area-inset-top,0px))}}
 .side h3{font-size:14px;font-weight:500;margin:0 0 6px;color:var(--muted)}
+.sideglobe{width:100%;max-width:150px;aspect-ratio:1;margin:0 auto;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#17293a,#060b12)}
+.sideglobe canvas{width:100%!important;height:100%!important;display:block;cursor:grab;touch-action:none}
+.sideglobe canvas:active{cursor:grabbing}
 .orig{font-family:var(--serif);font-size:15px;color:var(--muted);margin:0}
 .ref{font-family:var(--serif);font-size:18px;line-height:1.5;margin:0}
 #refBlock{padding:14px 16px;border-radius:12px;background:var(--accent-soft)}
@@ -157,6 +166,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .tries{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .tries li{background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-family:var(--serif);font-size:17px;line-height:1.5}
 .tries .from{display:block;font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:2px}
+.elaborate{margin-top:30px;padding-top:16px;border-top:1px solid var(--line)}
 .err{color:var(--muted);font-size:14px;margin-top:10px}
 details.log{margin-top:40px;font-size:14px;color:var(--muted)}
 details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:360px;overflow:auto;font-size:12px;color:var(--ink)}
@@ -183,9 +193,10 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
   </section>
 
   <section id="loading" class="hidden">
-    <div class="orbit" aria-hidden="true"></div>
+    <div class="loadglobe" id="loadGlobe" aria-hidden="true"></div>
     <p id="loadingMsg" style="font-size:18px;margin:0;max-width:46ch"></p>
     <p class="statement" id="loadingStatement"></p>
+    <div class="factbox"><p id="factText"></p></div>
     <p class="small" style="margin:0">This can take up to a minute.</p>
     <button class="btn" id="stopGen">Stop</button>
     <div id="loadingErr"></div>
@@ -234,6 +245,11 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
       </article>
       <aside class="side">
         <div>
+          <h3>Where you are</h3>
+          <div class="sideglobe" id="sideGlobe"></div>
+          <p class="small" id="sideGlobeLabel" style="text-align:center;margin:8px 0 0"></p>
+        </div>
+        <div>
           <h3>What you came in with</h3>
           <p class="orig" id="origStmt"></p>
         </div>
@@ -243,7 +259,11 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
           <p class="shift" id="refShift"></p>
         </div>
         <p class="small" id="refStatus" aria-live="polite" style="margin:-10px 0 0"></p>
-        <button class="btn primary hidden" id="checkSide">Pause and check in</button>
+        <div>
+          <h3><label for="journal">Your journal</label></h3>
+          <textarea id="journal" placeholder="Jot down anything, anytime — it stays with you for the whole walk." style="min-height:90px;background:var(--bg);font-size:15px"></textarea>
+        </div>
+        <button class="btn primary" id="checkSide">Pause and check in</button>
         <details class="research"><summary>Researcher view</summary><dl id="readout"></dl></details>
       </aside>
     </div>
@@ -512,29 +532,172 @@ function thumbnail(spec,seed){
     thumbR.render(scene,cam);const url=thumbR.domElement.toDataURL("image/jpeg",.82);disposeScene(scene);return url;
   }catch(e){return""}
 }
+
+/* ---------- A real shaded 3D globe (reuses the THREE.js already loaded for scenes) ---------- */
+function buildWorldTexture(){
+  const w=1024,h=512;
+  const c=document.createElement("canvas");c.width=w;c.height=h;
+  const ctx=c.getContext("2d");
+  const og=ctx.createLinearGradient(0,0,0,h);
+  og.addColorStop(0,"#0C2A42");og.addColorStop(.5,"#155079");og.addColorStop(1,"#0C2A42");
+  ctx.fillStyle=og;ctx.fillRect(0,0,w,h);
+  const proj=(lon,lat)=>[(lon+180)/360*w,(90-lat)/180*h];
+  const LAND=[
+    [[-168,66],[-165,60],[-150,70],[-130,70],[-95,68],[-80,62],[-75,55],[-65,50],[-55,52],[-60,45],[-70,42],[-75,35],[-80,26],[-82,25],[-97,26],[-97,18],[-90,14],[-83,9],[-80,8],[-105,20],[-115,30],[-120,34],[-124,40],[-124,48],[-130,55],[-140,60],[-155,58],[-160,55]],
+    [[-77,8],[-70,10],[-60,8],[-50,0],[-35,-5],[-35,-10],[-40,-15],[-42,-20],[-45,-23],[-48,-27],[-55,-34],[-62,-40],[-68,-45],[-70,-52],[-68,-55],[-72,-52],[-73,-45],[-72,-35],[-71,-25],[-70,-18],[-71,-10],[-78,-5],[-80,0]],
+    [[-17,21],[-16,15],[-17,12],[-13,8],[-10,5],[-8,4],[0,5],[9,4],[9,2],[8,-2],[12,-5],[12,-18],[18,-23],[16,-28],[18,-34],[25,-34],[28,-30],[32,-28],[35,-22],[40,-16],[40,-10],[48,0],[51,10],[43,12],[42,15],[38,18],[36,22],[33,31],[25,32],[10,37],[-6,35],[-10,30]],
+    [[-9,43],[-9,36],[0,38],[10,37],[15,38],[19,41],[26,40],[30,36],[35,33],[36,31],[35,27],[40,20],[42,15],[48,12],[52,24],[56,27],[61,25],[68,24],[72,20],[77,8],[80,13],[85,20],[92,22],[95,16],[98,8],[103,1],[104,10],[106,20],[110,21],[115,23],[120,30],[122,31],[122,37],[128,37],[130,42],[135,45],[140,43],[142,46],[143,51],[160,60],[170,68],[180,70],[170,70],[150,72],[130,73],[110,74],[90,73],[70,72],[55,69],[40,68],[30,68],[20,69],[10,65],[5,62],[0,58],[-5,55]],
+    [[113,-22],[115,-20],[122,-18],[128,-15],[130,-12],[136,-12],[142,-11],[145,-16],[146,-19],[150,-22],[153,-27],[153,-31],[150,-34],[147,-38],[144,-38],[140,-38],[137,-35],[135,-32],[132,-32],[129,-31],[126,-32],[122,-34],[115,-34],[113,-26]],
+    [[-45,60],[-42,60],[-20,70],[-20,77],[-30,83],[-45,82],[-55,70],[-55,65]],
+    [[130,33],[133,34],[138,35],[141,40],[142,45],[140,45],[139,38],[132,34]],
+    [[-5,50],[-5,56],[-2,58],[0,53],[-2,51]],
+    [[44,-12],[47,-16],[47,-22],[44,-25],[43,-20],[44,-15]],
+    [[131,-2],[141,-3],[150,-6],[148,-9],[140,-9]],
+    [[172,-41],[175,-37],[178,-38],[176,-42]]
+  ];
+  ctx.fillStyle="#5C8257";ctx.strokeStyle="rgba(28,45,34,.55)";ctx.lineWidth=1;
+  LAND.forEach(poly=>{
+    ctx.beginPath();
+    poly.forEach(([lon,lat],i)=>{const [x,y]=proj(lon,lat);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
+    ctx.closePath();ctx.fill();ctx.stroke();
+  });
+  const capN=ctx.createLinearGradient(0,0,0,h*.1);capN.addColorStop(0,"rgba(255,255,255,.85)");capN.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.fillStyle=capN;ctx.fillRect(0,0,w,h*.1);
+  const capS=ctx.createLinearGradient(0,h,0,h*.9);capS.addColorStop(0,"rgba(255,255,255,.85)");capS.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.fillStyle=capS;ctx.fillRect(0,h*.9,w,h*.1);
+  ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=1;
+  for(let lat=-60;lat<=60;lat+=30){const y=proj(0,lat)[1];ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+  for(let lon=-150;lon<=150;lon+=30){const x=proj(lon,0)[0];ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
+  return c;
+}
+const Globe3D=(()=>{
+  let renderer,camera,scene,group,sphere,pin,halo,raf=null,clock,host=null,mode="spin",targetYaw=0,dragging=false,drag=null,pitch=0;
+  function ensure(){
+    if(renderer||!HAS3D)return;
+    try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true})}catch(e){return}
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    camera=new THREE.PerspectiveCamera(30,1,.1,20);camera.position.set(0,0,5.6);
+    scene=new THREE.Scene();
+    scene.add(new THREE.AmbientLight(0xffffff,.4));
+    const sun=new THREE.DirectionalLight(0xffffff,1.25);sun.position.set(2.4,1.6,3.2);scene.add(sun);
+    group=new THREE.Group();scene.add(group);
+    const tex=new THREE.CanvasTexture(buildWorldTexture());
+    sphere=new THREE.Mesh(new THREE.SphereGeometry(1.5,48,48),new THREE.MeshPhongMaterial({map:tex,shininess:14,specular:0x3a5a78}));
+    group.add(sphere);
+    const glow=new THREE.Mesh(new THREE.SphereGeometry(1.64,32,32),new THREE.MeshBasicMaterial({color:0x6FA8E0,transparent:true,opacity:.13,side:THREE.BackSide}));
+    scene.add(glow);
+    pin=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xE8622E}));
+    pin.visible=false;group.add(pin);
+    halo=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xE8622E,transparent:true,opacity:.35}));
+    pin.add(halo);
+    clock=new THREE.Clock();
+    const c=renderer.domElement;
+    c.tabIndex=0;c.setAttribute("aria-label","Drag to spin the globe.");
+    c.addEventListener("pointerdown",e=>{dragging=true;drag={x:e.clientX,y:e.clientY};c.setPointerCapture(e.pointerId)});
+    c.addEventListener("pointermove",e=>{if(!drag)return;group.rotation.y+=(e.clientX-drag.x)*.008;pitch=clamp(pitch+(e.clientY-drag.y)*.008,-1.15,1.15);group.rotation.x=pitch;drag={x:e.clientX,y:e.clientY}});
+    c.addEventListener("pointerup",()=>{dragging=false;drag=null});
+    c.addEventListener("pointercancel",()=>{dragging=false;drag=null});
+  }
+  function latLonToVec3(lat,lon,r){
+    const phi=(90-lat)*Math.PI/180, theta=(lon+180)*Math.PI/180;
+    return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+  }
+  function size(){if(!host||!renderer)return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+  function attach(el){
+    if(!HAS3D)return;
+    ensure();if(!renderer)return;
+    if(host!==el){host=el;el.innerHTML="";el.appendChild(renderer.domElement);new ResizeObserver(size).observe(el);size()}
+    loop();
+  }
+  function spin(){mode="spin";if(pin)pin.visible=false}
+  let lastLat=null,lastLon=null;
+  function point(lat,lon){
+    if(!HAS3D||!renderer)return;
+    const latN=clamp(Number(lat)||0,-90,90),lonN=clamp(Number(lon)||0,-180,180);
+    if(lastLat===null||latN!==lastLat||lonN!==lastLon){pitch=0;group.rotation.x=0}
+    lastLat=latN;lastLon=lonN;
+    mode="point";pin.visible=true;
+    const p=latLonToVec3(latN,lonN,1.53);
+    pin.position.copy(p);
+    targetYaw=Math.atan2(-p.x,p.z);
+  }
+  function loop(){if(raf||!renderer)return;raf=requestAnimationFrame(frame)}
+  function frame(){
+    raf=requestAnimationFrame(frame);
+    if(!host||!host.offsetParent)return;
+    const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
+    if(!dragging){
+      if(mode==="spin"){group.rotation.y+=dt*.2}
+      else{let d=targetYaw-group.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));group.rotation.y+=d*Math.min(1,dt*2.4);if(Math.abs(d)<.015)group.rotation.y+=dt*.04}
+    }
+    if(pin.visible)halo.scale.setScalar(1.8+Math.sin(t*2.2)*.4);
+    renderer.render(scene,camera);
+  }
+  return{attach,spin,point};
+})();
+
+/* ---------- Loading screen facts carousel ---------- */
+const FACTS=[
+ "There are more than 7,000 living languages spoken in the world today.",
+ "Kyoto served as Japan's capital for over a thousand years, from 794 to 1868.",
+ "Capoeira, now practiced worldwide, began among enslaved Africans in Brazil as a blend of dance and self-defense.",
+ "Denmark consistently ranks among the world's happiest countries, a trend researchers often tie to hygge, deliberate everyday coziness.",
+ "Venice is built on more than 100 small islands connected by over 400 bridges.",
+ "Over 90% of the world's fresh water is locked in Antarctica's ice.",
+ "Istanbul is the only major city in the world that spans two continents, Europe and Asia.",
+ "Marrakech's main square, Jemaa el-Fnaa, has hosted storytellers, musicians, and food stalls for roughly a thousand years.",
+ "The Trans-Siberian Railway covers about 9,289 kilometers, the longest single rail line in the world.",
+ "In Japan, the practice of kintsugi repairs broken pottery with gold, treating the break as part of the object's story rather than something to hide.",
+ "Lagos, Nigeria is projected to become one of the largest cities on Earth by 2100.",
+ "The Inca road system once stretched roughly 40,000 kilometers across the Andes without the use of wheeled vehicles.",
+ "Finland has more saunas than cars.",
+ "Mexico City is slowly sinking, by as much as 50 centimeters a year in some areas, because it was built on a former lake bed.",
+ "Market stalls in Marrakech, drum circles in Salvador, and candlelit cafes in Copenhagen are all still, today, part of daily life, not performances staged for visitors."
+];
+let factTimer=null;
+function startFacts(){
+  stopFacts();
+  const el=$("factText");if(!el)return;
+  const pick=()=>FACTS[Math.floor(Math.random()*FACTS.length)];
+  el.textContent=pick();el.classList.remove("fade");
+  factTimer=setInterval(()=>{
+    el.classList.add("fade");
+    setTimeout(()=>{el.textContent=pick();el.classList.remove("fade")},500);
+  },4200);
+}
+function stopFacts(){if(factTimer){clearInterval(factTimer);factTimer=null}}
+
 /* Built-in places, used only when the AI isn't available in this view */
 const FALLBACK=[
- {name:"Kyoto",country:"Japan",teaser:"A city that keeps its cracks visible.",why:"Built-in example",
+ {name:"Kyoto",country:"Japan",lat:35.0116,lon:135.7681,teaser:"A city that keeps its cracks visible.",why:"Built-in example",
   moments:[
    {title:"The kintsugi workshop",scene:"A craftsman bends over a cracked tea bowl, tracing the break with lacquer. Later the seam will be dusted with gold. The bowl goes back into daily use.",meaning:"Kintsugi repairs broken pottery with lacquer mixed with powdered gold. The repair becomes part of the object's history instead of something hidden.",questions:["Why use gold instead of hiding the crack?","How long does a repair take?"],
+    terms:[{term:"Kintsugi",definition:"A Japanese technique for mending broken pottery with lacquer mixed with powdered gold, so the repair becomes part of the object's history instead of something to hide."},{term:"lacquer",definition:"A hard, glossy coating, traditionally made from tree sap, used here to glue and seal the broken pieces before the gold is added."}],
     scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}},
    {title:"The raked gravel garden",scene:"Before the gates open, a monk rakes the gravel into lines around the stones. Tomorrow he will rake it again.",meaning:"Zen gardens are tended daily. The care is the practice itself, not a task that ever gets finished.",questions:["What do the stones represent?","Why rake it every day?"],
+    terms:[{term:"Zen gardens",definition:"A style of Japanese garden using rocks and raked gravel instead of plants, meant to be looked at and tended rather than walked through."}],
     scene3d:{setting:"garden",time:"dawn",palette:{ground:"#D8D2C4",walls:"#7D6A55",accent:"#4E6B3A"},objects:[{kind:"raked_gravel",x:0,z:-1,spread:3},{kind:"rock",x:0,z:-1,size:1.6},{kind:"rock",x:1.2,z:-1.6,size:.8},{kind:"person",pose:"working",x:-3.4,z:1.5,color:"#3B3B3B"},{kind:"pagoda",x:6,z:-8},{kind:"maple_tree",x:-6,z:-5}]}},
    {title:"Maple viewing at dusk",scene:"People gather under the red leaves, photographing them, knowing the color will be gone in two weeks. Nobody seems to be in a hurry.",meaning:"Momijigari, autumn leaf viewing, is an old tradition. It's tied to mono no aware, a gentle awareness that things don't last.",questions:["How old is this tradition?","What does mono no aware mean?"],
+    terms:[{term:"Momijigari",definition:"The Japanese tradition of traveling out specifically to view autumn leaves, much like cherry blossom viewing in spring."},{term:"mono no aware",definition:"A Japanese term for a gentle, wistful awareness that beautiful things are temporary, and that this is part of what makes them beautiful."}],
     scene3d:{setting:"hillside",time:"dusk",palette:{ground:"#6E6A4A",walls:"#C9B79C",accent:"#C2402A"},objects:[{kind:"maple_tree",x:0,z:-2,size:1.6},{kind:"maple_tree",x:-3.5,z:-3,size:1.3},{kind:"maple_tree",x:3.5,z:-3.5,size:1.4},{kind:"gate",x:0,z:-6},{kind:"person",count:6,arrange:"scatter",x:0,z:0,spread:3},{kind:"lanterns",x:0,z:-1,length:8}]}}
   ]},
- {name:"Pelourinho, Salvador",country:"Brazil",teaser:"Old streets where music starts without asking.",why:"Built-in example",
+ {name:"Pelourinho, Salvador",country:"Brazil",lat:-12.9714,lon:-38.5014,teaser:"Old streets where music starts without asking.",why:"Built-in example",
   moments:[
    {title:"The atabaque drum circle",scene:"Street corners in the old town. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
+    terms:[{term:"atabaque",definition:"A tall, hand-played drum central to Afro-Brazilian music and to Candomblé religious ceremonies."},{term:"Candomblé",definition:"An Afro-Brazilian religion blending West African traditions with elements absorbed during colonization, in which drumming and music play a central role."}],
     scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}},
    {title:"The Mercado Modelo tables",scene:"Long communal tables outside the market. Strangers sit together mid-meal, passing the hot sauce down the line.",meaning:"Mercado Modelo sits by the old port. Shared tables at the market restaurants mean you eat with whoever is there.",questions:["What do people eat here?","Why was the market built here?"],
+    terms:[{term:"Mercado Modelo",definition:"A historic market building on Salvador's old waterfront, now home to restaurants and craft stalls."}],
     scene3d:{setting:"market",time:"day",palette:{ground:"#9A8A74",walls:"#E6D2A8",accent:"#C23B2E"},objects:[{kind:"table_long",x:0,z:0,length:5},{kind:"person",pose:"seated",count:8,arrange:"both_sides",spread:2,x:0,z:0},{kind:"umbrella",x:-3.5,z:-1},{kind:"stall",x:4.5,z:-3,color:"#2F6FB0"},{kind:"person",pose:"walking",count:4,arrange:"scatter",x:0,z:3,spread:4}]}},
    {title:"The capoeira circle",scene:"A ring of people clapping and singing. Two players move in the middle, then step out so someone else can enter. Beginners take their turn too.",meaning:"Capoeira was developed by enslaved Africans in Brazil, blending fighting, dance, and music. The roda, the circle, holds the game together.",questions:["How did capoeira begin?","What are they singing?"],
+    terms:[{term:"Capoeira",definition:"A Brazilian martial art blending fighting, dance, music, and acrobatics, developed by enslaved Africans in Brazil."},{term:"roda",definition:"The circle of participants, clapping and singing, that surrounds and musically drives a capoeira game."}],
     scene3d:{setting:"plaza",time:"night",palette:{ground:"#7C6E5E",walls:"#D9A86A",accent:"#E0A526"},objects:[{kind:"person",count:10,arrange:"circle",spread:2.6,x:0,z:0},{kind:"person",pose:"dancing",count:2,arrange:"circle",spread:.6,x:0,z:0},{kind:"lanterns",x:0,z:-3,length:10},{kind:"lantern",x:4,z:1}]}}
   ]},
- {name:"Copenhagen",country:"Denmark",teaser:"A city that makes warmth on purpose.",why:"Built-in example",
+ {name:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683,teaser:"A city that makes warmth on purpose.",why:"Built-in example",
   moments:[
    {title:"Candles at 4 p.m.",scene:"It's already dark in December. In the café, every table has a candle, and two friends lean in over theirs.",meaning:"Danes burn more candles per person than almost anyone. Warmth, or hygge, is something people make on purpose in the long winter.",questions:["What does hygge actually mean?","Why so many candles?"],
+    terms:[{term:"hygge",definition:"A Danish word for a deliberate, cozy sense of warmth and contentment, often built around candles, company, and simple comforts."}],
     scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}},
    {title:"The harbour bath",scene:"Lunchtime. Office workers walk out onto the wooden deck and jump into the harbor, then climb out laughing.",meaning:"The harbor was too polluted to swim in for decades. After a long cleanup, public harbor baths opened in the city center.",questions:["How did they clean the harbor?","Is the water cold all year?"],
     scene3d:{setting:"waterfront",time:"day",palette:{ground:"#9A8C78",walls:"#C96A4A",accent:"#E0A526"},objects:[{kind:"person",count:5,arrange:"scatter",spread:3,x:0,z:-3},{kind:"person",pose:"walking",count:3,arrange:"scatter",x:0,z:1,spread:4},{kind:"bench",x:-3,z:0,length:2.5},{kind:"boat",x:5,z:-9}]}},
@@ -545,11 +708,33 @@ const FALLBACK=[
 /* ================= App ================= */
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
+function highlightTerms(text,terms){
+  const list=(terms||[]).filter(t=>t&&t.term&&t.definition);
+  if(!list.length)return esc(text);
+  const marks=[];
+  list.forEach(t=>{
+    const re=new RegExp(`\\b${escapeRegExp(t.term)}\\b`,"i");
+    const m=re.exec(text);
+    if(m){const start=m.index,end=start+m[0].length;if(!marks.some(x=>start<x.end&&end>x.start))marks.push({start,end,def:t.definition})}
+  });
+  if(!marks.length)return esc(text);
+  marks.sort((a,b)=>a.start-b.start);
+  let out="",pos=0;
+  marks.forEach(m=>{out+=esc(text.slice(pos,m.start));out+=`<span class="term" tabindex="0">${esc(text.slice(m.start,m.end))}<span class="termtip">${esc(m.def)}</span></span>`;pos=m.end});
+  out+=esc(text.slice(pos));
+  return out;
+}
+document.addEventListener("click",e=>{
+  const t=e.target.closest(".term");
+  document.querySelectorAll(".term.pinned").forEach(x=>{if(x!==t)x.classList.remove("pinned")});
+  if(t)t.classList.toggle("pinned");
+});
 let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false}}
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:""}}
 S=fresh();
 const SCREENS=["intro","loading","reveal","walk","checkin","reflect","final"];
-function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0})}
+function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
 const mk=(r,p,m)=>`${r}.${p}.${m}`;
 let tStart=null,curKey=null;
 function tick(){if(curKey&&tStart!=null)S.dwell[curKey]=(S.dwell[curKey]||0)+(Date.now()-tStart);tStart=document.hidden?null:Date.now()}
@@ -622,6 +807,7 @@ ${S.synth&&S.synth.summary?`Current read of where it points: "${S.synth.summary}
 `:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed, and that let them see the way forward in practice. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on the questions they asked below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Take clearly different angles from before.`}
 Already visited (don't repeat): ${JSON.stringify(visited)}
 Their journey so far: ${JSON.stringify(journey())}
+${S.journal?`Their running journal from the walk so far, written freely as they went: "${S.journal}"`:""}
 
 Choose 3 real places (a specific neighborhood, market, square, or town), each with 3 moments.
 - Each moment is a defining, real element of that place with historical or cultural meaning that a visitor could actually find there (like bikes in Copenhagen, or the Easter market in Prague). Favor people interacting: shared tables, rituals, markets, games, work done together.
@@ -629,6 +815,8 @@ Choose 3 real places (a specific neighborhood, market, square, or town), each wi
 - The three places should approach it from different angles.
 - Only use places and practices you're confident are real and accurately described.
 - Write "scene" in present tense, 2 to 3 short concrete sentences. "meaning" is 1 to 2 sentences of real cultural or historical background. Plain language. No em dashes.
+- Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, and never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences themselves should already read clearly on their own, even before anyone hovers anything.
+- "lat" and "lon" are the real decimal-degree coordinates of the specific place, used to show it on a small map.
 
 Style example, for someone afraid to start things until they're good enough:
 title "The atabaque drum circle", scene "Street corners in Salvador's Pelourinho district. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough."
@@ -637,12 +825,16 @@ Each moment also needs a 3D scene description:
 ${VOCAB}
 
 Respond with ONLY JSON, no markdown:
-{"places":[{"name":"...","country":"...","teaser":"one evocative line that doesn't mention their problem","why":"for the research team: how this place connects to what they wrote","moments":[{"title":"...","scene":"...","meaning":"...","questions":["two short questions a curious visitor might ask"],"scene3d":{...}}]}]}`;
+{"places":[{"name":"...","country":"...","lat":0,"lon":0,"teaser":"one evocative line that doesn't mention their problem","why":"for the research team: how this place connects to what they wrote","moments":[{"title":"...","scene":"...","meaning":"...","questions":["two short questions a curious visitor might ask"],"terms":[{"term":"a specific word or short phrase exactly as it appears in scene or meaning","definition":"one plain sentence explaining it to someone who's never heard of it"}],"scene3d":{...}}]}]}`;
 }
 function cleanRound(r){
   if(!r||!Array.isArray(r.places))return null;
-  const places=r.places.filter(p=>p&&p.name&&Array.isArray(p.moments)&&p.moments.length).slice(0,3).map(p=>({name:String(p.name),country:String(p.country||""),teaser:String(p.teaser||""),why:String(p.why||""),
-    moments:p.moments.slice(0,4).filter(m=>m&&m.scene).map(m=>({title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]}}))})).filter(p=>p.moments.length);
+  const places=r.places.filter(p=>p&&p.name&&Array.isArray(p.moments)&&p.moments.length).slice(0,3).map(p=>({name:String(p.name),country:String(p.country||""),
+    lat:clamp(Number(p.lat)||0,-90,90),lon:clamp(Number(p.lon)||0,-180,180),
+    teaser:String(p.teaser||""),why:String(p.why||""),
+    moments:p.moments.slice(0,4).filter(m=>m&&m.scene).map(m=>({title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),
+      terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
+      scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]}}))})).filter(p=>p.moments.length);
   return places.length>=2?places:null;
 }
 let genCtl=null;
@@ -708,9 +900,10 @@ function renderWalk(newScene){
   $("backToSummary").classList.toggle("hidden",!S.returnToFinal);
   $("placeName").textContent=`${P.name}, ${P.country}`;
   $("mcount").textContent=`Moment ${mi+1} of ${P.moments.length}`;
+  Globe3D.attach($("sideGlobe"));Globe3D.point(P.lat,P.lon);$("sideGlobeLabel").textContent=`${P.name}, ${P.country}`;
   if(newScene){if(viewerOK){Viewer.load(M.scene3d,P.name+M.title);$("viewer").classList.remove("no3d")}else{$("viewer").classList.add("no3d")}
     const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")}
-  $("mtitle").textContent=M.title;$("mscene").textContent=M.scene;$("mmeaning").textContent=M.meaning;
+  $("mtitle").textContent=M.title;$("mscene").innerHTML=highlightTerms(M.scene,M.terms);$("mmeaning").innerHTML=highlightTerms(M.meaning,M.terms);
   renderChat();
   const last=mi===P.moments.length-1, allSeen=R.places.every((_,j)=>S.visited[`${ri}.${j}`]);
   $("prevM").disabled=mi===0;
@@ -730,7 +923,6 @@ function renderWalk(newScene){
       $("transitionBtn").dataset.act="check";
     }
   }
-  $("checkSide").classList.toggle("hidden",!allSeen||(last&&allSeen));
   renderSide();
 }
 $("tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(!t)return;const pi=+t.dataset.p;if(pi!==S.cur.p)enterPlace(S.cur.r,pi,0)});
@@ -741,6 +933,7 @@ $("transitionBtn").onclick=()=>{const a=$("transitionBtn").dataset.act;
   else goCheckin()};
 $("checkSide").onclick=goCheckin;
 $("backToSummary").onclick=()=>finish();
+$("journal").addEventListener("input",e=>{S.journal=e.target.value});
 $("recenter").onclick=()=>Viewer.reset();
 document.querySelectorAll("[data-move]").forEach(b=>{const d=b.dataset.move;const on=e=>{e.preventDefault();Viewer.setHold(d,true);const h=$("viewer").querySelector(".hint3d");h&&h.classList.add("gone")},off=()=>Viewer.setHold(d,false);
   b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off)});
@@ -752,6 +945,7 @@ function renderSide(){
   $("refBlock").classList.toggle("hidden",!changed);
   $("refStmt").textContent=S.refined;
   const last=S.refHistory[S.refHistory.length-1];$("refShift").textContent=last&&last.shift?last.shift:"";
+  $("journal").value=S.journal;
   renderResearch();
 }
 function renderResearch(){
@@ -774,8 +968,9 @@ function refine(ri,pi){
       const res=await sample.json(`You help a person in WorldMirror sharpen what's on their mind. They started by writing: "${S.problem}"
 The current version is: "${S.refined}"
 They just walked through ${P.name}, ${P.country}. Their whole journey so far, with the questions they asked at each moment: ${JSON.stringify(journey())}
+${S.journal?`Their running journal, written freely as they walked: "${S.journal}"`:""}
 
-Rewrite the statement so it reflects what their questions suggest they're really getting at. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. If nothing new emerged, return the current version unchanged. No em dashes.
+Rewrite the statement so it reflects what their questions and journal suggest they're really getting at. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. If nothing new emerged, return the current version unchanged. No em dashes.
 Respond with ONLY JSON: {"refined":"...","shift":"a few words on what changed, or empty string"}`,{modelTier:"default",cache:false});
       if(res&&res.refined&&typeof res.refined==="string"){if(res.refined.trim()!==S.refined){S.refined=res.refined.trim();S.refHistory.push({refined:S.refined,shift:String(res.shift||""),after:P.name});const b=$("refBlock");b.classList.remove("pulse");void b.offsetWidth;b.classList.add("pulse")}}
     }catch(e){if(e&&e.code==="not_granted")aiOff=true}
@@ -841,6 +1036,8 @@ function synthPrompt(){
 What they wrote at the start: "${S.problem}"
 How it reads now: "${S.refined}"
 Their journey (places, moments, the questions they asked at each one, time spent): ${JSON.stringify(journey())}
+${S.journal?`Their running journal, written freely as they walked: "${S.journal}"`:""}
+${S.elaboration?`They also added more about what's going on, directly: "${S.elaboration}"`:""}
 ${fb.length?`They already responded to earlier guesses about the cause. Keep what they confirmed, drop what they rejected, and revise what was partly right using their comments: ${JSON.stringify(fb)}`:""}
 
 Do three things:
@@ -887,6 +1084,15 @@ function drawSynth(msg){
     <div class="row" style="margin:14px 0 6px"><button class="btn" id="updateSynth" disabled>Update with my answers</button></div>`:""}
     <h3 class="sec">Where this points</h3>${pointsHtml(r)}
     ${msg?`<p class="err">${esc(msg)}</p>`:""}
+    <div class="elaborate">
+      <h3 class="sec" style="margin-top:0">Is there more to this?</h3>
+      <p class="small" style="margin:-4px 0 10px">Add more about what's going on, or say if these places got it wrong, either can shape what happens next.</p>
+      <textarea id="elaborateInput" placeholder="There's more to this..." style="min-height:80px"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="elaborateUpdate">Update the read with this</button>
+        <button class="btn" id="wrongPlaces">These places got it wrong — show me different ones</button>
+      </div>
+    </div>
     <div class="row" style="margin-top:26px">
       <button class="btn primary" id="tailored">Explore places for this</button>
       <button class="btn" id="saveSummary">Save as my working summary</button>
@@ -897,6 +1103,10 @@ function drawSynth(msg){
     el.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{c.verdict=b.dataset.v;el.querySelectorAll("[data-v]").forEach(x=>x.setAttribute("aria-pressed",x===b));el.querySelector(".ccomment").classList.toggle("hidden",c.verdict==="right");$("updateSynth").disabled=false});
     el.querySelector(".ccomment").oninput=e=>{c.comment=e.target.value;$("updateSynth").disabled=false};});
   $("updateSynth")&&($("updateSynth").onclick=()=>runSynthesis());
+  $("elaborateInput").value=S.elaboration||"";
+  $("elaborateInput").oninput=e=>{S.elaboration=e.target.value};
+  $("elaborateUpdate").onclick=()=>runSynthesis();
+  $("wrongPlaces").onclick=()=>{const m=S.elaboration;S.choices.push({after_round:S.rounds.length,choice:"places were a wrong interpretation",missing:m});makeRound("pivot",m)};
   $("tailored").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"explore places for this",causes:S.causes.map(c=>({...c}))});makeRound("tailored","")};
   $("saveSummary").onclick=finish;
   $("backCheck").onclick=()=>{show("checkin");renderCheckin()};
@@ -961,8 +1171,8 @@ fetch("/api/config").then(r=>r.json()).then(c=>{if(c&&c.codeRequired&&!STUDY_COD
 function sessionLog(event){
   return{session_id:SESSION_ID,participant_id:PID,event,sent_at:new Date().toISOString(),
     initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
-    rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why,moments:p.moments.map(m=>m.title)}))})),
-    journey:S.rounds.length?journey():[],chats:S.chats,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
+    rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,lat:p.lat,lon:p.lon,why:p.why,moments:p.moments.map(m=>m.title)}))})),
+    journey:S.rounds.length?journey():[],chats:S.chats,journal:S.journal,elaboration:S.elaboration,stats:S.rounds.length?computeStats():null,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
 }
 function sendLog(event,beacon){
   if(!S.problem)return;
@@ -971,7 +1181,7 @@ function sendLog(event,beacon){
   fetch("/api/log",{method:"POST",headers:{"Content-Type":"application/json"},body,keepalive:true}).catch(()=>{});
 }
 ["optSatisfied","optMore","pivotBtn","finalExplore"].forEach(id=>$(id).addEventListener("click",()=>sendLog(id)));
-document.addEventListener("click",e=>{const t=e.target.closest("#saveSummary,#tailored,#updateSynth,#backCheck");if(t)sendLog(t.id)});
+document.addEventListener("click",e=>{const t=e.target.closest("#saveSummary,#tailored,#updateSynth,#backCheck,#elaborateUpdate,#wrongPlaces");if(t)sendLog(t.id)});
 window.addEventListener("pagehide",()=>sendLog("pagehide",true));
 </script>
 </body>
