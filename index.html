@@ -91,7 +91,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .mscene{font-family:var(--serif);font-size:clamp(19px,2.2vw,23px);line-height:1.5;margin:0 0 14px;max-width:62ch}
 .meaning{font-family:var(--serif);font-size:16px;line-height:1.65;color:var(--muted);border-left:2px solid var(--accent);padding-left:14px;margin:0 0 14px;max-width:62ch}
 .ask{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
-.ask h3,.thoughts h3{font-size:15px;font-weight:500;margin:0 0 8px}
+.ask h3{font-size:15px;font-weight:500;margin:0 0 8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:14px;text-align:left}
 .chip:hover{border-color:var(--ink)}
@@ -101,9 +101,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .qa .a.pending{color:var(--muted);font-style:italic}
 #askForm{display:flex;gap:8px}
 #askForm input{font-family:var(--sans);font-size:15px;padding:10px 14px;border-radius:999px;background:var(--bg)}
-.thoughts{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
-.thoughts textarea{min-height:80px;background:var(--bg);font-size:16px}
 .nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.transition{margin-top:18px;padding:16px 18px;border-radius:14px;background:var(--accent-soft)}
+.transition p{margin:0 0 10px}
 
 .side{display:flex;flex-direction:column;gap:22px}
 @media (min-width:901px){.side{position:sticky;top:calc(20px + env(safe-area-inset-top,0px))}}
@@ -114,10 +114,6 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 #refBlock.pulse{animation:pulse 1.4s ease}
 @keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 10px transparent}}
 .shift{font-size:13px;color:var(--muted);margin:6px 0 0}
-.notes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
-.notes li{font-family:var(--serif);font-size:15px;line-height:1.5;padding-bottom:12px;border-bottom:1px solid var(--line)}
-.notes li small{display:block;font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:2px}
-.notes .empty{color:var(--muted);font-style:italic;border:0}
 .research{font-size:13px;color:var(--muted)}
 .research summary{cursor:pointer}
 .research dt{font-weight:500;color:var(--ink);margin-top:10px}
@@ -147,6 +143,12 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .note-label{display:block;font-size:14px;color:var(--muted);margin:0 0 6px}
 .final-line{font-family:var(--serif);font-size:clamp(26px,3.6vw,38px);line-height:1.35;margin:6px 0 30px;letter-spacing:-.01em}
 .sec{font-size:14px;font-weight:500;color:var(--muted);margin:30px 0 12px}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:14px 16px;text-align:center}
+.stat b{display:block;font-family:var(--serif);font-size:24px;font-weight:500}
+.stat span{font-size:12px;color:var(--muted)}
+.pcard.relive .pc-body small{display:block;margin-top:2px}
+.pcard.relive .pc-body em{font-style:normal;color:var(--accent);font-size:13px;display:block;margin-top:6px}
 .causes{display:grid;gap:12px}
 .cause{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--paper)}
 .ctext{font-family:var(--serif);font-size:19px;line-height:1.5;margin:0}
@@ -197,7 +199,8 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
   </section>
 
   <section id="walk" class="hidden">
-    <div class="walkhead"><div class="tabs" id="tabs"></div><button class="textbtn" id="restartTop">Start over</button></div>
+    <div class="walkhead"><div class="tabs" id="tabs"></div><div class="row"><button class="textbtn hidden" id="backToSummary">← Back to your summary</button><button class="textbtn" id="restartTop">Start over</button></div></div>
+    <p class="small" id="tabsHint" style="margin:-6px 0 14px"></p>
     <div class="grid">
       <article class="card">
         <div class="viewer" id="viewer">
@@ -215,19 +218,18 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
         <div class="mbody">
           <p class="mtitle" id="mtitle"></p>
           <p class="mscene" id="mscene"></p>
-          <p class="meaning hidden" id="mmeaning"></p>
-          <button class="btn" id="closerBtn">Look closer</button>
+          <p class="meaning" id="mmeaning"></p>
           <div class="ask">
-            <h3>Ask about this</h3>
+            <h3>Ask questions, converse about your thoughts</h3>
             <div class="chips" id="suggest"></div>
             <div id="chatlog" aria-live="polite"></div>
             <form id="askForm"><input type="text" id="askInput" placeholder="Ask anything about this moment or place" autocomplete="off"><button class="btn" id="askBtn">Ask</button></form>
           </div>
-          <div class="thoughts">
-            <h3><label for="thoughts">Your thoughts</label></h3>
-            <textarea id="thoughts" placeholder="What's catching you here, and what is it bringing up?"></textarea>
+          <div class="nav"><button class="btn" id="prevM">Back</button><button class="btn primary" id="nextM">Next moment →</button></div>
+          <div class="transition hidden" id="transitionCard">
+            <p class="small" id="transitionMsg"></p>
+            <button class="btn primary" id="transitionBtn"></button>
           </div>
-          <div class="nav"><button class="btn" id="prevM">Back</button><button class="btn primary" id="nextM">Next moment</button></div>
         </div>
       </article>
       <aside class="side">
@@ -241,10 +243,6 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
           <p class="shift" id="refShift"></p>
         </div>
         <p class="small" id="refStatus" aria-live="polite" style="margin:-10px 0 0"></p>
-        <div>
-          <h3>Your thoughts so far</h3>
-          <ul class="notes" id="notes"></ul>
-        </div>
         <button class="btn primary hidden" id="checkSide">Pause and check in</button>
         <details class="research"><summary>Researcher view</summary><dl id="readout"></dl></details>
       </aside>
@@ -548,7 +546,7 @@ const FALLBACK=[
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},notes:{},chats:{},closer:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false}}
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false}}
 S=fresh();
 const SCREENS=["intro","loading","reveal","walk","checkin","reflect","final"];
 function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0})}
@@ -593,7 +591,7 @@ function journey(){
   tick();
   const out=[];
   S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>{if(!S.visited[`${ri}.${pi}`])return;
-    out.push({place:`${P.name}, ${P.country}`,moments:P.moments.map((m,mi)=>{const k=mk(ri,pi,mi);return{moment:m.title,seen:S.dwell[k]!==undefined,seconds:Math.round((S.dwell[k]||0)/1000),looked_closer:!!S.closer[k],thoughts:(S.notes[k]||"").trim(),questions_asked:(S.chats[k]||[]).map(c=>c.q)}}).filter(x=>x.seen)})}));
+    out.push({place:`${P.name}, ${P.country}`,moments:P.moments.map((m,mi)=>{const k=mk(ri,pi,mi);return{moment:m.title,seen:S.dwell[k]!==undefined,seconds:Math.round((S.dwell[k]||0)/1000),questions_asked:(S.chats[k]||[]).map(c=>c.q)}}).filter(x=>x.seen)})}));
   return out;
 }
 
@@ -607,20 +605,21 @@ const VOCAB=`"scene3d": {
   "setting": one of "street","plaza","market","waterfront","riverside","garden","courtyard","interior","hillside",
   "time": "dawn" | "day" | "dusk" | "night",
   "palette": {"ground":"#hex","walls":"#hex","accent":"#hex"},
-  "objects": up to 10 of {"kind": see list, "x": -8 to 8, "z": -6 to 6 (the viewer stands at z=8.5 looking toward z=0; negative z is farther away), "count": 1 to 12, "arrange": "circle" | "row" | "both_sides" (people seated along a table) | "scatter", "spread": meters, "pose": "standing" | "seated" | "walking" | "drumming" | "dancing" | "working" (people only), "color": "#hex", "length": meters (tables, lanterns, bunting, petals, benches, steps), "size": 0.5 to 3, "rot": degrees, "y": height (0.79 puts small things on a table)}
+  "objects": up to 14 of {"kind": see list, "x": -8 to 8, "z": -6 to 6 (the viewer stands at z=8.5 looking toward z=0; negative z is farther away), "count": 1 to 12, "arrange": "circle" | "row" | "both_sides" (people seated along a table) | "scatter", "spread": meters, "pose": "standing" | "seated" | "walking" | "drumming" | "dancing" | "working" (people only), "color": "#hex", "length": meters (tables, lanterns, bunting, petals, benches, steps), "size": 0.5 to 3, "rot": degrees, "y": height (0.79 puts small things on a table)}
 }
 Object kinds: person, table_long, table_small, bench, stool, stall, lanterns, bunting, lantern, candles, fire, tree, maple_tree, building, pagoda, gate, drum, bicycle, motorbike, car, boat, bowl, crates, umbrella, petals, kite, steps, water, fountain, wall, raked_gravel, rock.
-Put the heart of the moment at x=0, z=0 so the viewer sees it first. When a moment involves people, show them doing the thing (drummers in a circle, people seated both sides of a long table). Pick the setting and time that match the moment.`;
+Put the heart of the moment at x=0, z=0 so the viewer sees it first. When a moment involves people, show them doing the thing (drummers in a circle, people seated both sides of a long table). Pick the setting and time that match the moment.
+Match scene3d to the "scene" text closely: the same number of people doing the same thing, the specific objects it names (a drum, a cracked bowl, a bicycle, candles on a table), and a time of day and setting that fit the words used (a dim room at night for candlelight, a street at dawn for an empty market). If a concrete visual detail is in the sentence, it should be an object in scene3d.`;
 
 function roundPrompt(mode,missing){
   const visited=[];S.rounds.forEach(R=>R.places.forEach(P=>visited.push(`${P.name}, ${P.country}`)));
-  return `You are the guide inside WorldMirror. A person has written what's on their mind. You choose real places around the world whose everyday moments might make contact with it. They will walk through each moment in a simple 3D scene, note their thoughts, and ask questions.
+  return `You are the guide inside WorldMirror. A person has written what's on their mind. You choose real places around the world whose everyday moments might make contact with it. They will walk through each moment in a simple 3D scene and can ask questions about it.
 
 What they wrote at the start: "${S.problem}"
 How it reads now, after exploring: "${S.refined}"
 ${S.causes.length||S.feedback.length?`Together you've been working out what's underneath. Their answers to possible causes so far: ${JSON.stringify(allFeedback())}. Guesses they haven't answered yet: ${JSON.stringify(S.causes.filter(c=>!c.verdict).map(c=>c.cause))}
 ${S.synth&&S.synth.summary?`Current read of where it points: "${S.synth.summary}"`:""}
-`:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed, and that let them see the way forward in practice. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on their thoughts and questions below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Take clearly different angles from before.`}
+`:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed, and that let them see the way forward in practice. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on the questions they asked below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Take clearly different angles from before.`}
 Already visited (don't repeat): ${JSON.stringify(visited)}
 Their journey so far: ${JSON.stringify(journey())}
 
@@ -705,32 +704,43 @@ function renderWalk(newScene){
   tick();
   const {r:ri,p:pi,m:mi}=S.cur,R=S.rounds[ri],P=curPlace(),M=curMoment(),k=mk(ri,pi,mi);curKey=k;tStart=Date.now();
   $("tabs").innerHTML=R.places.map((p,j)=>`<button class="tab${j===pi?" on":""}" data-p="${j}">${S.visited[`${ri}.${j}`]&&j!==pi?'<span class="seen" aria-label="visited"></span>':""}${esc(p.name)}</button>`).join("");
+  $("tabsHint").textContent=R.places.length>1?`${R.places.length} places to explore in this set — tap a tab above to jump to any of them, anytime.`:"";
+  $("backToSummary").classList.toggle("hidden",!S.returnToFinal);
   $("placeName").textContent=`${P.name}, ${P.country}`;
   $("mcount").textContent=`Moment ${mi+1} of ${P.moments.length}`;
   if(newScene){if(viewerOK){Viewer.load(M.scene3d,P.name+M.title);$("viewer").classList.remove("no3d")}else{$("viewer").classList.add("no3d")}
     const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")}
   $("mtitle").textContent=M.title;$("mscene").textContent=M.scene;$("mmeaning").textContent=M.meaning;
-  $("mmeaning").classList.toggle("hidden",!S.closer[k]);$("closerBtn").textContent=S.closer[k]?"Hide background":"Look closer";
-  $("thoughts").value=S.notes[k]||"";
   renderChat();
   const last=mi===P.moments.length-1, allSeen=R.places.every((_,j)=>S.visited[`${ri}.${j}`]);
   $("prevM").disabled=mi===0;
-  const nb=$("nextM");
-  if(!last){nb.textContent="Next moment";nb.dataset.act="next"}
-  else if(!allSeen){nb.textContent="Next place";nb.dataset.act="place"}
-  else{nb.textContent="Pause and check in";nb.dataset.act="check"}
-  $("checkSide").classList.toggle("hidden",!allSeen||nb.dataset.act==="check");
+  const tc=$("transitionCard");
+  if(!last){
+    $("nextM").classList.remove("hidden");tc.classList.add("hidden");
+  } else {
+    $("nextM").classList.add("hidden");tc.classList.remove("hidden");
+    if(!allSeen){
+      let n=R.places.findIndex((_,j)=>!S.visited[`${ri}.${j}`]);if(n<0)n=(pi+1)%R.places.length;
+      $("transitionMsg").textContent=`You've seen everything in ${P.name}, ${P.country}.`;
+      $("transitionBtn").textContent=`Continue to ${R.places[n].name} →`;
+      $("transitionBtn").dataset.act="place";$("transitionBtn").dataset.n=n;
+    } else {
+      $("transitionMsg").textContent=`You've walked through all ${R.places.length} places in this set.`;
+      $("transitionBtn").textContent="Pause and check in";
+      $("transitionBtn").dataset.act="check";
+    }
+  }
+  $("checkSide").classList.toggle("hidden",!allSeen||(last&&allSeen));
   renderSide();
 }
 $("tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(!t)return;const pi=+t.dataset.p;if(pi!==S.cur.p)enterPlace(S.cur.r,pi,0)});
 $("prevM").onclick=()=>{S.cur.m--;renderWalk(true)};
-$("nextM").onclick=()=>{const a=$("nextM").dataset.act;
-  if(a==="next"){S.cur.m++;renderWalk(true)}
-  else if(a==="place"){const R=S.rounds[S.cur.r];let n=R.places.findIndex((_,j)=>!S.visited[`${S.cur.r}.${j}`]);if(n<0)n=(S.cur.p+1)%R.places.length;enterPlace(S.cur.r,n,0)}
+$("nextM").onclick=()=>{S.cur.m++;renderWalk(true)};
+$("transitionBtn").onclick=()=>{const a=$("transitionBtn").dataset.act;
+  if(a==="place")enterPlace(S.cur.r,+$("transitionBtn").dataset.n,0);
   else goCheckin()};
 $("checkSide").onclick=goCheckin;
-$("closerBtn").onclick=()=>{S.closer[curKey]=!S.closer[curKey];$("mmeaning").classList.toggle("hidden",!S.closer[curKey]);$("closerBtn").textContent=S.closer[curKey]?"Hide background":"Look closer"};
-$("thoughts").addEventListener("input",e=>{S.notes[curKey]=e.target.value;renderNotes()});
+$("backToSummary").onclick=()=>finish();
 $("recenter").onclick=()=>Viewer.reset();
 document.querySelectorAll("[data-move]").forEach(b=>{const d=b.dataset.move;const on=e=>{e.preventDefault();Viewer.setHold(d,true);const h=$("viewer").querySelector(".hint3d");h&&h.classList.add("gone")},off=()=>Viewer.setHold(d,false);
   b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off)});
@@ -742,11 +752,7 @@ function renderSide(){
   $("refBlock").classList.toggle("hidden",!changed);
   $("refStmt").textContent=S.refined;
   const last=S.refHistory[S.refHistory.length-1];$("refShift").textContent=last&&last.shift?last.shift:"";
-  renderNotes();renderResearch();
-}
-function renderNotes(){
-  const items=[];S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>P.moments.forEach((M,mi)=>{const k=mk(ri,pi,mi),t=(S.notes[k]||"").trim();if(t)items.push(`<li><small>${esc(P.name)}, ${esc(M.title)}</small>${esc(t)}</li>`)})));
-  $("notes").innerHTML=items.length?items.join(""):`<li class="empty">Nothing yet. Jot down whatever comes up as you look around.</li>`;
+  renderResearch();
 }
 function renderResearch(){
   const R=S.rounds[S.cur?S.cur.r:S.rounds.length-1];if(!R)return;
@@ -758,18 +764,18 @@ let refining=null;
 function refine(ri,pi){
   if(aiOff)return;
   const P=S.rounds[ri].places[pi];
-  const touched=P.moments.some((_,mi)=>{const k=mk(ri,pi,mi);return(S.notes[k]||"").trim()||(S.chats[k]||[]).length});
+  const touched=P.moments.some((_,mi)=>{const k=mk(ri,pi,mi);return(S.chats[k]||[]).length});
   if(!touched)return;
-  const sig=JSON.stringify(P.moments.map((_,mi)=>[S.notes[mk(ri,pi,mi)]||"",(S.chats[mk(ri,pi,mi)]||[]).map(c=>c.q)]));
+  const sig=JSON.stringify(P.moments.map((_,mi)=>(S.chats[mk(ri,pi,mi)]||[]).map(c=>c.q)));
   S.refSig=S.refSig||{};if(S.refSig[`${ri}.${pi}`]===sig)return;S.refSig[`${ri}.${pi}`]=sig;
   const run=async()=>{const sample=await getSample();if(!sample){aiOff=true;return}
     $("refStatus").textContent="Updating as you go...";
     try{
       const res=await sample.json(`You help a person in WorldMirror sharpen what's on their mind. They started by writing: "${S.problem}"
 The current version is: "${S.refined}"
-They just walked through ${P.name}, ${P.country}. Their whole journey so far, with their own thoughts and the questions they asked: ${JSON.stringify(journey())}
+They just walked through ${P.name}, ${P.country}. Their whole journey so far, with the questions they asked at each moment: ${JSON.stringify(journey())}
 
-Rewrite the statement so it reflects what their thoughts and questions suggest they're really getting at. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. If nothing new emerged, return the current version unchanged. No em dashes.
+Rewrite the statement so it reflects what their questions suggest they're really getting at. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. If nothing new emerged, return the current version unchanged. No em dashes.
 Respond with ONLY JSON: {"refined":"...","shift":"a few words on what changed, or empty string"}`,{modelTier:"default",cache:false});
       if(res&&res.refined&&typeof res.refined==="string"){if(res.refined.trim()!==S.refined){S.refined=res.refined.trim();S.refHistory.push({refined:S.refined,shift:String(res.shift||""),after:P.name});const b=$("refBlock");b.classList.remove("pulse");void b.offsetWidth;b.classList.add("pulse")}}
     }catch(e){if(e&&e.code==="not_granted")aiOff=true}
@@ -830,28 +836,28 @@ $("backToWalk").onclick=()=>{enterPlace(S.cur.r,S.cur.p,S.cur.m)};
 /* ---------- Synthesis: observations -> possible causes -> where it points ---------- */
 function synthPrompt(){
   const fb=allFeedback();
-  return `You are the companion inside WorldMirror, helping a person make sense of their walk. Their problem is NOT solved. Your job is to work out with them what might be causing it, and where their observations point.
+  return `You are the companion inside WorldMirror, helping a person make sense of their walk. Their problem is NOT solved. Your job is to look across everything they asked for a pattern, and connect that pattern back to their problem gently, not to hand them a diagnosis or a to-do list.
 
 What they wrote at the start: "${S.problem}"
 How it reads now: "${S.refined}"
-Their journey (places, moments, their own thoughts, questions they asked, time spent): ${JSON.stringify(journey())}
+Their journey (places, moments, the questions they asked at each one, time spent): ${JSON.stringify(journey())}
 ${fb.length?`They already responded to earlier guesses about the cause. Keep what they confirmed, drop what they rejected, and revise what was partly right using their comments: ${JSON.stringify(fb)}`:""}
 
 Do three things:
-1. Observations: pick the 3 to 5 most telling things they noticed or asked. For each, say plainly what it might suggest about them. Quote their words when you can.
-2. Possible causes: offer 2 or 3 tentative guesses at what might be underneath the problem, each tied to specific observations. Everyday language, second person. No clinical labels or diagnoses.
-3. Where this points: a short summary (3 to 5 sentences) explaining how the observations point toward a way forward, then 2 or 3 small, concrete things they could try, each drawing on a specific moment from the walk. Practical and kind, not preachy.
+1. Observations: don't treat their questions as a flat list. Read across all of them for a pattern: a kind of question they kept coming back to, a type of detail that kept catching their attention, something they were curious about in more than one place even though the settings differed. Pick the 3 to 5 moments that best show this pattern and, for each, name what they asked and what that angle of curiosity might say about them. Quote their own questions where you can.
+2. Possible causes: offer 2 or 3 tentative guesses at what might be underneath the problem, each grounded in the pattern across observations, not in any single question alone. Everyday language, second person. No clinical labels or diagnoses.
+3. Where this points: a short summary (3 to 5 sentences) naming the underlying similarity in what they kept being drawn to, and relating it subtly back to what they came in with, without spelling their problem out loud or sounding like a verdict. Then offer 2 or 3 soft possibilities, each drawing on a specific moment from the walk, phrased as things to notice or sit with rather than steps to take. Use language like "you might notice..." or "it could be worth asking yourself..." instead of "you should" or "try this." Gentle and specific, never a to-do list, never preachy.
 
 Be honest that this is a working read. No em dashes.
 Respond with ONLY JSON:
-{"observations":[{"where":"place: moment","noticed":"what they noticed or asked","suggests":"what it might say about them"}],
+{"observations":[{"where":"place: moment","noticed":"what they asked or were drawn to","suggests":"what it might say about them"}],
 "causes":[{"cause":"...","evidence":"which observations point here"}],
 "summary":"...",
-"suggestions":[{"from":"place: moment","try":"..."}]}`;
+"suggestions":[{"from":"place: moment","try":"a soft possibility to sit with, phrased as noticing, not an instruction"}]}`;
 }
 function allFeedback(){const cur=S.causes.filter(c=>c.verdict).map(c=>({cause:c.cause,their_answer:c.verdict,their_comment:c.comment||""}));const seen=new Set(cur.map(c=>c.cause));return[...S.feedback.filter(f=>!seen.has(f.cause)),...cur]}
 function localSynth(){
-  const obs=[];journey().forEach(p=>p.moments.forEach(m=>{if(m.thoughts||m.questions_asked.length)obs.push({where:`${p.place.split(",")[0]}: ${m.moment}`,noticed:m.thoughts||`You asked: ${m.questions_asked[0]}`,suggests:""})}));
+  const obs=[];journey().forEach(p=>p.moments.forEach(m=>{if(m.questions_asked.length)obs.push({where:`${p.place.split(",")[0]}: ${m.moment}`,noticed:`You asked: ${m.questions_asked[0]}`,suggests:""})}));
   return{observations:obs.slice(0,5),causes:[],summary:"Working out what might be underneath, and where it points, needs the AI, which isn't available in this view. Here's what you noticed along the way.",suggestions:[],local:true};
 }
 async function runSynthesis(){
@@ -895,18 +901,57 @@ function drawSynth(msg){
   $("saveSummary").onclick=finish;
   $("backCheck").onclick=()=>{show("checkin");renderCheckin()};
 }
+/* ---------- Summary: stats + places visited + relive ---------- */
+function computeStats(){
+  tick();
+  let placesOffered=0,placesVisited=0,momentsOffered=0,momentsVisited=0,questions=0,ms=0;
+  S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>{
+    placesOffered++;if(S.visited[`${ri}.${pi}`])placesVisited++;
+    P.moments.forEach((M,mi)=>{momentsOffered++;const k=mk(ri,pi,mi);
+      if(S.dwell[k]!==undefined){momentsVisited++;ms+=S.dwell[k]||0}
+      questions+=(S.chats[k]||[]).length;
+    });
+  }));
+  return{placesOffered,placesVisited,momentsOffered,momentsVisited,questions,minutes:Math.round(ms/6000)/10};
+}
+function renderStats(){
+  const s=computeStats(),pct=s.momentsOffered?Math.round(s.momentsVisited/s.momentsOffered*100):0;
+  const tiles=[[`${s.placesVisited} of ${s.placesOffered}`,"places visited"],[`${s.momentsVisited} of ${s.momentsOffered}`,"moments explored"],[`${pct}%`,"of what was offered"],[`${s.questions}`,"questions you asked"],[`${s.minutes}`,"minutes spent walking"]];
+  return `<div class="statgrid">${tiles.map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>`;
+}
+function visitedMoments(){
+  tick();const items=[];
+  S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>{if(!S.visited[`${ri}.${pi}`])return;
+    P.moments.forEach((M,mi)=>{const k=mk(ri,pi,mi);if(S.dwell[k]===undefined)return;items.push({ri,pi,mi,P,M})})}));
+  return items;
+}
+function renderVisited(){
+  const items=visitedMoments();
+  if(!items.length)return `<p class="small">You didn't stay long enough anywhere yet to relive it. Walk through a moment, then come back here.</p>`;
+  return `<div class="cards">${items.map(it=>{const th=thumbnail(it.M.scene3d,it.P.name+it.M.title);
+    return `<button class="pcard relive" data-r="${it.ri}" data-p="${it.pi}" data-m="${it.mi}"><div class="thumb">${th?`<img src="${th}" alt="">`:""}</div><div class="pc-body"><b>${esc(it.M.title)}</b><small>${esc(it.P.name)}, ${esc(it.P.country)}</small><em>Relive this moment →</em></div></button>`}).join("")}</div>`;
+}
+function challengesHtml(){
+  const rejected=S.causes.filter(c=>c.verdict==="no");
+  if(!rejected.length)return "";
+  return `<h3 class="sec">Ideas that didn't fit</h3><p class="small" style="margin:-4px 0 14px">Ruling these out is part of the work too.</p><ul class="threads">${rejected.map(c=>`<li><b>Didn't fit</b><span>${esc(c.cause)}${c.comment?`. You said: "${esc(c.comment)}"`:""}</span></li>`).join("")}</ul>`;
+}
 function finish(){
   const r=S.synth||localSynth();
   const agreed=S.causes.filter(c=>c.verdict==="right"||c.verdict==="partly"), open=S.causes.filter(c=>!c.verdict);
   $("summaryBody").innerHTML=`
     <h3 class="sec">You came in with</h3><p class="orig" style="font-size:17px">${esc(S.problem)}</p>
     <h3 class="sec">How it reads now</h3><p class="ref" style="font-size:20px">${esc(S.refined)}</p>
+    <h3 class="sec">Your exploration</h3>${renderStats()}
+    <h3 class="sec">Places you visited</h3>${renderVisited()}
     ${agreed.length||open.length?`<h3 class="sec">What might be underneath</h3><ul class="threads">${[...agreed,...open].map(c=>`<li><b>${c.verdict==="right"?"You said this sounds right":c.verdict==="partly"?"Partly":"Not yet weighed in"}</b><span>${esc(c.cause)}${c.comment?`. You added: "${esc(c.comment)}"`:""}</span></li>`).join("")}</ul>`:""}
+    ${challengesHtml()}
     <h3 class="sec">Where this points</h3>${pointsHtml(r)}
     <h3 class="sec">What you noticed</h3>${obsList(r)}`;
-  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why}))})),journey:journey(),chats:S.chats,minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
+  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why}))})),journey:journey(),chats:S.chats,stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
   show("final");
 }
+$("summaryBody").addEventListener("click",e=>{const c=e.target.closest(".relive");if(!c)return;S.returnToFinal=true;enterPlace(+c.dataset.r,+c.dataset.p,+c.dataset.m)});
 $("finalExplore").onclick=()=>makeRound("tailored","");
 $("restart").onclick=()=>{S=fresh();$("problem").value="";$("startBtn").disabled=true;show("intro")};
 $("restartTop").onclick=()=>$("restart").onclick();
