@@ -670,22 +670,25 @@ function stopFacts(){if(factTimer){clearInterval(factTimer);factTimer=null}}
 
 /* Built-in places, used only when the AI isn't available in this view */
 const FALLBACK=[
- {name:"Kyoto",country:"Japan",lat:35.0116,lon:135.7681,teaser:"A city that keeps its cracks visible.",why:"Built-in example",
+ {name:"Kyoto",country:"Japan",lat:35.0116,lon:135.7681,why:"A city that keeps its cracks visible.",
   moments:[
    {title:"The kintsugi workshop",scene:"A craftsman bends over a cracked tea bowl, tracing the break with lacquer. Later the seam will be dusted with gold. The bowl goes back into daily use.",meaning:"Kintsugi repairs broken pottery with lacquer mixed with powdered gold. The repair becomes part of the object's history instead of something hidden.",questions:["Why use gold instead of hiding the crack?","How long does a repair take?"],
     terms:[{term:"Kintsugi",definition:"A Japanese technique for mending broken pottery with lacquer mixed with powdered gold, so the repair becomes part of the object's history instead of something to hide."},{term:"lacquer",definition:"A hard, glossy coating, traditionally made from tree sap, used here to glue and seal the broken pieces before the gold is added."}],
+    internal:{shared_thread:"feeling",thread_detail:"Something you're treating as broken or embarrassing is, here, the most valued part of the object.",feeling_cue:"the craftsman working carefully with the crack instead of hiding it",lever:"meaning",layer:"core",practice_feature:"filling the crack with gold lacquer instead of disguising it",shift:"the break itself becomes valuable rather than something to hide",reapply_question:"What's one 'broken' part of your situation you've been hiding that might actually be worth keeping visible?"},
     scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}}
   ]},
- {name:"Pelourinho, Salvador",country:"Brazil",lat:-12.9714,lon:-38.5014,teaser:"Old streets where music starts without asking.",why:"Built-in example",
+ {name:"Pelourinho, Salvador",country:"Brazil",lat:-12.9714,lon:-38.5014,why:"Old streets where music starts without asking.",
   moments:[
    {title:"The atabaque drum circle",scene:"Street corners in the old town. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
     terms:[{term:"atabaque",definition:"A tall, hand-played drum central to Afro-Brazilian music and to Candomblé religious ceremonies."},{term:"Candomblé",definition:"An Afro-Brazilian religion blending West African traditions with elements absorbed during colonization, in which drumming and music play a central role."}],
+    internal:{shared_thread:"feeling",thread_detail:"Nobody there waited until they were good enough to start playing.",feeling_cue:"someone newer to the circle picking up a drum anyway",lever:"meaning",layer:"surface",practice_feature:"anyone can start playing without being invited or judged ready first",shift:"starting doesn't require being ready first",reapply_question:"What would it look like to start the thing you've been waiting to feel ready for?"},
     scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}}
   ]},
- {name:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683,teaser:"A city that makes warmth on purpose.",why:"Built-in example",
+ {name:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683,why:"A city that makes warmth on purpose.",
   moments:[
    {title:"Candles at 4 p.m.",scene:"It's already dark in December. In the café, every table has a candle, and two friends lean in over theirs.",meaning:"Danes burn more candles per person than almost anyone. Warmth, or hygge, is something people make on purpose in the long winter.",questions:["What does hygge actually mean?","Why so many candles?"],
     terms:[{term:"hygge",definition:"A Danish word for a deliberate, cozy sense of warmth and contentment, often built around candles, company, and simple comforts."}],
+    internal:{shared_thread:"feeling",thread_detail:"A hard, dark stretch of the year is met with a deliberate, shared ritual of warmth instead of being pushed through alone.",feeling_cue:"two friends choosing to pause together rather than push through the dark afternoon",lever:"holding",layer:"n/a",practice_feature:"lighting a candle at a set time, every day, together",shift:"a hard feeling gets a regular, shared container instead of being carried alone",reapply_question:"What's one small, repeatable ritual that could hold a hard feeling for you, the way a candle does here?"},
     scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}}
   ]}
 ];
@@ -715,7 +718,7 @@ document.addEventListener("click",e=>{
   if(t)t.classList.toggle("pinned");
 });
 let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:""}}
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null}}
 S=fresh();
 const SCREENS=["intro","loading","reveal","walk","checkin","reflect","final"];
 function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
@@ -770,6 +773,10 @@ function qaLog(){
   })));
   return out;
 }
+function placeLog(p){
+  const M=p.moments[0]||{},i=M.internal||{};
+  return{name:p.name,country:p.country,lat:p.lat,lon:p.lon,why:p.why,moment:M.title,lever:i.lever,layer:i.layer,shift:i.shift};
+}
 
 /* ---------- Intro ---------- */
 $("problem").addEventListener("input",()=>{$("startBtn").disabled=$("problem").value.trim().length<8});
@@ -787,46 +794,158 @@ Object kinds: person, table_long, table_small, bench, stool, stall, lanterns, bu
 Put the heart of the moment at x=0, z=0 so the viewer sees it first. When a moment involves people, show them doing the thing (drummers in a circle, people seated both sides of a long table). Pick the setting and time that match the moment.
 Match scene3d to the "scene" text closely: the same number of people doing the same thing, the specific objects it names (a drum, a cracked bowl, a bicycle, candles on a table), and a time of day and setting that fit the words used (a dim room at night for candlelight, a street at dawn for an empty market). If a concrete visual detail is in the sentence, it should be an object in scene3d.`;
 
+function leversUsed(){
+  const out=[];
+  S.rounds.forEach(R=>R.places.forEach(P=>{const m=P.moments[0],i=m&&m.internal;if(i&&i.lever)out.push({place:`${P.name}, ${P.country}`,lever:i.lever,layer:i.layer||"",shift:i.shift})}));
+  return out;
+}
 function roundPrompt(mode,missing){
   const visited=[];S.rounds.forEach(R=>R.places.forEach(P=>visited.push(`${P.name}, ${P.country}`)));
-  return `You are the guide inside WorldMirror. A person has written what's on their mind. You choose real places around the world whose everyday moments might make contact with it. They will walk through each moment in a simple 3D scene and can ask questions about it.
+  const used=leversUsed();
+  return `You choose places for WorldMirror, a reflection tool. A user describes an everyday challenge. You pick three real places in the world where people live through something that connects to it, in a way that might help the user see their challenge differently. The user then explores each place and asks questions about it.
 
+WorldMirror does not give advice. It helps users reach a new view on their own. Your places make that possible. You never state the new view yourself.
+
+How a place helps
+
+A good place leads the user through three steps:
+
+Recognize: the user sees something of their own in the scene: their situation, their feeling, or their question. People there live with it too, so it is normal, not a personal failure. This has to come first. If a place skips it and only offers something new, users push back.
+Shift: something about how the user holds their challenge changes. The shift has to come from what people actually do there: the rules, timing, objects, roles, or gatherings of a practice. It must not depend on someone explaining a lesson.
+Reapply: the user connects the shift back to their own life. The place has to offer something small enough to bring home.
+
+Shifts come in five kinds. These are the levers.
+
+Lever | What changes | Example
+Meaning | The same situation carries a different meaning | Fish auction: the next tub is always coming, so a missed bid is not final. Kintsugi: the break is filled with gold and becomes the most valued part.
+Holding | The same feeling is carried differently: given a time, a place, an object, or company, instead of being fixed or hidden alone | Día de Muertos ofrendas: families set out a missing person's favorite foods and photos, so missing them becomes something done together, at a set time, with care.
+Setting | The same situation in a different social arrangement, where rules or roles make the environment work differently | Outdoor pull-up bars on Copacabana: people queue, take turns, and wave the next person in, so beginners and regulars share the bar.
+Scale | The problem's weight changes when seen among many lives or something vast | A crowded intersection at Chatuchak market: thousands of people, each with their own day, passing at once.
+Direction | The user glimpses a life organized around a different value and notices what they want | Evening on the Rambla in Montevideo: people sit along the river with mate and talk for hours, with nowhere they need to be.
+
+Step 1: Map the problem
+
+From everything you know about the person below, infer:
+
+situation, feeling, and outcome. The situation may be diffuse ("I just feel stuck") or missing. Don't invent one.
+meaning, only if the problem is belief-driven:
+Surface: what the situation costs ("rest = losing time," "a missed chance is gone for good")
+Core: what the situation says about the person ("I haven't earned rest," "a mistake shows I'm not good enough")
+problem shape. Pick the primary shape, and a secondary one if it clearly applies:
+
+Shape | What it looks like | Start with lever | Then consider
+Belief | A specific situation carries a painful meaning | Meaning (surface and core) | Holding, Scale
+Feeling | A feeling with no single situation, or one the user doesn't know how to carry (overwhelm, loneliness, uncertainty, missing someone, restlessness) | Holding | Scale, Setting
+Setting | The problem lives partly in the environment around the user (comparison, competition, a judgmental space) | Setting | Meaning (core)
+Choice | Torn between paths, or unsure what they want | Direction (two contrasting lives) | Meaning, Scale
+Weight | Everything feels high-stakes or catastrophic | Scale | Meaning (surface)
+
+Phrase every inference as a hypothesis. Don't force a core belief onto a problem that isn't belief-driven: not every struggle comes from a distorted belief. Some come from a feeling with nowhere to go, a setting that doesn't fit, or a choice that hasn't been made yet.
+
+If the shape or meaning is unclear, make one of the three places one likely to draw it out: a scene the user will probably react to, so they say what worries them.
+
+Step 2: Choose three places
+
+Every place must pass all five tests.
+
+A findable shared thread. The place shares the user's situation (people pausing mid-day, making a visible mistake), feeling (people living with uncertainty, missing someone, feeling overwhelmed), or question (people living by a value the user is weighing). After reading the scene and its background, the user should be able to say in one sentence what it shares with their own life. Too literal and it feels like advice. Too far and it feels random: a user who feels incompetent will not see themselves in a chess game unless the scene puts someone in the position they're afraid of.
+Room for the feeling. The scene includes someone who could plausibly feel what the user feels: a nervous newcomer, someone tempted to keep working, a beginner among regulars, a person who is visibly grieving or unsure. This is what makes Recognize possible.
+The practice carries the shift. Name the specific rule, timing, object, role, gathering, or vantage point that holds it. If the shift only exists when someone explains it ("the players there are nice and won't judge you"), reject the place.
+Transferable. The user could find a small version of it in their own life without moving countries or changing institutions. For Scale, the transferable thing is a vantage point they can return to (a busy station, a view of the sky). For Direction, it's a piece of that life they could try. Reject places where the difference comes from laws or systems the user can't control (shorter legal work weeks, national healthcare).
+Real, accurate, and respectful. The place and practice must be real and well documented. Describe them as they are. Don't exaggerate, romanticize, or present one practice as how everyone in a country behaves. Describe religious, mourning, and community practices with care, never as spectacle.
+
+Step 3: Make the set varied
+
+The three places must offer three different shifts, never the same one three times. A third place that repeats the first only adds time.
+Use at least two different levers across the set, guided by the problem shape.
+For the Meaning lever on a belief-driven problem, include at least one place that lowers the stakes (surface) and one that challenges the core belief, where the thing the user fears or avoids is valued in itself. Don't justify the feared thing only by its usefulness: "rest makes you more productive" keeps the core belief intact. Prefer places where rest, mistakes, slowness, or not knowing have value of their own.
+For the Direction lever, two contrasting lives usually work better than one, so the user notices which one pulls at them.
+
+If the input lists places the user has already visited, levers that already landed, or causes the user confirmed or rejected, use them. Don't repeat places or shifts. Move toward the layer, lever, or cause that hasn't been addressed yet.
+
+Step 4: Write the user-facing text
+
+The "why" and "scene" fields are shown to the user. They must describe, not teach.
+
+Describe what people do there and what the user will recognize.
+Show the practice and the person who might share the feeling, but don't explain what they mean.
+Never state the lesson, the shift, or what the user should take away.
+
+Don't write: "Kintsugi reframes mistakes as material to work with, not a stop sign."
+Write: "Craftspeople repair broken bowls by filling the cracks with gold, so the break stays visible."
+
+Don't write: "Sweden treats rest as necessary, not indulgent."
+Write: "Twice a day, coworkers leave their desks and sit down together for coffee and a cinnamon bun, even on deadline days."
+
+Don't write: "Shows that grief is easier when shared."
+Write: "Families arrange marigolds, photos, and a grandmother's favorite bread on a table at home. Cousins arrive through the evening and add something of their own."
+
+Don't write: "Reminds you your problem is small."
+Write: "At the market's busiest corner, vendors call out prices while thousands of shoppers stream past in every direction."
+
+The shift goes only in the internal fields, which the user never sees.
+
+Worked examples
+
+"I only feel validated when I keep myself busy. I feel guilty when I'm relaxing and I can't fully enjoy it." Shape: belief. Surface meaning: rest = losing time. Core meaning: rest has to be earned through output. Good: Fika, Stockholm (meaning, surface): it happens at set times, together, even on busy days, so stopping is expected rather than chosen. Good: a place where rest or idleness is valued in itself, not as a way to recharge for more work (meaning, core). Good third: Rambla, Montevideo (direction): long evenings by the river with nowhere to be let the user notice whether some part of them wants that. Bad: a third shared-drink ritual like a mate circle after fika, it repeats the same shift and adds nothing. Bad: "Danish workers have shorter work weeks," that difference comes from a system, so it doesn't transfer.
+
+"I don't feel confident about my work so I avoid the difficult task." Shape: belief. Surface meaning: a stumble is final and wastes others' time. Core meaning: a mistake shows I'm not good enough. Good: Fort Kochi fish auction (meaning, surface): the next tub is always coming, so a miss is never final. Good: Kintsugi workshop, Tokyo (meaning, core): the break is filled with gold and becomes the most valued part. Weak: Washington Square Park chess draws out the fear but nothing in the practice offers a shift on its own; if used, make it the first place to surface the meaning, paired with places whose practice carries one.
+
+"I feel vulnerable lately and I don't know what to do with it." Shape: feeling, no single situation, inferring a core belief would be guesswork. Good: a practice where people face something uncertain through a shared, coordinated ritual (holding), the repeated collective form gives the feeling a container so it doesn't have to be solved alone. Good: a place where vastness or many lives at once change the feeling's weight (scale). Bad: three places that each try to reinterpret a belief the user never stated.
+
+"I keep comparing myself to other people at the gym. I feel like everyone is judging me." Shape: setting, with a secondary belief. Good: outdoor pull-up bars, Copacabana (setting): people queue, take turns, and wave the next person in, so beginners and regulars share the same bar. Good: a beach game where a circle forms around a ball and anyone can step in, and a miss just means someone laughs and the ball goes back up (setting, or meaning on the surface layer).
+
+"I'm torn between applying to grad school and going home to teach." Shape: choice. Good: two contrasting scenes (direction), for example a late-night debate among students and professors in a university town, and a teacher's day in a small community school, each lets the user imagine themselves there and notice which pulls at them. Bad: places that tell the user which path is better, or that judge either choice.
+
+Context for this round:
 What they wrote at the start: "${S.problem}"
 How it reads now, after exploring: "${S.refined}"
+${S.problemMap?`Your last structured read of the problem: ${JSON.stringify(S.problemMap)}`:""}
 ${S.causes.length||S.feedback.length?`Together you've been working out what's underneath. Their answers to possible causes so far: ${JSON.stringify(allFeedback())}. Guesses they haven't answered yet: ${JSON.stringify(S.causes.filter(c=>!c.verdict).map(c=>c.cause))}
 ${S.synth&&S.synth.summary?`Current read of where it points: "${S.synth.summary}"`:""}
 `:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed, and that let them see the way forward in practice. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on the questions they asked below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Take clearly different angles from before.`}
 Already visited (don't repeat): ${JSON.stringify(visited)}
+${used.length?`Levers already used, with their place and shift (move toward what hasn't been addressed yet): ${JSON.stringify(used)}`:""}
 Their journey so far: ${JSON.stringify(journey())}
 ${S.journal?`Their running journal from the walk so far, written freely as they went: "${S.journal}"`:""}
 
-Choose 3 real places (a specific neighborhood, market, square, or town). Give each place exactly one moment, so pick hard: of everything that place could offer, choose the single moment that makes the most direct, surprising contact with what they're carrying. Not a decent one, the best one.
-- The moment is a defining, real element of that place with historical or cultural meaning that a visitor could actually find there (like bikes in Copenhagen, or the Easter market in Prague). Favor people interacting: shared tables, rituals, markets, games, work done together.
-- The moment should make contact with their problem: answer it, offer another way to see it, or show people living a version of it. Be indirect. Never name their problem in the scene text and never preach.
-- The three places should approach it from different angles, so that between them the three moments cover real range, not three versions of the same idea.
-- Only use places and practices you're confident are real and accurately described.
-- Write "scene" in present tense, 2 to 3 short concrete sentences. "meaning" is 1 to 2 sentences of real cultural or historical background. Plain language. No em dashes.
-- Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, and never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences themselves should already read clearly on their own, even before anyone hovers anything.
+Additional technical requirements for this app, on top of everything above:
+- Give each place exactly one moment (the single best one, per Step 2). "scene" is present tense, 2 to 3 short concrete sentences, following the Step 4 rules above.
+- Also write "meaning": 1 to 2 sentences of real cultural or historical background, in plain language, shown to the user right under the scene. It follows the same describe-don't-teach rule as "scene" and "why": no lesson, no shift, no "this teaches you to..."
+- Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences must already read clearly on their own, even before anyone hovers anything.
+- "questions": two short questions a curious visitor might ask, shown as suggested chat starters.
 - "lat" and "lon" are the real decimal-degree coordinates of the specific place, used to show it on a small map.
-
-Style example, for someone afraid to start things until they're good enough:
-title "The atabaque drum circle", scene "Street corners in Salvador's Pelourinho district. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough."
-
-The moment also needs a 3D scene description:
+- The moment also needs a 3D scene description that matches "scene" closely:
 ${VOCAB}
 
-Respond with ONLY JSON, no markdown. "moments" must contain exactly one entry:
-{"places":[{"name":"...","country":"...","lat":0,"lon":0,"teaser":"one evocative line that doesn't mention their problem","why":"for the research team: how this place connects to what they wrote","moments":[{"title":"...","scene":"...","meaning":"...","questions":["two short questions a curious visitor might ask"],"terms":[{"term":"a specific word or short phrase exactly as it appears in scene or meaning","definition":"one plain sentence explaining it to someone who's never heard of it"}],"scene3d":{...}}]}]}`;
+Respond with ONLY JSON, no markdown:
+{"problem_map":{"situation":"","feeling":"","outcome":"","surface_meaning":"","core_meaning":"","shape":"belief | feeling | setting | choice | weight","secondary_shape":"","confidence":"low | medium | high"},
+"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","questions":["...","..."],"terms":[{"term":"...","definition":"..."}],"scene3d":{...}},"internal":{"shared_thread":"situation | feeling | question","thread_detail":"What this place shares with the user, in one sentence the user could say themselves.","feeling_cue":"Who in the scene might feel what the user feels.","lever":"meaning | holding | setting | scale | direction","layer":"surface | core | n/a","practice_feature":"The specific rule, timing, object, role, gathering, or vantage point that carries the shift.","shift":"What could change for the user, in their terms.","reapply_question":"One open question that invites the user to find their own version. Never phrase it as advice."}}]}`;
+}
+function cleanInternal(i){
+  if(!i||typeof i!=="object")return{};
+  return{shared_thread:String(i.shared_thread||""),thread_detail:String(i.thread_detail||""),feeling_cue:String(i.feeling_cue||""),
+    lever:String(i.lever||""),layer:String(i.layer||""),practice_feature:String(i.practice_feature||""),
+    shift:String(i.shift||""),reapply_question:String(i.reapply_question||"")};
 }
 function cleanRound(r){
   if(!r||!Array.isArray(r.places))return null;
-  const places=r.places.filter(p=>p&&p.name&&Array.isArray(p.moments)&&p.moments.length).slice(0,3).map(p=>({name:String(p.name),country:String(p.country||""),
-    lat:clamp(Number(p.lat)||0,-90,90),lon:clamp(Number(p.lon)||0,-180,180),
-    teaser:String(p.teaser||""),why:String(p.why||""),
-    moments:p.moments.slice(0,1).filter(m=>m&&m.scene).map(m=>({title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),
-      terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
-      scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]}}))})).filter(p=>p.moments.length);
-  return places.length>=2?places:null;
+  const places=r.places.filter(p=>p&&p.name&&p.moment&&p.moment.scene).slice(0,3).map(p=>{
+    const m=p.moment;
+    return{name:String(p.name),country:String(p.country||""),
+      lat:clamp(Number(p.lat)||0,-90,90),lon:clamp(Number(p.lon)||0,-180,180),
+      why:String(p.why||""),
+      moments:[{title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),
+        terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
+        scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]},
+        internal:cleanInternal(p.internal)}]};
+  });
+  if(places.length<2)return null;
+  const pm=r.problem_map;
+  const problemMap=(pm&&typeof pm==="object")?{situation:String(pm.situation||""),feeling:String(pm.feeling||""),outcome:String(pm.outcome||""),
+    surface_meaning:String(pm.surface_meaning||""),core_meaning:String(pm.core_meaning||""),
+    shape:String(pm.shape||""),secondary_shape:String(pm.secondary_shape||""),confidence:String(pm.confidence||"")}:null;
+  return{places,problemMap};
 }
 let genCtl=null;
 async function makeRound(mode,missing){
@@ -838,7 +957,8 @@ async function makeRound(mode,missing){
   let places=null, err="";
   if(sample){
     genCtl=new AbortController();
-    try{places=cleanRound(await sample.json(roundPrompt(mode,missing),{signal:genCtl.signal,modelTier:"default",cache:false}));if(!places)err="The places that came back were incomplete."}
+    try{const cleaned=cleanRound(await sample.json(roundPrompt(mode,missing),{signal:genCtl.signal,modelTier:"default",cache:false}));
+      if(cleaned){places=cleaned.places;S.problemMap=cleaned.problemMap||S.problemMap}else err="The places that came back were incomplete."}
     catch(e){if(e&&e.code==="cancelled"){show(S.synth?"reflect":S.rounds.length?"checkin":"intro");return}
       if(e&&e.code==="not_granted")aiOff=true;
       err=e&&e.code==="rate_limited"?"Too many requests right now. Wait a minute and try again.":e&&e.code==="bad_code"?"That study code wasn't accepted. Check it and start again.":"Finding places didn't work this time."}
@@ -866,7 +986,7 @@ function renderReveal(){
   $("revealTitle").textContent=ri===0?"A few places that might have something to say about this":R.mode==="pivot"?"Somewhere different this time":R.mode==="tailored"?"Places for what you've found so far":"A little further in";
   $("revealStatement").textContent=S.refined;
   $("cards").innerHTML=R.places.map((P,pi)=>{const th=thumbnail(P.moments[0].scene3d,P.name+P.moments[0].title);
-    return`<button class="pcard" data-p="${pi}"><div class="thumb">${th?`<img src="${th}" alt="">`:""}</div><div class="pc-body"><b>${esc(P.name)}</b><small>${esc(P.country)}</small><span>${esc(P.teaser)}</span></div></button>`}).join("");
+    return`<button class="pcard" data-p="${pi}"><div class="thumb">${th?`<img src="${th}" alt="">`:""}</div><div class="pc-body"><b>${esc(P.name)}</b><small>${esc(P.country)}</small><span>${esc(P.why)}</span></div></button>`}).join("");
 }
 $("cards").addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c)enterPlace(S.rounds.length-1,+c.dataset.p,0)});
 $("walkBtn").onclick=()=>enterPlace(S.rounds.length-1,0,0);
@@ -942,7 +1062,11 @@ function renderSide(){
 }
 function renderResearch(){
   const R=S.rounds[S.cur?S.cur.r:S.rounds.length-1];if(!R)return;
-  $("readout").innerHTML=R.places.map(p=>`<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>`).join("")+(S.refHistory.length?`<dt>Refinements</dt>`+S.refHistory.map(h=>`<dd>${esc(h.refined)}${h.shift?` <em>(${esc(h.shift)})</em>`:""}</dd>`).join(""):"");
+  const pm=S.problemMap;
+  $("readout").innerHTML=(pm?`<dt>Problem map</dt><dd>${esc(pm.shape)}${pm.secondary_shape?` / ${esc(pm.secondary_shape)}`:""} (${esc(pm.confidence)} confidence)</dd>${pm.core_meaning?`<dd class="small">Core: ${esc(pm.core_meaning)}</dd>`:""}`:"")+
+    R.places.map(p=>{const intl=(p.moments[0]&&p.moments[0].internal)||{};
+      return `<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>${intl.lever?`<dd class="small">Lever: ${esc(intl.lever)}${intl.layer&&intl.layer!=="n/a"?` (${esc(intl.layer)})`:""} — ${esc(intl.shift)}</dd>`:""}`;
+    }).join("")+(S.refHistory.length?`<dt>Refinements</dt>`+S.refHistory.map(h=>`<dd>${esc(h.refined)}${h.shift?` <em>(${esc(h.shift)})</em>`:""}</dd>`).join(""):"");
 }
 
 /* ---------- Background refinement after each place ---------- */
@@ -1053,6 +1177,7 @@ function synthPrompt(){
 What they wrote at the start: "${S.problem}"
 How it reads now: "${S.refined}"
 Their journey (places, moments, the questions they asked at each one, time spent): ${JSON.stringify(journey())}
+${S.problemMap?`An earlier structured read of their problem: ${JSON.stringify(S.problemMap)}`:""}
 ${S.journal?`Their running journal, written freely as they walked: "${S.journal}"`:""}
 ${S.elaboration?`They also added more about what's going on, directly: "${S.elaboration}"`:""}
 ${fb.length?`They already responded to earlier guesses about the cause. Keep what they confirmed, drop what they rejected, and revise what was partly right using their comments: ${JSON.stringify(fb)}`:""}
@@ -1175,7 +1300,7 @@ function finish(){
     ${challengesHtml()}
     <h3 class="sec">Where this points</h3>${pointsHtml(r)}
     <h3 class="sec">What you noticed</h3>${obsList(r)}`;
-  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,why:p.why}))})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
+  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
   show("final");
 }
 $("summaryBody").addEventListener("click",e=>{const c=e.target.closest(".relive");if(!c)return;S.returnToFinal=true;enterPlace(+c.dataset.r,+c.dataset.p,+c.dataset.m)});
@@ -1187,8 +1312,8 @@ $("restartTop").onclick=()=>$("restart").onclick();
 fetch("/api/config").then(r=>r.json()).then(c=>{if(c&&c.codeRequired&&!STUDY_CODE)$("codeWrap").classList.remove("hidden")}).catch(()=>{});
 function sessionLog(event){
   return{session_id:SESSION_ID,participant_id:PID,event,sent_at:new Date().toISOString(),
-    initial_statement:S.problem,current_statement:S.refined,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
-    rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(p=>({name:p.name,country:p.country,lat:p.lat,lon:p.lon,why:p.why,moments:p.moments.map(m=>m.title)}))})),
+    initial_statement:S.problem,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
+    rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),
     journey:S.rounds.length?journey():[],qa:qaLog(),journal:S.journal,elaboration:S.elaboration,stats:S.rounds.length?computeStats():null,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
 }
 function sendLog(event,beacon){
