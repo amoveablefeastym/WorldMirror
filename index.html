@@ -134,6 +134,8 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 
 /* checkin */
 .narrow{max-width:760px}
+.intake-q{display:block;font-family:var(--serif);font-size:22px;line-height:1.45;margin:0 0 14px}
+#intakeAnswer{min-height:90px}
 .cmp{display:grid;gap:16px;margin:22px 0 30px}
 .cmp label{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
 .cmp .orig{font-size:17px}
@@ -196,6 +198,25 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     <p class="small" style="margin-top:26px;max-width:62ch">What you write here and while walking is sent to Anthropic's Claude AI through this study's server, so it can choose places, answer your questions, and notice what's shifting. Your session, including your notes and questions, is saved for the research team.</p>
   </section>
 
+  <section id="intake" class="hidden narrow">
+    <h2>A few questions first</h2>
+    <p class="lede" style="margin-bottom:14px">So the places fit what's actually going on. Answer in a few words, or skip any you'd rather not.</p>
+    <p class="statement" id="intakeStatement" style="margin-bottom:22px"></p>
+    <p class="thinking" id="intakeThinking">Thinking about what to ask...</p>
+    <div id="intakeBody" class="hidden">
+      <p class="small" id="intakeCount" style="margin:0 0 6px"></p>
+      <label class="intake-q" for="intakeAnswer" id="intakeQ"></label>
+      <div class="chips" id="intakeChips"></div>
+      <textarea id="intakeAnswer" placeholder="In your own words..."></textarea>
+      <div class="row" style="margin-top:14px">
+        <button class="btn primary" id="intakeNext">Next</button>
+        <button class="btn" id="intakeSkip">Skip this one</button>
+        <button class="textbtn" id="intakeBack">← Previous</button>
+      </div>
+    </div>
+    <p style="margin-top:26px"><button class="textbtn" id="intakeSkipAll">Skip the questions and show me places</button></p>
+  </section>
+
   <section id="loading" class="hidden">
     <div class="loadglobe" id="loadGlobe" aria-hidden="true"></div>
     <p id="loadingMsg" style="font-size:18px;margin:0;max-width:46ch"></p>
@@ -234,6 +255,10 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
           <p class="mtitle" id="mtitle"></p>
           <p class="mscene" id="mscene"></p>
           <p class="meaning" id="mmeaning"></p>
+          <div class="photocard hidden" id="photoCard">
+            <img id="photoImg" alt="">
+            <p class="small" id="photoCredit"></p>
+          </div>
           <div class="ask">
             <h3>Ask questions, converse about your thoughts</h3>
             <div class="chips" id="suggest"></div>
@@ -255,10 +280,6 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
         </div>
         <div>
           <h3>What you came in with</h3>
-          <div class="photocard hidden" id="photoCard">
-            <img id="photoImg" alt="">
-            <p class="small" id="photoCredit"></p>
-          </div>
           <p class="orig" id="origStmt"></p>
         </div>
         <div id="refBlock" class="hidden">
@@ -725,27 +746,6 @@ document.addEventListener("click",e=>{
   document.querySelectorAll(".term.pinned").forEach(x=>{if(x!==t)x.classList.remove("pinned")});
   if(t)t.classList.toggle("pinned");
 });
-let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null}}
-S=fresh();
-const SCREENS=["intro","loading","reveal","walk","checkin","reflect","final"];
-function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
-const mk=(r,p,m)=>`${r}.${p}.${m}`;
-let tStart=null,curKey=null;
-function tick(){if(curKey&&tStart!=null)S.dwell[curKey]=(S.dwell[curKey]||0)+(Date.now()-tStart);tStart=document.hidden?null:Date.now()}
-document.addEventListener("visibilitychange",()=>{if(document.hidden){tick();tStart=null}else tStart=Date.now()});
-
-/* ---------- AI access ---------- */
-let samplePromise=null, aiOff=false;
-/* Self-hosted: AI requests go to this site's own /api/claude endpoint, which holds the API key. */
-const URLP=new URLSearchParams(location.search);
-const PID=(URLP.get("pid")||"").slice(0,64);
-let STUDY_CODE=URLP.get("code")||"";
-const SESSION_ID=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
-function parseJSONText(t){
-  const clean=String(t||"").replace(/```json|```/g,"").trim();
-  try{return JSON.parse(clean)}catch(e){}
-  const a=clean.indexOf("{"),b=clean.lastIndexOf("}");
 
 /* ---------- A real photo, pulled from Wikipedia (free, keyless, CORS-enabled) ---------- */
 const photoCache=new Map();
@@ -779,6 +779,27 @@ async function findMomentPhoto(P,M){
   for(const q of candidates){const r=await wikiImage(q);if(r)return r}
   return null;
 }
+let S;
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[]}}
+S=fresh();
+const SCREENS=["intro","intake","loading","reveal","walk","checkin","reflect","final"];
+function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
+const mk=(r,p,m)=>`${r}.${p}.${m}`;
+let tStart=null,curKey=null;
+function tick(){if(curKey&&tStart!=null)S.dwell[curKey]=(S.dwell[curKey]||0)+(Date.now()-tStart);tStart=document.hidden?null:Date.now()}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){tick();tStart=null}else tStart=Date.now()});
+
+/* ---------- AI access ---------- */
+let samplePromise=null, aiOff=false;
+/* Self-hosted: AI requests go to this site's own /api/claude endpoint, which holds the API key. */
+const URLP=new URLSearchParams(location.search);
+const PID=(URLP.get("pid")||"").slice(0,64);
+let STUDY_CODE=URLP.get("code")||"";
+const SESSION_ID=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
+function parseJSONText(t){
+  const clean=String(t||"").replace(/```json|```/g,"").trim();
+  try{return JSON.parse(clean)}catch(e){}
+  const a=clean.indexOf("{"),b=clean.lastIndexOf("}");
   if(a>=0&&b>a){try{return JSON.parse(clean.slice(a,b+1))}catch(e){}}
   throw{code:"bad_json"};
 }
@@ -821,8 +842,106 @@ function placeLog(p){
 
 /* ---------- Intro ---------- */
 $("problem").addEventListener("input",()=>{$("startBtn").disabled=$("problem").value.trim().length<8});
-$("startBtn").onclick=()=>{if(!$("codeWrap").classList.contains("hidden"))STUDY_CODE=$("studyCode").value.trim();S=fresh();S.problem=$("problem").value.trim();S.refined=S.problem;makeRound("initial","")};
+$("startBtn").onclick=()=>{if(!$("codeWrap").classList.contains("hidden"))STUDY_CODE=$("studyCode").value.trim();S=fresh();S.problem=$("problem").value.trim();S.refined=S.problem;startIntake()};
 $("exampleBtn").onclick=()=>{$("problem").value="I keep putting off starting things until I feel ready, and I'm starting to feel like everyone around me is further along.";$("startBtn").disabled=false;$("problem").focus()};
+
+/* ---------- Intake: adaptive questions until belief, setting, feeling, action are clear enough ---------- */
+const INTAKE_DIMS=["belief","setting","feeling","action"];
+const INTAKE_MAX=7;
+const INTAKE_FALLBACK=[
+  {targets:["setting"],question:"Where or when does this tend to show up most?",options:["At work or school","At home, on my own","Around certain people"]},
+  {targets:["feeling"],question:"When it shows up, what does it feel like?",options:["Anxious","Heavy or tired","Restless"]},
+  {targets:["belief"],question:"What does it seem to say about you, or about what's at stake?",options:["That I'm falling behind","That I'm not good enough","I'm not sure"]},
+  {targets:["action"],question:"What do you usually end up doing when it happens?",options:["Put it off","Push harder","Keep it to myself"]}
+];
+function intakePrompt(asked){
+  return `You help WorldMirror, a reflection tool, understand a person before it picks places in the world for them to explore. They wrote: "${S.problem}"
+${asked.length?`Questions asked so far and their answers (an empty answer means they skipped it): ${JSON.stringify(asked.map(x=>({question:x.question,answer:x.answer})))}`:"No questions asked yet."}
+
+To choose good places, WorldMirror needs a clear enough sense of four things:
+- belief: what the situation seems to mean to them, or say about them ("if this goes wrong, it means...")
+- setting: where, when, or around whom it shows up
+- feeling: what it feels like in the moment
+- action: what they tend to do when it happens (avoid, push through, withdraw, overthink...)
+
+Judge what you actually know from their own words, not from guesses. An answer that is vague, generic, or sidesteps the question doesn't count as knowing it. Then decide:
+- If something important is still missing or unclear, ask one more question aimed at it. A question doesn't have to cover one thing at a time: it can reach two together if that's natural ("when it hits, what do you usually do, and what goes through your head?"), or follow up on something they said that hints at more. Ask about what matters most first; belief and action usually matter most for choosing places.
+- If something was skipped, don't ask it again the same way. Try a different, gentler angle once, then let it go.
+- If you have enough to choose places well, stop. Don't ask for the sake of it. ${asked.length>=INTAKE_MAX-1?"This is the last question you may ask, so ask the one that matters most, or stop.":""}
+
+A question is one plain sentence, warm and curious, in second person, easy to answer in a few words. Build on their own words. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
+Give 2 or 3 short example answers (2 to 6 words, in their voice) they can tap, varied enough that none feels like the expected one.
+
+Respond with ONLY JSON:
+{"known":{"belief":"what you know, or empty","setting":"...","feeling":"...","action":"..."},"done":false,"question":{"targets":["belief | setting | feeling | action"],"question":"...","options":["...","..."]}}
+When done is true, set "question" to null.`;
+}
+function cleanIntakeQ(r){
+  if(!r||typeof r!=="object")return null;
+  if(r.done)return{done:true};
+  const q=r.question;
+  if(!q||!q.question)return null;
+  return{targets:(Array.isArray(q.targets)?q.targets:[]).map(String).filter(t=>INTAKE_DIMS.includes(t)),question:String(q.question),options:(Array.isArray(q.options)?q.options:[]).slice(0,3).map(String)};
+}
+let intakeQs=[],intakeI=0,intakeToken=0,intakeAI=true;
+async function startIntake(){
+  S.intake=[];intakeQs=[];intakeI=0;intakeAI=!aiOff;
+  $("intakeStatement").textContent=`"${S.problem}"`;
+  show("intake");
+  nextIntakeQ();
+}
+async function nextIntakeQ(){
+  const token=++intakeToken;
+  $("intakeThinking").classList.remove("hidden");$("intakeBody").classList.add("hidden");
+  $("intakeThinking").textContent=intakeQs.length?"Thinking about what you said...":"Thinking about what to ask...";
+  let q=null;
+  if(intakeAI&&intakeQs.length<INTAKE_MAX){
+    const sample=await getSample();
+    try{q=cleanIntakeQ(await sample.json(intakePrompt(intakeQs),{modelTier:"quick",cache:false}))}catch(e){}
+    if(token!==intakeToken)return;
+    if(!q)intakeAI=false;
+  }
+  if(!q&&!intakeAI){
+    const asked=new Set(intakeQs.map(x=>x.question));
+    const f=INTAKE_FALLBACK.find(x=>!asked.has(x.question));
+    q=f?{...f}:{done:true};
+  }
+  if(q.done||intakeQs.length>=INTAKE_MAX){finishIntake();return}
+  intakeQs.push({...q,answer:""});intakeI=intakeQs.length-1;
+  $("intakeThinking").classList.add("hidden");$("intakeBody").classList.remove("hidden");
+  renderIntake();
+}
+function renderIntake(){
+  const q=intakeQs[intakeI];
+  $("intakeCount").textContent=`Question ${intakeI+1}`;
+  $("intakeQ").textContent=q.question;
+  $("intakeChips").innerHTML=q.options.map(o=>`<button class="chip" type="button">${esc(o)}</button>`).join("");
+  $("intakeChips").querySelectorAll(".chip").forEach((b,i)=>b.onclick=()=>{$("intakeAnswer").value=q.options[i];$("intakeAnswer").focus()});
+  $("intakeAnswer").value=q.answer||"";
+  $("intakeBack").classList.toggle("hidden",intakeI===0);
+  $("intakeAnswer").focus();
+}
+function intakeStep(answer){
+  const q=intakeQs[intakeI];
+  /* Changing an earlier answer means the follow-ups after it may no longer fit, so ask again from here. */
+  if(intakeI<intakeQs.length-1){
+    if(answer===q.answer){intakeI++;renderIntake();return}
+    intakeQs=intakeQs.slice(0,intakeI+1);
+  }
+  q.answer=answer;
+  nextIntakeQ();
+}
+function finishIntake(){
+  intakeToken++;
+  if(intakeQs[intakeI])intakeQs[intakeI].answer=$("intakeAnswer").value.trim()||intakeQs[intakeI].answer;
+  S.intake=intakeQs.map(q=>({targets:q.targets,question:q.question,answer:(q.answer||"").trim()})).filter(x=>x.answer);
+  makeRound("initial","");
+}
+$("intakeNext").onclick=()=>intakeStep($("intakeAnswer").value.trim());
+$("intakeSkip").onclick=()=>intakeStep("");
+$("intakeBack").onclick=()=>{intakeQs[intakeI].answer=$("intakeAnswer").value.trim();if(intakeI>0){intakeI--;renderIntake()}};
+$("intakeSkipAll").onclick=()=>finishIntake();
+$("intakeAnswer").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("intakeNext").click()}});
 
 /* ---------- Generate a round of places ---------- */
 const VOCAB=`"scene3d": {
@@ -868,7 +987,14 @@ Step 1: Map the problem
 
 From everything you know about the person below, infer:
 
-situation, feeling, and outcome. The situation may be diffuse ("I just feel stuck") or missing. Don't invent one.
+situation, feeling, action, and outcome. The situation may be diffuse ("I just feel stuck") or missing. Don't invent one. Action is what they tend to do when it shows up (avoid it, push harder, withdraw, overthink).
+
+Before this, they may have answered a few short questions about their belief (what the situation means to them or says about them), setting (where, when, or around whom it shows up), feeling (what it feels like), and action (what they do when it happens). These answers are their own words, so weigh them above your own inference:
+Belief answers ground surface and core meaning. If they state a belief, use it instead of guessing one; if they say they don't know, don't force one.
+Setting answers tell you where the challenge lives. Use them to judge whether the shape is Setting, and to pick scenes whose environment echoes theirs closely enough to recognize.
+Feeling answers tell you what the person in the scene who could share their feeling (Room for the feeling) should be feeling.
+Action answers tell you what they do in the moment. Look for practices where someone in the scene faces the same pull (to put it off, push through, hide) and the practice itself handles it differently.
+Use the answers to inform the places, but never repeat or quote them back in the user-facing text.
 meaning, only if the problem is belief-driven:
 Surface: what the situation costs ("rest = losing time," "a missed chance is gone for good")
 Core: what the situation says about the person ("I haven't earned rest," "a mistake shows I'm not good enough")
@@ -940,6 +1066,7 @@ Worked examples
 
 Context for this round:
 What they wrote at the start: "${S.problem}"
+${S.intake.length?`Their answers to the opening questions (each tagged with what it was asking about: belief, setting, feeling, action): ${JSON.stringify(S.intake)}`:""}
 How it reads now, after exploring: "${S.refined}"
 ${S.problemMap?`Your last structured read of the problem: ${JSON.stringify(S.problemMap)}`:""}
 ${S.causes.length||S.feedback.length?`Together you've been working out what's underneath. Their answers to possible causes so far: ${JSON.stringify(allFeedback())}. Guesses they haven't answered yet: ${JSON.stringify(S.causes.filter(c=>!c.verdict).map(c=>c.cause))}
@@ -960,7 +1087,7 @@ Additional technical requirements for this app, on top of everything above:
 ${VOCAB}
 
 Respond with ONLY JSON, no markdown:
-{"problem_map":{"situation":"","feeling":"","outcome":"","surface_meaning":"","core_meaning":"","shape":"belief | feeling | setting | choice | weight","secondary_shape":"","confidence":"low | medium | high"},
+{"problem_map":{"situation":"","feeling":"","action":"","outcome":"","surface_meaning":"","core_meaning":"","shape":"belief | feeling | setting | choice | weight","secondary_shape":"","confidence":"low | medium | high"},
 "places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","questions":["...","..."],"terms":[{"term":"...","definition":"..."}],"scene3d":{...}},"internal":{"shared_thread":"situation | feeling | question","thread_detail":"What this place shares with the user, in one sentence the user could say themselves.","feeling_cue":"Who in the scene might feel what the user feels.","lever":"meaning | holding | setting | scale | direction","layer":"surface | core | n/a","practice_feature":"The specific rule, timing, object, role, gathering, or vantage point that carries the shift.","shift":"What could change for the user, in their terms.","reapply_question":"One open question that invites the user to find their own version. Never phrase it as advice."}}]}`;
 }
 function cleanInternal(i){
@@ -983,7 +1110,7 @@ function cleanRound(r){
   });
   if(places.length<2)return null;
   const pm=r.problem_map;
-  const problemMap=(pm&&typeof pm==="object")?{situation:String(pm.situation||""),feeling:String(pm.feeling||""),outcome:String(pm.outcome||""),
+  const problemMap=(pm&&typeof pm==="object")?{situation:String(pm.situation||""),feeling:String(pm.feeling||""),action:String(pm.action||""),outcome:String(pm.outcome||""),
     surface_meaning:String(pm.surface_meaning||""),core_meaning:String(pm.core_meaning||""),
     shape:String(pm.shape||""),secondary_shape:String(pm.secondary_shape||""),confidence:String(pm.confidence||"")}:null;
   return{places,problemMap};
@@ -1224,6 +1351,7 @@ function synthPrompt(){
   return `You are the companion inside WorldMirror, helping a person make sense of their walk. Their problem is NOT solved. Your job is to look across everything they asked for a pattern, and connect that pattern back to their problem gently, not to hand them a diagnosis or a to-do list.
 
 What they wrote at the start: "${S.problem}"
+${S.intake.length?`Their answers to the opening questions (belief, setting, feeling, action): ${JSON.stringify(S.intake)}`:""}
 How it reads now: "${S.refined}"
 Their journey (places, moments, the questions they asked at each one, time spent): ${JSON.stringify(journey())}
 ${S.problemMap?`An earlier structured read of their problem: ${JSON.stringify(S.problemMap)}`:""}
@@ -1349,7 +1477,7 @@ function finish(){
     ${challengesHtml()}
     <h3 class="sec">Where this points</h3>${pointsHtml(r)}
     <h3 class="sec">What you noticed</h3>${obsList(r)}`;
-  $("log").textContent=JSON.stringify({initial_statement:S.problem,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
+  $("log").textContent=JSON.stringify({initial_statement:S.problem,intake:S.intake,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
   show("final");
 }
 $("summaryBody").addEventListener("click",e=>{const c=e.target.closest(".relive");if(!c)return;S.returnToFinal=true;enterPlace(+c.dataset.r,+c.dataset.p,+c.dataset.m)});
@@ -1361,7 +1489,7 @@ $("restartTop").onclick=()=>$("restart").onclick();
 fetch("/api/config").then(r=>r.json()).then(c=>{if(c&&c.codeRequired&&!STUDY_CODE)$("codeWrap").classList.remove("hidden")}).catch(()=>{});
 function sessionLog(event){
   return{session_id:SESSION_ID,participant_id:PID,event,sent_at:new Date().toISOString(),
-    initial_statement:S.problem,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
+    initial_statement:S.problem,intake:S.intake,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
     rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),
     journey:S.rounds.length?journey():[],qa:qaLog(),journal:S.journal,elaboration:S.elaboration,stats:S.rounds.length?computeStats():null,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
 }
