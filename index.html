@@ -96,6 +96,10 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .term{position:relative;border-bottom:1px dotted var(--accent);cursor:help}
 .term .termtip{display:none;position:absolute;left:0;bottom:100%;margin-bottom:6px;width:230px;max-width:70vw;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:10px;font-family:var(--sans);font-size:13px;line-height:1.45;font-style:normal;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.28)}
 .term:hover .termtip,.term:focus .termtip,.term.pinned .termtip{display:block}
+.photocard{margin:0 0 18px}
+.photocard img{width:100%;max-height:360px;object-fit:contain;border-radius:12px;display:block;background:var(--paper)}
+.photocard p{margin:6px 0 0}
+.photocard a{color:var(--accent)}
 .ask{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .ask h3{font-size:15px;font-weight:500;margin:0 0 8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
@@ -251,6 +255,10 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
         </div>
         <div>
           <h3>What you came in with</h3>
+          <div class="photocard hidden" id="photoCard">
+            <img id="photoImg" alt="">
+            <p class="small" id="photoCredit"></p>
+          </div>
           <p class="orig" id="origStmt"></p>
         </div>
         <div id="refBlock" class="hidden">
@@ -738,6 +746,39 @@ function parseJSONText(t){
   const clean=String(t||"").replace(/```json|```/g,"").trim();
   try{return JSON.parse(clean)}catch(e){}
   const a=clean.indexOf("{"),b=clean.lastIndexOf("}");
+
+/* ---------- A real photo, pulled from Wikipedia (free, keyless, CORS-enabled) ---------- */
+const photoCache=new Map();
+async function wikiSummary(title){
+  const res=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g,"_"))}`);
+  return res.ok?await res.json():null;
+}
+async function wikiImage(query){
+  if(!query)return null;
+  const key=query.toLowerCase();
+  if(photoCache.has(key))return photoCache.get(key);
+  const result=await(async()=>{
+    try{
+      let d=await wikiSummary(query);
+      if(!d||d.type==="disambiguation"||!d.thumbnail){
+        const sres=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
+        const sd=sres.ok?await sres.json():null;
+        const title=sd&&sd.query&&sd.query.search&&sd.query.search[0]&&sd.query.search[0].title;
+        if(!title)return null;
+        d=await wikiSummary(title);
+      }
+      if(!d||!d.thumbnail)return null;
+      return{url:d.thumbnail.source,title:d.title,pageUrl:(d.content_urls&&d.content_urls.desktop&&d.content_urls.desktop.page)||`https://en.wikipedia.org/wiki/${encodeURIComponent(d.title)}`};
+    }catch(e){return null}
+  })();
+  photoCache.set(key,result);
+  return result;
+}
+async function findMomentPhoto(P,M){
+  const candidates=[...(M.terms||[]).map(t=>t.term),P.name];
+  for(const q of candidates){const r=await wikiImage(q);if(r)return r}
+  return null;
+}
   if(a>=0&&b>a){try{return JSON.parse(clean.slice(a,b+1))}catch(e){}}
   throw{code:"bad_json"};
 }
@@ -1013,7 +1054,15 @@ function renderWalk(newScene){
   $("mcount").textContent=P.moments.length>1?`Moment ${mi+1} of ${P.moments.length}`:"";
   Globe3D.attach($("sideGlobe"));Globe3D.point(P.lat,P.lon);$("sideGlobeLabel").textContent=`${P.name}, ${P.country}`;
   if(newScene){if(viewerOK){Viewer.load(M.scene3d,P.name+M.title);$("viewer").classList.remove("no3d")}else{$("viewer").classList.add("no3d")}
-    const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")}
+    const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")
+    $("photoCard").classList.add("hidden");
+    const myKey=k;
+    findMomentPhoto(P,M).then(r=>{
+      if(curKey!==myKey||!r)return;
+      $("photoImg").src=r.url;
+      $("photoCredit").innerHTML=`Real photo via <a href="${esc(r.pageUrl)}" target="_blank" rel="noopener">Wikipedia</a> — ${esc(r.title)}`;
+      $("photoCard").classList.remove("hidden");
+    });}
   $("mtitle").textContent=M.title;$("mscene").innerHTML=highlightTerms(M.scene,M.terms);$("mmeaning").innerHTML=highlightTerms(M.meaning,M.terms);
   renderChat();
   const last=mi===P.moments.length-1, allSeen=R.places.every((_,j)=>S.visited[`${ri}.${j}`]);
