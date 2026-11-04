@@ -867,7 +867,7 @@ To choose good places, WorldMirror needs a clear enough sense of four things:
 Judge what you actually know from their own words, not from guesses. An answer that is vague, generic, or sidesteps the question doesn't count as knowing it. Then decide:
 - If something important is still missing or unclear, ask one more question aimed at it. A question doesn't have to cover one thing at a time: it can reach two together if that's natural ("when it hits, what do you usually do, and what goes through your head?"), or follow up on something they said that hints at more. Ask about what matters most first; belief and action usually matter most for choosing places.
 - If something was skipped, don't ask it again the same way. Try a different, gentler angle once, then let it go.
-- If you have enough to choose places well, stop. Don't ask for the sake of it. ${asked.length>=INTAKE_MAX-1?"This is the last question you may ask, so ask the one that matters most, or stop.":""}
+- If you have enough to choose places well, stop. "Enough" means a usable sense of each, not certainty: a few honest words per thing is plenty, and most people are ready after 2 to 4 questions. Each extra question costs them patience, so don't ask for the sake of it or to polish what you already know. ${asked.length>=INTAKE_MAX-1?"This is the last question you may ask, so ask the one that matters most, or stop.":""}
 
 A question is one plain sentence, warm and curious, in second person, easy to answer in a few words. Build on their own words. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
 Give 2 or 3 short example answers (2 to 6 words, in their voice) they can tap, varied enough that none feels like the expected one.
@@ -894,8 +894,9 @@ async function nextIntakeQ(){
   const token=++intakeToken;
   $("intakeThinking").classList.remove("hidden");$("intakeBody").classList.add("hidden");
   $("intakeThinking").textContent=intakeQs.length?"Thinking about what you said...":"Thinking about what to ask...";
+  if(intakeQs.length>=INTAKE_MAX){finishIntake();return}
   let q=null;
-  if(intakeAI&&intakeQs.length<INTAKE_MAX){
+  if(intakeAI){
     const sample=await getSample();
     try{q=cleanIntakeQ(await sample.json(intakePrompt(intakeQs),{modelTier:"quick",cache:false}))}catch(e){}
     if(token!==intakeToken)return;
@@ -906,7 +907,7 @@ async function nextIntakeQ(){
     const f=INTAKE_FALLBACK.find(x=>!asked.has(x.question));
     q=f?{...f}:{done:true};
   }
-  if(q.done||intakeQs.length>=INTAKE_MAX){finishIntake();return}
+  if(q.done){finishIntake();return}
   intakeQs.push({...q,answer:""});intakeI=intakeQs.length-1;
   $("intakeThinking").classList.add("hidden");$("intakeBody").classList.remove("hidden");
   renderIntake();
