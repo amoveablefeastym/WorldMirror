@@ -780,7 +780,7 @@ async function findMomentPhoto(P,M){
   return null;
 }
 let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[]}}
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[],nextQs:{}}}
 S=fresh();
 const SCREENS=["intro","intake","loading","reveal","walk","checkin","reflect","final"];
 function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
@@ -1082,7 +1082,7 @@ Additional technical requirements for this app, on top of everything above:
 - Give each place exactly one moment (the single best one, per Step 2). "scene" is present tense, 2 to 3 short concrete sentences, following the Step 4 rules above.
 - Also write "meaning": 1 to 2 sentences of real cultural or historical background, in plain language, shown to the user right under the scene. It follows the same describe-don't-teach rule as "scene" and "why": no lesson, no shift, no "this teaches you to..."
 - Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences must already read clearly on their own, even before anyone hovers anything.
-- "questions": two short questions a curious visitor might ask, shown as suggested chat starters.
+- "questions": two short questions in the user's voice (asked to a local guide), shown as tappable chat starters. They are the first steps on a path that lets the user arrive at the shift on their own. The first helps them understand what is actually happening in the scene, since nobody can find a shift in a scene they don't understand. The second draws their attention to the practice_feature or to the person who might feel what they feel. Never state or hint at the shift inside the question: "So missing a bid isn't the end?" gives it away; "What does a buyer do right after letting a cart go by?" lets them notice it.
 - "lat" and "lon" are the real decimal-degree coordinates of the specific place, used to show it on a small map.
 - The moment also needs a 3D scene description that matches "scene" closely:
 ${VOCAB}
@@ -1300,7 +1300,7 @@ async function pivotWithContext(context){
 /* ---------- Ask about the moment ---------- */
 function renderChat(){
   const M=curMoment(),log=S.chats[curKey]||[];
-  $("suggest").innerHTML=M.questions.filter(q=>!log.some(c=>c.q===q)).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("");
+  $("suggest").innerHTML=(S.nextQs[curKey]||M.questions).filter(q=>!log.some(c=>c.q===q)).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("");
   $("chatlog").innerHTML=log.map(c=>`<div class="qa"><p class="q">${esc(c.q)}</p><p class="a">${esc(c.a)}</p></div>`).join("");
 }
 $("suggest").addEventListener("click",e=>{const c=e.target.closest(".chip");if(c)ask(c.dataset.q)});
@@ -1321,12 +1321,38 @@ Place: ${P.name}, ${P.country}
 Moment: ${M.title}. ${M.scene}
 Background: ${M.meaning}
 They came to WorldMirror with this on their mind: "${S.refined}". Don't bring that up unless their question invites it, and never lecture or give life advice.
+${M.internal&&M.internal.practice_feature?`What this moment is meant to let them notice for themselves, which you never say outright: the practice "${M.internal.practice_feature}", and the person in the scene who might feel like them, "${M.internal.feeling_cue}". When it fits their question, make sure your answer brings these details into view. If they ask how this relates to them, don't explain a lesson or turn it into advice or tips: point back to one concrete detail of the practice or that person, and end with one short question that invites them to find their own version.`:""}
 ${convo?`Conversation so far:\n${convo}\n`:""}Their question: ${q}
 
 Answer in 2 to 4 sentences of plain conversational prose. Be accurate; if you're not sure of something, say so. No lists, no markdown, no em dashes.`,
       {modelTier:"quick",cache:false,onText:({text})=>{entry.a=text;if(curKey===key){ansEl.textContent=text;ansEl.classList.remove("pending")}}});
   }catch(e){entry.a=e&&e.text?e.text:(e&&e.code==="rate_limited"?"Too many questions at once. Try again in a moment.":e&&e.code==="bad_code"?"The study code wasn't accepted.":"That question didn't go through. Try asking again.");if(e&&e.code==="not_granted")aiOff=true;if(curKey===key)ansEl.textContent=entry.a}
   ansEl.classList.remove("pending");$("askBtn").disabled=false;asking=false;if(curKey===key)renderChat();
+  if(entry.a&&sample)suggestNext(key,P,M);
+}
+
+/* After each answer, suggest the next step toward noticing the shift on their own. */
+async function suggestNext(key,P,M){
+  const log=S.chats[key]||[],i=M.internal||{};
+  if(!i.shift)return;
+  try{
+    const r=await (await getSample()).json(`You suggest the next questions a person might tap while exploring a place in WorldMirror, a reflection tool that never gives advice. The person came in with: "${S.refined}"
+Place: ${P.name}, ${P.country}
+Moment: ${M.title}. ${M.scene}
+Background: ${M.meaning}
+What this moment is quietly meant to let them notice (never shown to them): they share "${i.thread_detail}"; someone there who might feel like them: "${i.feeling_cue}"; the practice that carries it: "${i.practice_feature}"; the shift: "${i.shift}"; a closing question: "${i.reapply_question}"
+Conversation with the local guide so far:
+${log.map(c=>`Q: ${c.q}\nA: ${c.a}`).join("\n")}
+
+Write 2 short questions in their voice, asked to the guide, that each move them one step closer to noticing the shift for themselves. Work out where they are on this path and take the next step, not three steps at once:
+1. Understand the scene: if their questions show confusion about what's happening, clarify that first.
+2. Notice the practice and the person: what people do there, what happens after a miss or a stumble, how that person handles it.
+3. Connect it to their own life: only once they clearly understand the scene, and phrased as a question about themselves ("Is there something in my week that comes around again like the next cart?"), never as a conclusion.
+Never state or hint at the shift inside the question. Build on what they just asked and how they reacted. Don't repeat questions already asked. Keep each under 15 words. No em dashes.
+Respond with ONLY JSON: {"questions":["...","..."]}`,{modelTier:"quick",cache:false});
+    const qs=(r&&Array.isArray(r.questions)?r.questions:[]).map(String).filter(Boolean).slice(0,2);
+    if(qs.length){S.nextQs[key]=qs;if(curKey===key&&!asking)renderChat()}
+  }catch(e){}
 }
 
 /* ---------- Check in ---------- */
