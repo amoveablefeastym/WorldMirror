@@ -781,7 +781,7 @@ async function findMomentPhoto(P,M){
   return null;
 }
 let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[],nextQs:{},nextReflect:{},reflectsUsed:[]}}
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[],nextQs:{},nextReflect:{},reflectsUsed:[],stuck:{}}}
 S=fresh();
 const SCREENS=["intro","intake","loading","reveal","walk","checkin","reflect","final"];
 function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
@@ -1304,10 +1304,12 @@ async function pivotWithContext(context){
 }
 
 /* ---------- Ask about the moment ---------- */
+const CONNECT_Q="Help me see the connection";
 function renderChat(){
   const M=curMoment(),log=S.chats[curKey]||[];
   const rf=S.nextReflect[curKey]||M.reflect;
   $("suggest").innerHTML=(S.nextQs[curKey]||M.questions).filter(q=>!log.some(c=>c.q===q)).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")+
+    (log.length>=3&&S.stuck[curKey]&&!log.some(c=>c.q===CONNECT_Q)?`<button class="chip" data-q="${esc(CONNECT_Q)}">${esc(CONNECT_Q)}</button>`:"")+
     (rf&&!S.reflectsUsed.includes(rf)?`<button class="chip reflect" data-r="${esc(rf)}" title="Add to your journal">✎ ${esc(rf)}</button>`:"");
   $("chatlog").innerHTML=log.map(c=>`<div class="qa"><p class="q">${esc(c.q)}</p><p class="a">${esc(c.a)}</p></div>`).join("");
 }
@@ -1339,7 +1341,7 @@ Place: ${P.name}, ${P.country}
 Moment: ${M.title}. ${M.scene}
 Background: ${M.meaning}
 They came to WorldMirror with this on their mind: "${S.refined}". Don't bring that up unless their question invites it, and never lecture or give life advice.
-${M.internal&&M.internal.practice_feature?`What this moment is meant to let them notice for themselves: the practice "${M.internal.practice_feature}", the person in the scene who might feel like them, "${M.internal.feeling_cue}", what it shares with their life, "${M.internal.thread_detail}", and the possible shift, "${M.internal.shift}". When it fits their question, make sure your answer brings the practice and that person into view, but don't volunteer the shift. Only if they ask directly how this relates to them or what it means for them, explain it plainly: name the concrete detail of the practice, say what it suggests about their situation, and frame it as one way of seeing it, not a verdict. Even then, no advice, tips, action plans, or offers to help them strategize.`:""}
+${M.internal&&M.internal.practice_feature?`What this moment is meant to let them notice for themselves: the practice "${M.internal.practice_feature}", the person in the scene who might feel like them, "${M.internal.feeling_cue}", what it shares with their life, "${M.internal.thread_detail}", and the possible shift, "${M.internal.shift}". When it fits their question, make sure your answer brings the practice and that person into view, but don't volunteer the shift. Only if they ask directly how this relates to them or what it means for them (including "${CONNECT_Q}"), explain it plainly: name the concrete detail of the practice, say what it suggests about their situation, and frame it as one way of seeing it, not a verdict. Even then, no advice, tips, action plans, or offers to help them strategize.`:""}
 ${convo?`Conversation so far:\n${convo}\n`:""}Their question: ${q}
 
 Answer in 2 to 4 sentences of plain conversational prose. Be accurate; if you're not sure of something, say so. No lists, no markdown, no em dashes.`,
@@ -1370,10 +1372,12 @@ Never state or hint at the shift inside the question. For example, at a flower a
 Build on what they just asked and how they reacted. Don't repeat questions already asked. Keep each under 15 words.
 
 Also write one "reflect" prompt: a short, gentle invitation to jot down their own reaction in their journal, tied to what just came up in the conversation, such as what they felt watching it, what surprised them, or what they first assumed. It's about their reaction, never a conclusion they should reach. Under 15 words, second person, for example: "What did you feel watching a cart roll past unsold?"
+Finally, judge "stuck": true if, from their questions and reactions, they still don't seem to see what the scene has to do with what they came in with (they're circling the mechanics, asking why it matters, or saying they don't get it); false if they're engaging with the meaning or making connections of their own.
 No em dashes.
-Respond with ONLY JSON: {"questions":["...","..."],"reflect":"..."}`,{modelTier:"quick",cache:false});
+Respond with ONLY JSON: {"questions":["...","..."],"reflect":"...","stuck":false}`,{modelTier:"quick",cache:false});
     const qs=(r&&Array.isArray(r.questions)?r.questions:[]).map(String).filter(Boolean).slice(0,2);
     if(r&&r.reflect)S.nextReflect[key]=String(r.reflect);
+    if(r)S.stuck[key]=r.stuck===true;
     if(qs.length){S.nextQs[key]=qs;if(curKey===key&&!asking)renderChat()}
   }catch(e){}
 }
