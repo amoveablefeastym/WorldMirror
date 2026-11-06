@@ -105,6 +105,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:14px;text-align:left}
 .chip:hover{border-color:var(--ink)}
+.chip.reflect{border-style:dashed;color:var(--accent)}
 .qa{margin-bottom:14px}
 .qa .q{font-weight:500;margin:0 0 4px;font-size:15px}
 .qa .a{font-family:var(--serif);margin:0;line-height:1.6;max-width:64ch}
@@ -780,7 +781,7 @@ async function findMomentPhoto(P,M){
   return null;
 }
 let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[],nextQs:{}}}
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[],nextQs:{},nextReflect:{},reflectsUsed:[]}}
 S=fresh();
 const SCREENS=["intro","intake","loading","reveal","walk","checkin","reflect","final"];
 function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
@@ -1087,13 +1088,14 @@ Additional technical requirements for this app, on top of everything above:
 - Also write "meaning": 1 to 2 sentences of real cultural or historical background, in plain language, shown to the user right under the scene. It follows the same describe-don't-teach rule as "scene" and "why": no lesson, no shift, no "this teaches you to..."
 - Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences must already read clearly on their own, even before anyone hovers anything.
 - "questions": two short questions in the user's voice (asked to a local guide), shown as tappable chat starters. They are the first steps on a path that lets the user arrive at the shift on their own. The first helps them understand what is actually happening in the scene, since nobody can find a shift in a scene they don't understand. The second draws their attention to the practice_feature or to the person who might feel what they feel. Never state or hint at the shift inside the question: "So missing a bid isn't the end?" gives it away; "What does a buyer do right after letting a cart go by?" lets them notice it.
+- "reflect": one short, gentle prompt inviting them to jot down their first reaction to the scene in their journal (what they feel, notice, or assume looking at it). About their reaction, never a conclusion. Under 15 words, second person.
 - "lat" and "lon" are the real decimal-degree coordinates of the specific place, used to show it on a small map.
 - The moment also needs a 3D scene description that matches "scene" closely:
 ${VOCAB}
 
 Respond with ONLY JSON, no markdown:
 {"problem_map":{"situation":"","feeling":"","action":"","outcome":"","surface_meaning":"","core_meaning":"","shape":"belief | feeling | setting | choice | weight","secondary_shape":"","confidence":"low | medium | high"},
-"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","questions":["...","..."],"terms":[{"term":"...","definition":"..."}],"scene3d":{...}},"internal":{"shared_thread":"situation | feeling | question","thread_detail":"What this place shares with the user, in one sentence the user could say themselves.","feeling_cue":"Who in the scene might feel what the user feels.","lever":"meaning | holding | setting | scale | direction","layer":"surface | core | n/a","practice_feature":"The specific rule, timing, object, role, gathering, or vantage point that carries the shift.","shift":"What could change for the user, in their terms.","reapply_question":"One open question that invites the user to find their own version. Never phrase it as advice."}}]}`;
+"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","questions":["...","..."],"reflect":"...","terms":[{"term":"...","definition":"..."}],"scene3d":{...}},"internal":{"shared_thread":"situation | feeling | question","thread_detail":"What this place shares with the user, in one sentence the user could say themselves.","feeling_cue":"Who in the scene might feel what the user feels.","lever":"meaning | holding | setting | scale | direction","layer":"surface | core | n/a","practice_feature":"The specific rule, timing, object, role, gathering, or vantage point that carries the shift.","shift":"What could change for the user, in their terms.","reapply_question":"One open question that invites the user to find their own version. Never phrase it as advice."}}]}`;
 }
 function cleanInternal(i){
   if(!i||typeof i!=="object")return{};
@@ -1108,7 +1110,7 @@ function cleanRound(r){
     return{name:String(p.name),country:String(p.country||""),
       lat:clamp(Number(p.lat)||0,-90,90),lon:clamp(Number(p.lon)||0,-180,180),
       why:String(p.why||""),
-      moments:[{title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),
+      moments:[{title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),reflect:String(m.reflect||""),
         terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
         scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]},
         internal:cleanInternal(p.internal)}]};
@@ -1304,10 +1306,22 @@ async function pivotWithContext(context){
 /* ---------- Ask about the moment ---------- */
 function renderChat(){
   const M=curMoment(),log=S.chats[curKey]||[];
-  $("suggest").innerHTML=(S.nextQs[curKey]||M.questions).filter(q=>!log.some(c=>c.q===q)).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("");
+  const rf=S.nextReflect[curKey]||M.reflect;
+  $("suggest").innerHTML=(S.nextQs[curKey]||M.questions).filter(q=>!log.some(c=>c.q===q)).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")+
+    (rf&&!S.reflectsUsed.includes(rf)?`<button class="chip reflect" data-r="${esc(rf)}" title="Add to your journal">✎ ${esc(rf)}</button>`:"");
   $("chatlog").innerHTML=log.map(c=>`<div class="qa"><p class="q">${esc(c.q)}</p><p class="a">${esc(c.a)}</p></div>`).join("");
 }
-$("suggest").addEventListener("click",e=>{const c=e.target.closest(".chip");if(c)ask(c.dataset.q)});
+$("suggest").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;
+  if(c.dataset.r!==undefined){writeInJournal(c.dataset.r);return}
+  ask(c.dataset.q)});
+/* A reflection prompt goes into the journal as a heading for the user to write under. */
+function writeInJournal(prompt){
+  S.reflectsUsed.push(prompt);
+  S.journal=(S.journal.trim()?S.journal.replace(/\s*$/,"")+"\n\n":"")+prompt+"\n";
+  const j=$("journal");j.value=S.journal;
+  j.scrollIntoView({behavior:"smooth",block:"center"});j.focus();j.setSelectionRange(j.value.length,j.value.length);
+  renderChat();
+}
 $("askForm").addEventListener("submit",e=>{e.preventDefault();const q=$("askInput").value.trim();if(q){$("askInput").value="";ask(q)}});
 let asking=false;
 async function ask(q){
@@ -1344,18 +1358,22 @@ async function suggestNext(key,P,M){
 Place: ${P.name}, ${P.country}
 Moment: ${M.title}. ${M.scene}
 Background: ${M.meaning}
-What this moment is quietly meant to let them notice (never shown to them): they share "${i.thread_detail}"; someone there who might feel like them: "${i.feeling_cue}"; the practice that carries it: "${i.practice_feature}"; the shift: "${i.shift}"; a closing question: "${i.reapply_question}"
+What this moment is quietly meant to let them notice (never shown to them): they share "${i.thread_detail}"; someone there who might feel like them: "${i.feeling_cue}"; the practice that carries it: "${i.practice_feature}"; the shift: "${i.shift}"
 Conversation with the local guide so far:
 ${log.map(c=>`Q: ${c.q}\nA: ${c.a}`).join("\n")}
 
-Write 2 short questions in their voice, asked to the guide, that each move them one step closer to noticing the shift for themselves. Work out where they are on this path and take the next step, not three steps at once:
+Write 2 short questions in their voice, asked to the guide, that each move them one step closer to seeing the hidden meaning of the practice: what it quietly says about the thing they're struggling with. Work out where they are on this path and take the next step, not several at once:
 1. Understand the scene: if their questions show confusion about what's happening, clarify that first.
-2. Notice the practice and the person: what people do there, what happens after a miss or a stumble, how that person handles it.
-3. Connect it to their own life: only once they clearly understand the scene, and phrased as a question about themselves ("Is there something in my week that comes around again like the next cart?"), never as a conclusion.
-Never state or hint at the shift inside the question. For example, at a flower auction where the shift is that an unsold cart reflects that morning's fit and timing rather than the flowers' worth, a user who has asked "Who names the price?" and "Wouldn't people just wait?" now understands the mechanics but not yet the point. Good next steps: "When a cart doesn't sell, is something wrong with those flowers?" and "Does the same lot always sell for the same price?" Later, once that has landed: "Has a no I got recently been more like an unsold cart?" Bad: "So rejection is about timing, not my worth?" because it hands them the conclusion.
-Build on what they just asked and how they reacted. Don't repeat questions already asked. Keep each under 15 words. No em dashes.
-Respond with ONLY JSON: {"questions":["...","..."]}`,{modelTier:"quick",cache:false});
+2. Notice the practice and the person: what people do there, what happens after a miss, a flaw, or a quiet moment, how the person who might feel like them handles it.
+3. See what it means: questions that make the meaning visible inside the scene itself (what a result says or doesn't say about the thing, why people there don't treat it the way the user might), so the user can make the connection on their own. Stay in the scene: don't ask them to find a similar person or moment in their own life.
+Never state or hint at the shift inside the question. For example, at a flower auction where the shift is that an unsold cart reflects that morning's fit and timing rather than the flowers' worth, a user who has asked "Who names the price?" and "Wouldn't people just wait?" now understands the mechanics but not yet the point. Good next steps: "When a cart doesn't sell, is something wrong with those flowers?" and "Does the same lot always sell for the same price?" Then: "What does a grower make of a cart that didn't sell today?" Bad: "So rejection is about timing, not my worth?" because it hands them the conclusion.
+Build on what they just asked and how they reacted. Don't repeat questions already asked. Keep each under 15 words.
+
+Also write one "reflect" prompt: a short, gentle invitation to jot down their own reaction in their journal, tied to what just came up in the conversation, such as what they felt watching it, what surprised them, or what they first assumed. It's about their reaction, never a conclusion they should reach. Under 15 words, second person, for example: "What did you feel watching a cart roll past unsold?"
+No em dashes.
+Respond with ONLY JSON: {"questions":["...","..."],"reflect":"..."}`,{modelTier:"quick",cache:false});
     const qs=(r&&Array.isArray(r.questions)?r.questions:[]).map(String).filter(Boolean).slice(0,2);
+    if(r&&r.reflect)S.nextReflect[key]=String(r.reflect);
     if(qs.length){S.nextQs[key]=qs;if(curKey===key&&!asking)renderChat()}
   }catch(e){}
 }
