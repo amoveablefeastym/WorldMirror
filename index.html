@@ -744,37 +744,69 @@ document.addEventListener("click",e=>{
   if(t)t.classList.toggle("pinned");
 });
 
-/* ---------- A real photo, pulled from Wikipedia (free, keyless, CORS-enabled) ---------- */
+/* ---------- A real photo, pulled from Wikipedia (free, keyless, CORS-enabled) ----------
+   Collects every photo on the relevant Wikipedia pages with its alt text and caption,
+   then asks the AI which one best lets someone picture themselves in the scene. */
 const photoCache=new Map();
-async function wikiSummary(title){
-  const res=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g,"_"))}`);
-  return res.ok?await res.json():null;
+const NOT_A_SCENE=/\b(\w*map|logo|flag|coat of arms|seal|icon|diagram|chart|plan|signature|locator|emblem)\b/i;
+const THUMB_WIDTHS=[960,500,330]; // Wikimedia only serves standard thumbnail widths
+async function wikiTitle(query){
+  const res=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=1&format=json&origin=*`);
+  const d=res.ok?await res.json():null;
+  return d&&d.query&&d.query.search&&d.query.search[0]&&d.query.search[0].title||null;
 }
-async function wikiImage(query){
-  if(!query)return null;
-  const key=query.toLowerCase();
+async function wikiPhotos(title){
+  const res=await fetch(`https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&prop=text&redirects=1&format=json&formatversion=2&origin=*`);
+  const d=res.ok?await res.json():null;
+  if(!d||!d.parse)return[];
+  const doc=new DOMParser().parseFromString(d.parse.text,"text/html");
+  const pageUrl=`https://en.wikipedia.org/wiki/${encodeURIComponent(d.parse.title.replace(/ /g,"_"))}`;
+  return[...doc.querySelectorAll("img")].map(img=>{
+    const fileW=Number(img.getAttribute("data-file-width"))||0,src=img.getAttribute("src")||"";
+    const file=decodeURIComponent((src.match(/\/thumb\/[0-9a-f]\/[0-9a-f]{2}\/([^/]+)\//)||[])[1]||"");
+    const holder=img.closest("figure,.gallerybox,.infobox,.thumb");
+    const capEl=holder&&holder.querySelector("figcaption,.gallerytext,.infobox-caption,.thumbcaption");
+    return{page:d.parse.title,pageUrl,file,fileW,alt:(img.getAttribute("alt")||"").trim(),
+      caption:(capEl?capEl.textContent:"").replace(/\s+/g," ").trim().slice(0,220),
+      url:src.startsWith("//")?"https:"+src:src};
+  }).filter(c=>c.file&&c.fileW>=500&&!/\.svg/i.test(c.file)&&!NOT_A_SCENE.test(`${c.file} ${c.caption}`.replace(/_/g," ")))
+    .map(c=>({...c,url:c.url.replace(/\/\d+px-/,`/${THUMB_WIDTHS.find(w=>w<=c.fileW)}px-`)}));
+}
+/* Without the AI: the photo whose description shares the most words with the scene. */
+function photoByWords(cands,P,M){
+  const words=new Set(`${P.name} ${M.title} ${M.scene}`.toLowerCase().match(/[a-z]{4,}/g)||[]);
+  let best=null,bestN=0;
+  cands.forEach(c=>{const n=(`${c.alt} ${c.caption} ${c.file}`.toLowerCase().match(/[a-z]{4,}/g)||[]).filter(w=>words.has(w)).length;if(n>bestN){best=c;bestN=n}});
+  return best||cands[0]||null;
+}
+async function findMomentPhoto(P,M){
+  const key=`${P.name}|${M.title}`;
   if(photoCache.has(key))return photoCache.get(key);
   const result=await(async()=>{
     try{
-      let d=await wikiSummary(query);
-      if(!d||d.type==="disambiguation"||!d.thumbnail){
-        const sres=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
-        const sd=sres.ok?await sres.json():null;
-        const title=sd&&sd.query&&sd.query.search&&sd.query.search[0]&&sd.query.search[0].title;
-        if(!title)return null;
-        d=await wikiSummary(title);
-      }
-      if(!d||!d.thumbnail)return null;
-      return{url:d.thumbnail.source,title:d.title,pageUrl:(d.content_urls&&d.content_urls.desktop&&d.content_urls.desktop.page)||`https://en.wikipedia.org/wiki/${encodeURIComponent(d.title)}`};
+      const queries=[P.name,P.name.split(",").slice(-1)[0].trim(),...(M.terms||[]).slice(0,2).map(t=>t.term)];
+      const titles=[...new Set((await Promise.all(queries.map(q=>wikiTitle(q).catch(()=>null)))).filter(Boolean))].slice(0,4);
+      const seen=new Set(),cands=[];
+      (await Promise.all(titles.map(t=>wikiPhotos(t).catch(()=>[])))).flat().forEach(c=>{if(!seen.has(c.file)){seen.add(c.file);cands.push(c)}});
+      const list=cands.slice(0,30);
+      if(!list.length)return null;
+      const sample=aiOff?null:await getSample();
+      if(!sample)return photoByWords(list,P,M);
+      const r=await sample.json(`You pick one photo to show a person exploring a scene in WorldMirror, so they can picture themselves standing there.
+Place: ${P.name}, ${P.country}
+Scene: ${M.title}. ${M.scene}
+
+Candidate photos from Wikipedia, with their alt text, caption, and file name:
+${list.map((c,i)=>`${i}. [${c.page}] alt: "${c.alt}" caption: "${c.caption}" file: ${c.file}`).join("\n")}
+
+Choose the photo that best shows the vibe and the environment of this scene: the actual place, the people and the activity, the light and the atmosphere, as close as possible to what the scene describes. Prefer real photographs of the place or practice as it is today. Avoid maps, plans, old paintings and engravings, portraits of individuals, building facades with no life around them, and close-ups of a single object unless that object is the heart of the scene. If none would help someone picture being there, pick -1.
+Respond with ONLY JSON: {"pick":0}`,{modelTier:"quick",cache:false});
+      const i=Number(r&&r.pick);
+      return Number.isInteger(i)&&i>=0&&i<list.length?list[i]:null;
     }catch(e){return null}
   })();
   photoCache.set(key,result);
   return result;
-}
-async function findMomentPhoto(P,M){
-  const candidates=[...(M.terms||[]).map(t=>t.term),P.name];
-  for(const q of candidates){const r=await wikiImage(q);if(r)return r}
-  return null;
 }
 let S;
 function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,elaboration:"",userChain:null,intake:[],nextQs:{},stuck:{}}}
@@ -1208,8 +1240,8 @@ function renderWalk(newScene){
     const myKey=k;
     findMomentPhoto(P,M).then(r=>{
       if(curKey!==myKey||!r)return;
-      $("photoImg").src=r.url;
-      $("photoCredit").innerHTML=`Real photo via <a href="${esc(r.pageUrl)}" target="_blank" rel="noopener">Wikipedia</a> — ${esc(r.title)}`;
+      $("photoImg").src=r.url;$("photoImg").alt=r.alt||r.caption||r.page;
+      $("photoCredit").innerHTML=`${r.caption?`${esc(r.caption)}<br>`:""}Real photo via <a href="${esc(r.pageUrl)}" target="_blank" rel="noopener">Wikipedia: ${esc(r.page)}</a>`;
       $("photoCard").classList.remove("hidden");
     });}
   $("mtitle").textContent=M.title;$("mscene").innerHTML=highlightTerms(M.scene,M.terms);$("mmeaning").innerHTML=highlightTerms(M.meaning,M.terms);
