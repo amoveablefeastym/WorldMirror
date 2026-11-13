@@ -105,7 +105,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:14px;text-align:left}
 .chip:hover{border-color:var(--ink)}
-.chip.reflect{border-style:dashed;color:var(--accent)}
+.chip.react{font-style:italic}
 .qa{margin-bottom:14px}
 .qa .q{font-weight:500;margin:0 0 4px;font-size:15px}
 .qa .a{font-family:var(--serif);margin:0;line-height:1.6;max-width:64ch}
@@ -289,10 +289,6 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
           <p class="shift" id="refShift"></p>
         </div>
         <p class="small" id="refStatus" aria-live="polite" style="margin:-10px 0 0"></p>
-        <div>
-          <h3><label for="journal">Your journal</label></h3>
-          <textarea id="journal" placeholder="Jot down anything, anytime — it stays with you for the whole walk." style="min-height:90px;background:var(--bg);font-size:15px"></textarea>
-        </div>
         <button class="btn primary" id="checkSide">Pause and check in</button>
         <details class="research"><summary>Researcher view</summary><dl id="readout"></dl></details>
       </aside>
@@ -704,21 +700,21 @@ const FALLBACK=[
   moments:[
    {title:"The kintsugi workshop",scene:"A craftsman bends over a cracked tea bowl, tracing the break with lacquer. Later the seam will be dusted with gold. The bowl goes back into daily use.",meaning:"Kintsugi repairs broken pottery with lacquer mixed with powdered gold. The repair becomes part of the object's history instead of something hidden.",questions:["Why use gold instead of hiding the crack?","How long does a repair take?"],
     terms:[{term:"Kintsugi",definition:"A Japanese technique for mending broken pottery with lacquer mixed with powdered gold, so the repair becomes part of the object's history instead of something to hide."},{term:"lacquer",definition:"A hard, glossy coating, traditionally made from tree sap, used here to glue and seal the broken pieces before the gold is added."}],
-    internal:{shared_thread:"feeling",thread_detail:"Something you're treating as broken or embarrassing is, here, the most valued part of the object.",feeling_cue:"the craftsman working carefully with the crack instead of hiding it",lever:"meaning",layer:"core",practice_feature:"filling the crack with gold lacquer instead of disguising it",shift:"the break itself becomes valuable rather than something to hide",reapply_question:"What's one 'broken' part of your situation you've been hiding that might actually be worth keeping visible?"},
+    internal:{target_sub_belief:"",protagonist:"the owner of the cracked bowl, watching the repair",position_match:{shared_relationship:"having something visibly damaged that others will see",surface_difference:"a tea bowl in a repair workshop"},problem_match:"a visible flaw where the standard is unbroken",projected_belief:"a broken thing is worth less and the break should be hidden",predicted_outcome:"the crack gets disguised, or the bowl is put away",visible_outcome:"the crack is traced in gold so it stands out, and the bowl goes back into daily use",scene_belief:"the break is part of the bowl's history, worth showing",feeling_cue:"the cracked bowl on the table, in plain view",role_clarity:"the bowl, or the person it belongs to, not the craftsman",distance_check:{not_too_far:"",not_too_close:""},lever:"meaning",reapply_question:"What would it look like to keep a crack visible instead of hiding it?"},
     scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}}
   ]},
  {name:"Pelourinho, Salvador",country:"Brazil",lat:-12.9714,lon:-38.5014,why:"Old streets where music starts without asking.",
   moments:[
    {title:"The atabaque drum circle",scene:"Street corners in the old town. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
     terms:[{term:"atabaque",definition:"A tall, hand-played drum central to Afro-Brazilian music and to Candomblé religious ceremonies."},{term:"Candomblé",definition:"An Afro-Brazilian religion blending West African traditions with elements absorbed during colonization, in which drumming and music play a central role."}],
-    internal:{shared_thread:"feeling",thread_detail:"Nobody there waited until they were good enough to start playing.",feeling_cue:"someone newer to the circle picking up a drum anyway",lever:"meaning",layer:"surface",practice_feature:"anyone can start playing without being invited or judged ready first",shift:"starting doesn't require being ready first",reapply_question:"What would it look like to start the thing you've been waiting to feel ready for?"},
+    internal:{target_sub_belief:"",protagonist:"someone newer to the circle picking up a drum",position_match:{shared_relationship:"being watched by more experienced people while still learning",surface_difference:"drumming on a street corner"},problem_match:"less skill than the people around them",projected_belief:"you have to be good enough before you join in",predicted_outcome:"the newcomer hangs back, or gets waved off",visible_outcome:"the newcomer starts playing and the circle keeps going around them",scene_belief:"anyone can start playing; the circle carries the beat",feeling_cue:"a newer player standing at the edge of the circle",role_clarity:"the newcomer, not the experienced drummers",distance_check:{not_too_far:"",not_too_close:""},lever:"meaning",reapply_question:"What would it look like to start before you feel ready?"},
     scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}}
   ]},
  {name:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683,why:"A city that makes warmth on purpose.",
   moments:[
    {title:"Candles at 4 p.m.",scene:"It's already dark in December. In the café, every table has a candle, and two friends lean in over theirs.",meaning:"Danes burn more candles per person than almost anyone. Warmth, or hygge, is something people make on purpose in the long winter.",questions:["What does hygge actually mean?","Why so many candles?"],
     terms:[{term:"hygge",definition:"A Danish word for a deliberate, cozy sense of warmth and contentment, often built around candles, company, and simple comforts."}],
-    internal:{shared_thread:"feeling",thread_detail:"A hard, dark stretch of the year is met with a deliberate, shared ritual of warmth instead of being pushed through alone.",feeling_cue:"two friends choosing to pause together rather than push through the dark afternoon",lever:"holding",layer:"n/a",practice_feature:"lighting a candle at a set time, every day, together",shift:"a hard feeling gets a regular, shared container instead of being carried alone",reapply_question:"What's one small, repeatable ritual that could hold a hard feeling for you, the way a candle does here?"},
+    internal:{target_sub_belief:"",protagonist:"one of the two friends, tempted to keep pushing through the dark afternoon",position_match:{shared_relationship:"getting through a hard stretch with others around",surface_difference:"a candlelit cafe in a Danish winter"},problem_match:"a heavy stretch of time with no end in sight",projected_belief:"a hard feeling has to be pushed through alone",predicted_outcome:"they keep going on their own until it passes",visible_outcome:"they stop at four in the afternoon, light a candle, and sit together",scene_belief:"a hard stretch can be given a regular, shared time and place",feeling_cue:"the dark outside the window at four in the afternoon",role_clarity:"either friend",distance_check:{not_too_far:"",not_too_close:""},lever:"holding",reapply_question:"What small, repeatable ritual could hold a hard feeling for you?"},
     scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}}
   ]}
 ];
@@ -781,7 +777,7 @@ async function findMomentPhoto(P,M){
   return null;
 }
 let S;
-function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,journal:"",elaboration:"",problemMap:null,intake:[],nextQs:{},nextReflect:{},reflectsUsed:[],stuck:{}}}
+function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,elaboration:"",userChain:null,intake:[],nextQs:{},stuck:{}}}
 S=fresh();
 const SCREENS=["intro","intake","loading","reveal","walk","checkin","reflect","final"];
 function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
@@ -837,8 +833,8 @@ function qaLog(){
   return out;
 }
 function placeLog(p){
-  const M=p.moments[0]||{},i=M.internal||{};
-  return{name:p.name,country:p.country,lat:p.lat,lon:p.lon,why:p.why,moment:M.title,lever:i.lever,layer:i.layer,shift:i.shift};
+  const M=p.moments[0]||{};
+  return{name:p.name,country:p.country,lat:p.lat,lon:p.lon,why:p.why,moment:M.title,scene:M.scene,internal:M.internal||{}};
 }
 
 /* ---------- Intro ---------- */
@@ -846,35 +842,38 @@ $("problem").addEventListener("input",()=>{$("startBtn").disabled=$("problem").v
 $("startBtn").onclick=()=>{if(!$("codeWrap").classList.contains("hidden"))STUDY_CODE=$("studyCode").value.trim();S=fresh();S.problem=$("problem").value.trim();S.refined=S.problem;startIntake()};
 $("exampleBtn").onclick=()=>{$("problem").value="I keep putting off starting things until I feel ready, and I'm starting to feel like everyone around me is further along.";$("startBtn").disabled=false;$("problem").focus()};
 
-/* ---------- Intake: adaptive questions until belief, setting, feeling, action are clear enough ---------- */
-const INTAKE_DIMS=["belief","setting","feeling","action"];
+/* ---------- Intake: adaptive questions that fill in the user's chain and separate the sub-beliefs ---------- */
+const INTAKE_DIMS=["position","problem","belief","feeling","outcome","sub_beliefs"];
 const INTAKE_MAX=5;
 const INTAKE_FALLBACK=[
-  {targets:["setting"],question:"Where or when does this tend to show up most?",options:["At work or school","At home, on my own","Around certain people"]},
-  {targets:["feeling"],question:"When it shows up, what does it feel like?",options:["Anxious","Heavy or tired","Restless"]},
-  {targets:["belief"],question:"What does it seem to say about you, or about what's at stake?",options:["That I'm falling behind","That I'm not good enough","I'm not sure"]},
-  {targets:["action"],question:"What do you usually end up doing when it happens?",options:["Put it off","Push harder","Keep it to myself"]}
+  {targets:["position"],question:"Where does this tend to happen, and who's around when it does?",options:["At school or work","In front of friends","On my own"]},
+  {targets:["problem"],question:"What does the situation seem to ask of you that feels out of reach?",options:["Better results","Being confident","Keeping up"]},
+  {targets:["belief","sub_beliefs"],question:"If it goes badly, what would that say about you?",options:["That I'm not good enough","That people will judge me","I'm not sure"]},
+  {targets:["feeling","outcome"],question:"When it happens, how do you feel, and what do you end up doing?",options:["Anxious, so I avoid it","Tired, so I lose focus","Tense, so I push harder"]}
 ];
 function intakePrompt(asked){
   return `You help WorldMirror, a reflection tool, understand a person before it picks places in the world for them to explore. They wrote: "${S.problem}"
 ${asked.length?`Questions asked so far and their answers (an empty answer means they skipped it): ${JSON.stringify(asked.map(x=>({question:x.question,answer:x.answer})))}`:"No questions asked yet."}
 
-To choose good places, WorldMirror needs a clear enough sense of four things:
-- belief: what the situation seems to mean to them, or say about them ("if this goes wrong, it means...")
-- setting: where, when, or around whom it shows up
+WorldMirror will look for scenes where someone is in a similar position, facing a similar problem, but reading it differently. To choose them, it needs a usable sense of five things:
+- position: where this happens, their role there, and who is around, watching, choosing, or comparing
+- problem: the gap they notice between what they have or can do and what the situation asks of them
+- belief: what that gap seems to mean about them, and why it would be bad
 - feeling: what it feels like in the moment
-- action: what they tend to do when it happens (avoid, push through, withdraw, overthink...)
+- outcome: what they end up doing as a result (avoid it, push through, withdraw, lose focus...)
+
+The belief often rests on more than one separate worry (the sub-beliefs). "I'm not good enough" might rest on "my effort should equal the outcome," "a mistake makes my work worth less," or "being watched means being measured on everything." Each needs a different scene, so it matters which ones are really there. When their answers point to more than one, or you can't tell which, ask a question that tells them apart, for example: "Is it more about how the work turns out, or about who sees it?"
 
 Judge what you actually know from their own words, not from guesses. An answer that is vague, generic, or sidesteps the question doesn't count as knowing it. Then decide:
-- If something important is still missing or unclear, ask one more question aimed at it. A question doesn't have to cover one thing at a time: it can reach two together if that's natural ("when it hits, what do you usually do, and what goes through your head?"), or follow up on something they said that hints at more. Ask about what matters most first; belief and action usually matter most for choosing places.
+- If something important is still missing or unclear, ask one more question aimed at it. A question doesn't have to cover one thing at a time: it can reach two together if that's natural ("when it happens, who's around, and what goes through your head?"), or follow up on something they said that hints at more. The belief and the worries under it matter most; the position comes next, since a scene has to put someone where they are.
 - If something was skipped, don't ask it again the same way. Try a different, gentler angle once, then let it go.
-- If you have enough to choose places well, stop. "Enough" means a usable sense of each, not certainty: a few honest words per thing is plenty, and most people are ready after 2 to 4 questions. Each extra question costs them patience, so don't ask for the sake of it or to polish what you already know. ${asked.length>=INTAKE_MAX-1?"This is the last question you may ask, so ask the one that matters most, or stop.":""}
+- If you have enough to choose places well, stop. "Enough" means a usable sense of each and of the main worries under the belief, not certainty: a few honest words per thing is plenty, and most people are ready after 2 to 4 questions. Each extra question costs them patience, so don't ask for the sake of it or to polish what you already know. ${asked.length>=INTAKE_MAX-1?"This is the last question you may ask, so ask the one that matters most, or stop.":""}
 
-A question is one plain sentence, warm and curious, in second person, easy to answer in a few words. Build on their own words. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
+A question is one plain sentence, warm and curious, in second person, easy to answer in a few words. Build on their own words. Use everyday language: never use words like position, problem, belief, outcome, or sub-belief in the question. Don't ask about their past or why they became this way. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
 Give 2 or 3 short example answers (2 to 6 words, in their voice) they can tap, varied enough that none feels like the expected one.
 
 Respond with ONLY JSON:
-{"known":{"belief":"what you know, or empty","setting":"...","feeling":"...","action":"..."},"done":false,"question":{"targets":["belief | setting | feeling | action"],"question":"...","options":["...","..."]}}
+{"known":{"position":"what you know, or empty","problem":"...","belief":"...","feeling":"...","outcome":"...","sub_beliefs":["separate worries under the belief that you can see so far"]},"done":false,"question":{"targets":["position | problem | belief | feeling | outcome | sub_beliefs"],"question":"...","options":["...","..."]}}
 When done is true, set "question" to null.`;
 }
 function cleanIntakeQ(r){
@@ -946,6 +945,7 @@ $("intakeSkipAll").onclick=()=>finishIntake();
 $("intakeAnswer").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("intakeNext").click()}});
 
 /* ---------- Generate a round of places ---------- */
+/* MATCHER:BEGIN (eval/matcher-eval.js runs this block, from here to MATCHER:END) */
 const VOCAB=`"scene3d": {
   "setting": one of "street","plaza","market","waterfront","riverside","garden","courtyard","interior","hillside",
   "time": "dawn" | "day" | "dusk" | "night",
@@ -956,172 +956,187 @@ Object kinds: person, table_long, table_small, bench, stool, stall, lanterns, bu
 Put the heart of the moment at x=0, z=0 so the viewer sees it first. When a moment involves people, show them doing the thing (drummers in a circle, people seated both sides of a long table). Pick the setting and time that match the moment.
 Match scene3d to the "scene" text closely: the same number of people doing the same thing, the specific objects it names (a drum, a cracked bowl, a bicycle, candles on a table), and a time of day and setting that fit the words used (a dim room at night for candlelight, a street at dawn for an empty market). If a concrete visual detail is in the sentence, it should be an object in scene3d.`;
 
-function leversUsed(){
+function scenesUsed(){
   const out=[];
-  S.rounds.forEach(R=>R.places.forEach(P=>{const m=P.moments[0],i=m&&m.internal;if(i&&i.lever)out.push({place:`${P.name}, ${P.country}`,lever:i.lever,layer:i.layer||"",shift:i.shift})}));
+  S.rounds.forEach(R=>R.places.forEach(P=>{const m=P.moments[0],i=m&&m.internal;if(i&&(i.target_sub_belief||i.scene_belief))out.push({place:`${P.name}, ${P.country}`,target_sub_belief:i.target_sub_belief_text||i.target_sub_belief,scene_belief:i.scene_belief})}));
   return out;
 }
 function roundPrompt(mode,missing){
   const visited=[];S.rounds.forEach(R=>R.places.forEach(P=>visited.push(`${P.name}, ${P.country}`)));
-  const used=leversUsed();
-  return `You choose places for WorldMirror, a reflection tool. A user describes an everyday challenge. You pick three real places in the world where people live through something that connects to it, in a way that might help the user see their challenge differently. The user then explores each place and asks questions about it.
+  const used=scenesUsed();
+  return `You choose places for WorldMirror, a reflection tool. A user describes an everyday challenge. You pick three real places in the world where someone is in a position like the user's, facing the same kind of problem, but holding a different belief about it, and the scene shows what happens as a result. The user explores each place and asks questions about it.
 
-WorldMirror does not give advice. It helps users reach a new view on their own. Your places make that possible. You never state the new view yourself.
+WorldMirror does not give advice. It helps users see their challenge differently on their own. You never state the new view yourself.
 
-How a place helps
+The five parts of a challenge
 
-A good place leads the user through three steps:
+Every challenge, the user's and that of the person in the scene (the protagonist), has five parts:
+Position: the external context, role, and audience.
+Problem: the gap between what the person has and what the position demands. Test: it is not about who they are.
+Belief: the rule the person uses to read the problem: what it means about them, and why it would be bad. Test: someone else could think differently about it.
+Feeling: the emotional state that position, problem, and belief create. Test: "I feel ___."
+Outcome: the observable action they choose as a result. This is the behavior that can change.
 
-Recognize: the user sees something of their own in the scene: their situation, their feeling, or their question. People there live with it too, so it is normal, not a personal failure. This has to come first. If a place skips it and only offers something new, users push back.
-Shift: something about how the user holds their challenge changes. The shift has to come from what people actually do there: the rules, timing, objects, roles, or gatherings of a practice. It must not depend on someone explaining a lesson.
-Reapply: the user connects the shift back to their own life. The place has to offer something small enough to bring home.
+How a scene changes the user: projection
 
-Shifts come in five kinds. These are the levers.
+1. The user takes the protagonist's position: "I would..." or "If I were there..."
+2. Because the position and problem are similar, the user's own belief seems to apply, so they project it onto the protagonist: "Wouldn't people judge you?" "No one wants a flawed mug."
+3. From that belief they predict a bad outcome: "He'll give up." "It won't get picked."
+4. The scene shows a different outcome, visibly. The juggler drops a ball, laughs, and keeps going. Someone picks the flawed mug first.
+5. Surprise: "Why didn't that happen?"
+6. The user finds the protagonist's belief, the rule that explains the outcome: drops are part of the show; flaws make it unique.
+7. The user brings that belief back to their own life.
+The change comes from the gap between what the user predicts, using their own belief, and what the scene shows.
 
-Lever | What changes | Example
-Meaning | The same situation carries a different meaning | Fish auction: the next tub is always coming, so a missed bid is not final. Kintsugi: the break is filled with gold and becomes the most valued part.
-Holding | The same feeling is carried differently: given a time, a place, an object, or company, instead of being fixed or hidden alone | Día de Muertos ofrendas: families set out a missing person's favorite foods and photos, so missing them becomes something done together, at a set time, with care.
-Setting | The same situation in a different social arrangement, where rules or roles make the environment work differently | Outdoor pull-up bars on Copacabana: people queue, take turns, and wave the next person in, so beginners and regulars share the bar.
-Scale | The problem's weight changes when seen among many lives or something vast | A crowded intersection at Chatuchak market: thousands of people, each with their own day, passing at once.
-Direction | The user glimpses a life organized around a different value and notices what they want | Evening on the Rambla in Montevideo: people sit along the river with mate and talk for hours, with nowhere they need to be.
+What must match, and what must differ
 
-Step 1: Map the problem
+Position, the relationship to others (being judged, watched, chosen, compared): the same, so the user can step into the role.
+Position, the surface (place, activity, culture, object): different, so there is distance and the user isn't defending themselves.
+Problem, the kind of gap: the same, so the user's belief applies and they project it.
+Feeling: the same at first, or easy to imagine, so the change lands while the feeling is active.
+Belief: different. This is the rule the user discovers.
+Outcome: different and visible. This breaks the prediction and creates the surprise.
 
-From everything you know about the person below, infer:
+How similar is similar enough
 
-situation, feeling, action, and outcome. The situation may be diffuse ("I just feel stuck") or missing. Don't invent one. Action is what they tend to do when it shows up (avoid it, push harder, withdraw, overthink).
+Too far: the position or problem doesn't match, so there is nothing to project onto. The user gets curious about the mechanics, or stays detached. From real sessions: at a flower auction, a user took the buyer's role and spent the scene saying "I don't understand this scene." A chess game, for someone who felt incompetent. A user looking for connection was shown communal meals where everyone already belonged; no one there was in her position, so she compared herself to them and felt worse.
+Too close: the same surface as the user's own life, such as an office worker being rejected, for a user who has been rejected at work. There is no distance, so the user feels their own problem directly, defends, or ruminates.
+Just right: the same position and problem, a different surface, and a different outcome the user can see. A flawed mug in a pottery seconds shop, for a student whose work is graded: the mug is judged against a factory standard. A street performer going on after a strong act, for someone who feels watched in class.
+The position match has to be clear enough at the start to begin projection. The matching problem can surface as the user asks questions.
 
-Before this, they may have answered a few short questions about their belief (what the situation means to them or says about them), setting (where, when, or around whom it shows up), feeling (what it feels like), and action (what they do when it happens). These answers are their own words, so weigh them above your own inference:
-Belief answers ground surface and core meaning. If they state a belief, use it instead of guessing one; if they say they don't know, don't force one.
-Setting answers tell you where the challenge lives. Use them to judge whether the shape is Setting, and to pick scenes whose environment echoes theirs closely enough to recognize.
-Feeling answers tell you what the person in the scene who could share their feeling (Room for the feeling) should be feeling.
-Action answers tell you what they do in the moment. Look for practices where someone in the scene faces the same pull (to put it off, push through, hide) and the practice itself handles it differently.
-Use the answers to inform the places, but never repeat or quote them back in the user-facing text.
-meaning, only if the problem is belief-driven:
-Surface: what the situation costs ("rest = losing time," "a missed chance is gone for good")
-Core: what the situation says about the person ("I haven't earned rest," "a mistake shows I'm not good enough")
-problem shape. Pick the primary shape, and a secondary one if it clearly applies:
+Step 1: Map the user's chain
 
-Shape | What it looks like | Start with lever | Then consider
-Belief | A specific situation carries a painful meaning | Meaning (surface and core) | Holding, Scale
-Feeling | A feeling with no single situation, or one the user doesn't know how to carry (overwhelm, loneliness, uncertainty, missing someone, restlessness) | Holding | Scale, Setting
-Setting | The problem lives partly in the environment around the user (comparison, competition, a judgmental space) | Setting | Meaning (core)
-Choice | Torn between paths, or unsure what they want | Direction (two contrasting lives) | Meaning, Scale
-Weight | Everything feels high-stakes or catastrophic | Scale | Meaning (surface)
+From everything you know about the person below, fill in their position, problem, belief, feeling, and outcome. Apply the tests: the problem must not be about who they are, and the belief must be something someone else could think differently about.
 
-Phrase every inference as a hypothesis. Don't force a core belief onto a problem that isn't belief-driven: not every struggle comes from a distorted belief. Some come from a feeling with nowhere to go, a setting that doesn't fit, or a choice that hasn't been made yet.
+Then break the belief into 2 to 4 candidate sub-beliefs: the separate rules that hold up the root belief. "I'm not good enough" can rest on "my effort should equal the outcome," "a mistake makes my work worth less," and "being watched means being measured on everything." For each, give the evidence (their own words, quoted, or what you inferred it from), whether it is stated or inferred, and your confidence.
 
-If the shape or meaning is unclear, make one of the three places one likely to draw it out: a scene the user will probably react to, so they say what worries them.
+Don't invent a cause the user didn't hint at. Never speculate about their past ("it seems possible you've been judged before"). If the challenge is mostly a feeling with nowhere to go rather than a belief, keep the sub-beliefs modest and mark them low confidence instead of forcing a distorted belief onto them.
 
-Step 2: Choose three places
+Step 2: Design each scene around one sub-belief
 
-Every place must pass all five tests.
+Each place targets one sub-belief. Across the three places, cover different sub-beliefs where possible. A scene aimed at the wrong sub-belief fails even if it is well built: a fish auction showing "there's always a next tub" didn't help a user who wasn't afraid of missing chances; she was afraid of being judged. Our most successful session addressed each sub-belief with a different scene. If there are only two sub-beliefs, give the one with stronger evidence two clearly different scenes.
 
-A findable shared thread. The place shares the user's situation (people pausing mid-day, making a visible mistake), feeling (people living with uncertainty, missing someone, feeling overwhelmed), or question (people living by a value the user is weighing). After reading the scene and its background, the user should be able to say in one sentence what it shares with their own life. Too literal and it feels like advice. Too far and it feels random: a user who feels incompetent will not see themselves in a chess game unless the scene puts someone in the position they're afraid of.
-Room for the feeling. The scene includes someone who could plausibly feel what the user feels: a nervous newcomer, someone tempted to keep working, a beginner among regulars, a person who is visibly grieving or unsure. This is what makes Recognize possible.
-The practice carries the shift. Name the specific rule, timing, object, role, gathering, or vantage point that holds it. If the shift only exists when someone explains it ("the players there are nice and won't judge you"), reject the place.
-Transferable. The user could find a small version of it in their own life without moving countries or changing institutions. For Scale, the transferable thing is a vantage point they can return to (a busy station, a view of the sky). For Direction, it's a piece of that life they could try. Reject places where the difference comes from laws or systems the user can't control (shorter legal work weeks, national healthcare).
-Real, accurate, and respectful. The place and practice must be real and well documented. Describe them as they are. Don't exaggerate, romanticize, or present one practice as how everyone in a country behaves. Describe religious, mourning, and community practices with care, never as spectacle.
+For each place, work out:
+Protagonist: who in the scene the user should identify with.
+Position match: the shared relationship (being judged, watched, chosen, compared), and how the surface differs from the user's life.
+Problem match: the shared kind of gap.
+Projected belief: what the protagonist would believe if they held the user's sub-belief.
+Predicted outcome: what the user would therefore expect to happen.
+Visible outcome: what the scene actually shows, and how it differs. It must be something you can see happen, not a rule that has to be explained.
+Scene belief: the rule that explains the visible outcome.
+Feeling cue: what in the scene invites the user's feeling (a nervous newcomer, a dropped ball, a stamp marking a flaw).
+Role clarity: scenes with more than one role need the right role to be obvious. At the flower auction the user took the buyer's role, where nothing contradicted her belief; the change was only available from the grower's side. Say which role the user should take and how the scene text makes it obvious. If the scene naturally offers both the judge's role and the judged role, note it: in the seconds shop the user first judged the flawed pieces as a shopper, then took the mug's view, and that role swap produced the strongest change of any session.
+Distance check: one sentence on why it isn't too far (position and problem match), and one on why it isn't too close (the surface differs from the user's life).
+Lever: the kind of change the scene offers, for the research team: meaning (the same situation carries a different meaning), holding (the same feeling is carried differently, with a time, place, object, or company), setting (a different social arrangement makes the situation work differently), scale (the weight changes among many lives or something vast), or direction (a life organized around a different value).
 
-Step 3: Make the set varied
+Step 3: Reject places that fail
 
-The three places must offer three different shifts, never the same one three times. A third place that repeats the first only adds time.
-Use at least two different levers across the set, guided by the problem shape.
-For the Meaning lever on a belief-driven problem, include at least one place that lowers the stakes (surface) and one that challenges the core belief, where the thing the user fears or avoids is valued in itself. Don't justify the feared thing only by its usefulness: "rest makes you more productive" keeps the core belief intact. Prefer places where rest, mistakes, slowness, or not knowing have value of their own.
-For the Direction lever, two contrasting lives usually work better than one, so the user notices which one pulls at them.
+Reject a place if any of these are true:
+No one in the scene is in the user's position.
+The kind of gap doesn't match, so the user's belief wouldn't apply.
+The outcome that breaks the prediction can't be seen, only explained.
+The scene shows the user's want already fulfilled for people who never had the problem. This triggers comparison, not projection.
+The surface is essentially the user's own setting.
+The difference depends on laws or systems the user can't control (shorter legal work weeks, national healthcare).
+The place or practice isn't real or well documented.
+It isn't transferable: the user couldn't find a small version of the scene belief in their own life without moving countries or changing institutions.
 
-If the input lists places the user has already visited, levers that already landed, or causes the user confirmed or rejected, use them. Don't repeat places or shifts. Move toward the layer, lever, or cause that hasn't been addressed yet.
+Places must be real, accurate, and respectful. Describe them as they are. Don't exaggerate, romanticize, or present one practice as how everyone in a country behaves. Describe religious, mourning, and community practices with care, never as spectacle.
+
+Make the moment belong to its place
+
+Among scenes that pass the steps above, pick a moment that could only happen here, or happens here in a way it wouldn't anywhere else. Ask yourself: if the caption were removed, could someone who knows this place recognize it?
+Prefer everyday rituals (how people greet, eat, commute, shop, wait, celebrate, or mourn), small details locals stop noticing (street sounds, shop signs, how people queue, gestures, the rhythm of a market), the texture of the place (weather, light, architecture, crowds or their absence, the pace of life), and things tied to local history, beliefs, food, language, music, or social norms, including old and new side by side.
+Avoid generic scenes that could be anywhere (a highway, a chain store, a hotel room), postcard cliches unless they show something unexpected about how locals actually relate to the landmark, anything that reduces a culture to a stereotype or treats people as exotic props, and picking the most dramatic option over the most revealing one.
+For each place, note what is unique to this place here, what a visitor would notice that a local wouldn't, and the feeling of the moment (calm, chaotic, warm, formal, playful...).
 
 Step 4: Write the user-facing text
 
-The "why" and "scene" fields are shown to the user. They must describe, not teach.
+The "why" and "scene" fields are shown to the user. They must:
+Put the protagonist in view, in the user's position, with the feeling cue.
+Show the visible outcome as something that happens in the scene.
+Describe what happens, without stating the lesson, the scene belief, or what the user should take away.
 
-Describe what people do there and what the user will recognize.
-Show the practice and the person who might share the feeling, but don't explain what they mean.
-Never state the lesson, the shift, or what the user should take away.
+Don't write: "Kintsugi reframes mistakes as material to work with."
+Write: "A craftsperson traces the crack in a broken bowl with gold, so the break stays visible."
 
-Don't write: "Kintsugi reframes mistakes as material to work with, not a stop sign."
-Write: "Craftspeople repair broken bowls by filling the cracks with gold, so the break stays visible."
+Don't write: "Shows that mistakes are part of the process."
+Write: "A juggler drops a club in front of the crowd, laughs, scoops it up, and keeps going. People clap."
 
-Don't write: "Sweden treats rest as necessary, not indulgent."
-Write: "Twice a day, coworkers leave their desks and sit down together for coffee and a cinnamon bun, even on deadline days."
+Don't write: "Flawed items are valued here."
+Write: "Mugs with lopsided handles and uneven glaze sit on the seconds shelf, each stamped as imperfect. A shopper picks one up, turns it over, and takes it to the till."
 
-Don't write: "Shows that grief is easier when shared."
-Write: "Families arrange marigolds, photos, and a grandmother's favorite bread on a table at home. Cousins arrive through the evening and add something of their own."
+The chain, the sub-beliefs, and the scene design go only in the internal fields, which the user never sees.
 
-Don't write: "Reminds you your problem is small."
-Write: "At the market's busiest corner, vendors call out prices while thousands of shoppers stream past in every direction."
+Worked example
 
-The shift goes only in the internal fields, which the user never sees.
+These show the reasoning, not a list of places to reuse. Don't pick a place named in this prompt unless nothing else fits the user as well.
 
-Worked examples
-
-These show the reasoning, not a list of places to reuse. Don't pick a place named here unless nothing else fits the user as well.
-
-"I only feel validated when I keep myself busy. I feel guilty when I'm relaxing and I can't fully enjoy it." Shape: belief. Surface meaning: rest = losing time. Core meaning: rest has to be earned through output. Good: Fika, Stockholm (meaning, surface): it happens at set times, together, even on busy days, so stopping is expected rather than chosen. Good: a place where rest or idleness is valued in itself, not as a way to recharge for more work (meaning, core). Good third: Rambla, Montevideo (direction): long evenings by the river with nowhere to be let the user notice whether some part of them wants that. Bad: a third shared-drink ritual like a mate circle after fika, it repeats the same shift and adds nothing. Bad: "Danish workers have shorter work weeks," that difference comes from a system, so it doesn't transfer.
-
-"I don't feel confident about my work so I avoid the difficult task." Shape: belief. Surface meaning: a stumble is final and wastes others' time. Core meaning: a mistake shows I'm not good enough. Good: Fort Kochi fish auction (meaning, surface): the next tub is always coming, so a miss is never final. Good: Kintsugi workshop, Tokyo (meaning, core): the break is filled with gold and becomes the most valued part. Weak: Washington Square Park chess draws out the fear but nothing in the practice offers a shift on its own; if used, make it the first place to surface the meaning, paired with places whose practice carries one.
-
-"I feel vulnerable lately and I don't know what to do with it." Shape: feeling, no single situation, inferring a core belief would be guesswork. Good: a practice where people face something uncertain through a shared, coordinated ritual (holding), the repeated collective form gives the feeling a container so it doesn't have to be solved alone. Good: a place where vastness or many lives at once change the feeling's weight (scale). Bad: three places that each try to reinterpret a belief the user never stated.
-
-"I keep comparing myself to other people at the gym. I feel like everyone is judging me." Shape: setting, with a secondary belief. Good: outdoor pull-up bars, Copacabana (setting): people queue, take turns, and wave the next person in, so beginners and regulars share the same bar. Good: a beach game where a circle forms around a ball and anyone can step in, and a miss just means someone laughs and the ball goes back up (setting, or meaning on the surface layer).
-
-"I'm torn between applying to grad school and going home to teach." Shape: choice. Good: two contrasting scenes (direction), for example a late-night debate among students and professors in a university town, and a teacher's day in a small community school, each lets the user imagine themselves there and notice which pulls at them. Bad: places that tell the user which path is better, or that judge either choice.
-
-"I feel unmotivated because I've been trying only to be met with rejection or outcomes that don't match my efforts." Shape: belief, secondary feeling. Core meaning: if results don't land, my skills aren't enough. The problem has three parts (effort that doesn't match outcomes, making mistakes, fear of being judged), so give each place one part. Good: Royal FloraHolland flower auction, Aalsmeer (meaning, core): the clock price drops until the buyer whose needs, timing, and price fit that lot presses the button, and the same flowers can fetch a high price one morning and a low one the next, so a cart that doesn't sell says more about that morning's fit than about the flowers. Good: a pottery factory's seconds shop (meaning, core): pieces stamped as flawed sit on their own shelves and visitors pick them out as favorites. Good: a busking pitch in a busy square (scale): performers take turns, most passersby keep walking, and a quiet set is one of many in the day. Lesson from real use: the user didn't see what the auction had to do with them until they understood who sets the price and why buyers don't simply wait. When a practice runs on unfamiliar mechanics, the scene must make those mechanics plain, and the first starter question should be about how it works.
+"I keep comparing myself to other people at the gym. I feel like everyone is judging me." Chain: position, a beginner exercising in a shared space where others can see them; problem, their strength and skill are visibly below others'; belief, being seen struggling means people think less of me; feeling, exposed and self-conscious; outcome, they avoid the equipment others use, or skip going. Sub-beliefs: sb1 "people watching are judging my performance" (stated, high); sb2 "I have to be at their level before I belong there" (inferred from "comparing myself", medium). Good for sb2: a capoeira roda in Salvador, Brazil. Protagonist: a beginner stepping into the circle to play opposite an experienced player. Projected belief: "a beginner doesn't belong in there with them." Predicted outcome: the experienced player shows them up, or they get waved out. Visible outcome: the experienced player slows the game to the beginner's pace, and the circle keeps clapping and singing them through it. Scene belief: the roda is played with whoever steps in. Not too far: being watched while less skilled than others. Not too close: a music-and-movement circle, not a gym. Bad: another gym or fitness class (too close). Bad: a yoga retreat where everyone is already calm and flexible (the want is already fulfilled for people who never had the problem, so it triggers comparison).
 
 Context for this round:
 What they wrote at the start: "${S.problem}"
-${S.intake.length?`Their answers to the opening questions (each tagged with what it was asking about: belief, setting, feeling, action): ${JSON.stringify(S.intake)}`:""}
+${S.intake.length?`Their answers to the opening questions (each tagged with what it was asking about): ${JSON.stringify(S.intake)}`:""}
 How it reads now, after exploring: "${S.refined}"
-${S.problemMap?`Your last structured read of the problem: ${JSON.stringify(S.problemMap)}`:""}
+${S.userChain?`Your last read of their chain and sub-beliefs: ${JSON.stringify(S.userChain)}`:""}
 ${S.causes.length||S.feedback.length?`Together you've been working out what's underneath. Their answers to possible causes so far: ${JSON.stringify(allFeedback())}. Guesses they haven't answered yet: ${JSON.stringify(S.causes.filter(c=>!c.verdict).map(c=>c.cause))}
 ${S.synth&&S.synth.summary?`Current read of where it points: "${S.synth.summary}"`:""}
-`:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed, and that let them see the way forward in practice. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on the questions they asked below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Take clearly different angles from before.`}
+`:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on the questions they asked below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Revisit their chain and sub-beliefs with this in mind, and take clearly different angles from before.`}
 Already visited (don't repeat): ${JSON.stringify(visited)}
-${used.length?`Levers already used, with their place and shift (move toward what hasn't been addressed yet): ${JSON.stringify(used)}`:""}
+${used.length?`Scenes already shown, with the sub-belief each one targeted and the scene belief it offered. Move toward sub-beliefs not yet addressed, or ones their questions show are still active: ${JSON.stringify(used)}`:""}
 Their journey so far: ${JSON.stringify(journey())}
-${S.journal?`Their running journal from the walk so far, written freely as they went: "${S.journal}"`:""}
 
 Additional technical requirements for this app, on top of everything above:
-- Give each place exactly one moment (the single best one, per Step 2). "scene" is present tense, 2 to 3 short concrete sentences, following the Step 4 rules above.
-- Also write "meaning": 1 to 2 sentences of real cultural or historical background, in plain language, shown to the user right under the scene. It follows the same describe-don't-teach rule as "scene" and "why": no lesson, no shift, no "this teaches you to..."
+- Give each place exactly one moment. "scene" is present tense, 2 to 3 short concrete sentences, following the Step 4 rules above.
+- Also write "meaning": 1 to 2 sentences of real cultural or historical background, in plain language, shown to the user right under the scene. It follows the same describe-don't-teach rule as "scene" and "why": no lesson, no scene belief, no "this teaches you to..."
 - Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences must already read clearly on their own, even before anyone hovers anything.
-- "questions": two short questions in the user's voice (asked to a local guide), shown as tappable chat starters. They are the first steps on a path that lets the user arrive at the shift on their own. The first helps them understand what is actually happening in the scene, since nobody can find a shift in a scene they don't understand. The second draws their attention to the practice_feature or to the person who might feel what they feel. Never state or hint at the shift inside the question: "So missing a bid isn't the end?" gives it away; "What does a buyer do right after letting a cart go by?" lets them notice it.
-- "reflect": one short, gentle prompt inviting them to jot down their first reaction to the scene in their journal (what they feel, notice, or assume looking at it). About their reaction, never a conclusion. Under 15 words, second person.
+- Tappable chat starters. Most users don't know what to ask: they see something interesting but can't name why. Model how a curious traveler reacts, noticing a feeling first and then looking for the reason, without lecturing.
+  "reactions": 1 to 2 short first-person comments the user might be feeling looking at this moment, which they can tap to explore ("This market feels louder and friendlier than I expected." "I'd hate to be the one going on after that act."). At least one names a feeling or a surprise, ideally about the protagonist's position.
+  "questions": 3 to 4 questions in the user's voice, asked to a local guide, moving from what they see to why it's like that: one about something visible, which also helps them find the protagonist ("Who's the person at the edge of the circle?"); one about why ("Why do they stamp the flawed ones instead of throwing them out?"); one about how it feels to be there, ideally from inside the protagonist's position, so they say what they'd expect ("Would anyone pick the mug with the wonky handle?"); and one comparing the custom with home ("How is this different from how we'd do it at home?"), about the custom, not about their challenge.
+  Tie every starter to something specific in this moment, never generic ones like "Tell me about this culture." Keep each under about 12 words, the way a person would talk. Never give away the answer or the scene belief: "So flaws don't matter here?" gives it away.
 - "lat" and "lon" are the real decimal-degree coordinates of the specific place, used to show it on a small map.
-- The moment also needs a 3D scene description that matches "scene" closely:
+- No em dashes anywhere in user-facing text.
+- The moment also needs a 3D scene description that matches "scene" closely, with the protagonist at the heart of it:
 ${VOCAB}
 
 Respond with ONLY JSON, no markdown:
-{"problem_map":{"situation":"","feeling":"","action":"","outcome":"","surface_meaning":"","core_meaning":"","shape":"belief | feeling | setting | choice | weight","secondary_shape":"","confidence":"low | medium | high"},
-"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","questions":["...","..."],"reflect":"...","terms":[{"term":"...","definition":"..."}],"scene3d":{...}},"internal":{"shared_thread":"situation | feeling | question","thread_detail":"What this place shares with the user, in one sentence the user could say themselves.","feeling_cue":"Who in the scene might feel what the user feels.","lever":"meaning | holding | setting | scale | direction","layer":"surface | core | n/a","practice_feature":"The specific rule, timing, object, role, gathering, or vantage point that carries the shift.","shift":"What could change for the user, in their terms.","reapply_question":"One open question that invites the user to find their own version. Never phrase it as advice."}}]}`;
+{"user_chain":{"position":"","problem":"","belief":"","feeling":"","outcome":"","sub_beliefs":[{"id":"sb1","belief":"","evidence":"","source":"stated | inferred","confidence":"low | medium | high"}]},
+"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","reactions":["..."],"questions":["...","...","..."],"terms":[{"term":"...","definition":"..."}],"scene3d":{...}},"internal":{"target_sub_belief":"sb1","protagonist":"","position_match":{"shared_relationship":"","surface_difference":""},"problem_match":"","projected_belief":"","predicted_outcome":"","visible_outcome":"","scene_belief":"","feeling_cue":"","role_clarity":"","distance_check":{"not_too_far":"","not_too_close":""},"lever":"meaning | holding | setting | scale | direction","place_specific":{"unique_here":"","visitor_notice":"","mood":""},"reapply_question":"One open question, never advice."}}]}`;
 }
-function cleanInternal(i){
+function cleanChain(c){
+  if(!c||typeof c!=="object")return null;
+  const s=k=>String(c[k]||"");
+  return{position:s("position"),problem:s("problem"),belief:s("belief"),feeling:s("feeling"),outcome:s("outcome"),
+    sub_beliefs:(Array.isArray(c.sub_beliefs)?c.sub_beliefs:[]).filter(b=>b&&b.belief).slice(0,4).map((b,n)=>({id:String(b.id||`sb${n+1}`),belief:String(b.belief),evidence:String(b.evidence||""),source:String(b.source||""),confidence:String(b.confidence||"")}))};
+}
+function cleanInternal(i,chain){
   if(!i||typeof i!=="object")return{};
-  return{shared_thread:String(i.shared_thread||""),thread_detail:String(i.thread_detail||""),feeling_cue:String(i.feeling_cue||""),
-    lever:String(i.lever||""),layer:String(i.layer||""),practice_feature:String(i.practice_feature||""),
-    shift:String(i.shift||""),reapply_question:String(i.reapply_question||"")};
+  const s=v=>String(v||""),pm=i.position_match||{},dc=i.distance_check||{},ps=i.place_specific||{};
+  const target=s(i.target_sub_belief),sb=chain&&chain.sub_beliefs.find(b=>b.id===target);
+  return{target_sub_belief:target,target_sub_belief_text:sb?sb.belief:"",protagonist:s(i.protagonist),
+    position_match:{shared_relationship:s(pm.shared_relationship),surface_difference:s(pm.surface_difference)},
+    problem_match:s(i.problem_match),projected_belief:s(i.projected_belief),predicted_outcome:s(i.predicted_outcome),
+    visible_outcome:s(i.visible_outcome),scene_belief:s(i.scene_belief),feeling_cue:s(i.feeling_cue),role_clarity:s(i.role_clarity),
+    distance_check:{not_too_far:s(dc.not_too_far),not_too_close:s(dc.not_too_close)},lever:s(i.lever),
+    place_specific:{unique_here:s(ps.unique_here),visitor_notice:s(ps.visitor_notice),mood:s(ps.mood)},reapply_question:s(i.reapply_question)};
 }
 function cleanRound(r){
   if(!r||!Array.isArray(r.places))return null;
+  const userChain=cleanChain(r.user_chain);
   const places=r.places.filter(p=>p&&p.name&&p.moment&&p.moment.scene).slice(0,3).map(p=>{
     const m=p.moment;
     return{name:String(p.name),country:String(p.country||""),
       lat:clamp(Number(p.lat)||0,-90,90),lon:clamp(Number(p.lon)||0,-180,180),
       why:String(p.why||""),
-      moments:[{title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,2).map(String),reflect:String(m.reflect||""),
+      moments:[{title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),reactions:(Array.isArray(m.reactions)?m.reactions:[]).slice(0,2).map(String),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,4).map(String),
         terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
         scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]},
-        internal:cleanInternal(p.internal)}]};
+        internal:cleanInternal(p.internal,userChain)}]};
   });
   if(places.length<2)return null;
-  const pm=r.problem_map;
-  const problemMap=(pm&&typeof pm==="object")?{situation:String(pm.situation||""),feeling:String(pm.feeling||""),action:String(pm.action||""),outcome:String(pm.outcome||""),
-    surface_meaning:String(pm.surface_meaning||""),core_meaning:String(pm.core_meaning||""),
-    shape:String(pm.shape||""),secondary_shape:String(pm.secondary_shape||""),confidence:String(pm.confidence||"")}:null;
-  return{places,problemMap};
+  return{places,userChain};
 }
+/* MATCHER:END */
 let genCtl=null;
 async function makeRound(mode,missing){
   show("loading");
@@ -1133,7 +1148,7 @@ async function makeRound(mode,missing){
   if(sample){
     genCtl=new AbortController();
     try{const cleaned=cleanRound(await sample.json(roundPrompt(mode,missing),{signal:genCtl.signal,modelTier:"default",cache:false}));
-      if(cleaned){places=cleaned.places;S.problemMap=cleaned.problemMap||S.problemMap}else err="The places that came back were incomplete."}
+      if(cleaned){places=cleaned.places;S.userChain=cleaned.userChain||S.userChain}else err="The places that came back were incomplete."}
     catch(e){if(e&&e.code==="cancelled"){show(S.synth?"reflect":S.rounds.length?"checkin":"intro");return}
       if(e&&e.code==="not_granted")aiOff=true;
       err=e&&e.code==="rate_limited"?"Too many requests right now. Wait a minute and try again.":e&&e.code==="bad_code"?"That study code wasn't accepted. Check it and start again.":"Finding places didn't work this time."}
@@ -1228,7 +1243,6 @@ $("transitionBtn").onclick=()=>{const a=$("transitionBtn").dataset.act;
   else goCheckin()};
 $("checkSide").onclick=goCheckin;
 $("backToSummary").onclick=()=>finish();
-$("journal").addEventListener("input",e=>{S.journal=e.target.value});
 $("recenter").onclick=()=>Viewer.reset();
 document.querySelectorAll("[data-move]").forEach(b=>{const d=b.dataset.move;const on=e=>{e.preventDefault();Viewer.setHold(d,true);const h=$("viewer").querySelector(".hint3d");h&&h.classList.add("gone")},off=()=>Viewer.setHold(d,false);
   b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off)});
@@ -1240,15 +1254,14 @@ function renderSide(){
   $("refBlock").classList.toggle("hidden",!changed);
   $("refStmt").textContent=S.refined;
   const last=S.refHistory[S.refHistory.length-1];$("refShift").textContent=last&&last.shift?last.shift:"";
-  $("journal").value=S.journal;
   renderResearch();
 }
 function renderResearch(){
   const R=S.rounds[S.cur?S.cur.r:S.rounds.length-1];if(!R)return;
-  const pm=S.problemMap;
-  $("readout").innerHTML=(pm?`<dt>Problem map</dt><dd>${esc(pm.shape)}${pm.secondary_shape?` / ${esc(pm.secondary_shape)}`:""} (${esc(pm.confidence)} confidence)</dd>${pm.core_meaning?`<dd class="small">Core: ${esc(pm.core_meaning)}</dd>`:""}`:"")+
+  const ch=S.userChain;
+  $("readout").innerHTML=(ch?`<dt>User chain</dt><dd>${esc(ch.belief)}</dd>${ch.sub_beliefs.map(b=>`<dd class="small">${esc(b.id)}: ${esc(b.belief)} (${esc(b.source)}, ${esc(b.confidence)})</dd>`).join("")}`:"")+
     R.places.map(p=>{const intl=(p.moments[0]&&p.moments[0].internal)||{};
-      return `<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>${intl.lever?`<dd class="small">Lever: ${esc(intl.lever)}${intl.layer&&intl.layer!=="n/a"?` (${esc(intl.layer)})`:""} — ${esc(intl.shift)}</dd>`:""}`;
+      return `<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>${intl.target_sub_belief||intl.lever?`<dd class="small">Targets ${esc(intl.target_sub_belief_text||intl.target_sub_belief)}${intl.lever?` · lever: ${esc(intl.lever)}`:""}</dd>`:""}${intl.visible_outcome?`<dd class="small">Predicted: ${esc(intl.predicted_outcome)} → Shows: ${esc(intl.visible_outcome)}</dd>`:""}`;
     }).join("")+(S.refHistory.length?`<dt>Refinements</dt>`+S.refHistory.map(h=>`<dd>${esc(h.refined)}${h.shift?` <em>(${esc(h.shift)})</em>`:""}</dd>`).join(""):"");
 }
 
@@ -1267,9 +1280,8 @@ function refine(ri,pi){
       const res=await sample.json(`You help a person in WorldMirror sharpen what's on their mind. They started by writing: "${S.problem}"
 The current version is: "${S.refined}"
 They just walked through ${P.name}, ${P.country}. Their whole journey so far, with the questions they asked at each moment: ${JSON.stringify(journey())}
-${S.journal?`Their running journal, written freely as they walked: "${S.journal}"`:""}
 
-Rewrite the statement so it reflects what their questions and journal suggest they're really getting at. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. If nothing new emerged, return the current version unchanged. No em dashes.
+Rewrite the statement so it reflects what their questions suggest they're really getting at. Keep it in their voice (first person), one or two sentences, no more specific than the evidence supports. Never diagnose, never add a cause they didn't hint at, no advice. If nothing new emerged, return the current version unchanged. No em dashes.
 Respond with ONLY JSON: {"refined":"...","shift":"a few words on what changed, or empty string"}`,{modelTier:"default",cache:false});
       if(res&&res.refined&&typeof res.refined==="string"){if(res.refined.trim()!==S.refined){S.refined=res.refined.trim();S.refHistory.push({refined:S.refined,shift:String(res.shift||""),after:P.name});const b=$("refBlock");b.classList.remove("pulse");void b.offsetWidth;b.classList.add("pulse")}}
     }catch(e){if(e&&e.code==="not_granted")aiOff=true}
@@ -1307,23 +1319,13 @@ async function pivotWithContext(context){
 const CONNECT_Q="Help me see the connection";
 function renderChat(){
   const M=curMoment(),log=S.chats[curKey]||[];
-  const rf=S.nextReflect[curKey]||M.reflect;
-  $("suggest").innerHTML=(S.nextQs[curKey]||M.questions).filter(q=>!log.some(c=>c.q===q)).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")+
-    (log.length>=3&&S.stuck[curKey]&&!log.some(c=>c.q===CONNECT_Q)?`<button class="chip" data-q="${esc(CONNECT_Q)}">${esc(CONNECT_Q)}</button>`:"")+
-    (rf&&!S.reflectsUsed.includes(rf)?`<button class="chip reflect" data-r="${esc(rf)}" title="Add to your journal">✎ ${esc(rf)}</button>`:"");
+  const nx=S.nextQs[curKey]||{reactions:M.reactions||[],questions:M.questions},unasked=q=>!log.some(c=>c.q===q);
+  $("suggest").innerHTML=nx.reactions.filter(unasked).map(q=>`<button class="chip react" data-q="${esc(q)}">${esc(q)}</button>`).join("")+
+    nx.questions.filter(unasked).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")+
+    (log.length>=3&&S.stuck[curKey]&&!log.some(c=>c.q===CONNECT_Q)?`<button class="chip" data-q="${esc(CONNECT_Q)}">${esc(CONNECT_Q)}</button>`:"");
   $("chatlog").innerHTML=log.map(c=>`<div class="qa"><p class="q">${esc(c.q)}</p><p class="a">${esc(c.a)}</p></div>`).join("");
 }
-$("suggest").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;
-  if(c.dataset.r!==undefined){writeInJournal(c.dataset.r);return}
-  ask(c.dataset.q)});
-/* A reflection prompt goes into the journal as a heading for the user to write under. */
-function writeInJournal(prompt){
-  S.reflectsUsed.push(prompt);
-  S.journal=(S.journal.trim()?S.journal.replace(/\s*$/,"")+"\n\n":"")+prompt+"\n";
-  const j=$("journal");j.value=S.journal;
-  j.scrollIntoView({behavior:"smooth",block:"center"});j.focus();j.setSelectionRange(j.value.length,j.value.length);
-  renderChat();
-}
+$("suggest").addEventListener("click",e=>{const c=e.target.closest(".chip");if(c)ask(c.dataset.q)});
 $("askForm").addEventListener("submit",e=>{e.preventDefault();const q=$("askInput").value.trim();if(q){$("askInput").value="";ask(q)}});
 let asking=false;
 async function ask(q){
@@ -1336,15 +1338,25 @@ async function ask(q){
   if(!sample){entry.a="Asking questions needs the AI, which isn't available in this view.";ansEl.textContent=entry.a;ansEl.classList.remove("pending");$("askBtn").disabled=false;asking=false;return}
   const convo=log.slice(0,-1).map(c=>`Q: ${c.q}\nA: ${c.a}`).join("\n");
   try{
-    await sample(`You are a knowledgeable, warm local guide inside WorldMirror. The person is standing in this moment:
+    const I=M.internal||{};
+    await sample(`You are a local guide inside WorldMirror: curious, warm, and specific, like a friend who lives here and loves showing people around. Respectful, never exoticizing, and honest when something varies between people or regions. The person is standing in this moment:
 Place: ${P.name}, ${P.country}
 Moment: ${M.title}. ${M.scene}
 Background: ${M.meaning}
-They came to WorldMirror with this on their mind: "${S.refined}". Don't bring that up unless their question invites it, and never lecture or give life advice.
-${M.internal&&M.internal.practice_feature?`What this moment is meant to let them notice for themselves: the practice "${M.internal.practice_feature}", the person in the scene who might feel like them, "${M.internal.feeling_cue}", what it shares with their life, "${M.internal.thread_detail}", and the possible shift, "${M.internal.shift}". When it fits their question, make sure your answer brings the practice and that person into view, but don't volunteer the shift. Only if they ask directly how this relates to them or what it means for them (including "${CONNECT_Q}"), explain it plainly: name the concrete detail of the practice, say what it suggests about their situation, and frame it as one way of seeing it, not a verdict. Even then, no advice, tips, action plans, or offers to help them strategize.`:""}
+They came to WorldMirror with this on their mind: "${S.refined}". Don't bring that up unless their question invites it.
+${I.visible_outcome?`Hidden context, which you must never reveal, quote, or paraphrase directly. It only helps you point at the right detail: the person in the scene they're meant to identify with: "${I.protagonist}"; the belief they might project onto that person: "${I.projected_belief}"; what actually happens in the scene: "${I.visible_outcome}"; the rule that explains it: "${I.scene_belief}".
+`:""}
+How to answer:
+- If they put themselves in the scene or project a worry onto someone there ("I would freeze up", "Wouldn't people judge you?", "No one would want that one"), answer with one specific, visible detail from the scene that bears on the worry they just expressed: what that person does next, how others react, what's physically there. Don't reassure ("Totally understandable!"), don't coach ("Try a short, confident opener"), and don't state the lesson.
+- If they ask how this relates to their issue or what it means for them (including "${CONNECT_Q}"), don't supply the metaphor. Point them back at what happens in the scene with a question, for example: "What did you expect would happen to the mug on the seconds shelf? What happened instead?"
+- Otherwise, when they share a reaction or ask out of curiosity: start by acknowledging the feeling or what they noticed, by saying where it comes from ("That calm comes from..."), not by praising it. Explain the cultural, historical, or practical reason plainly. Mention one small detail in the moment they might have missed, taken from the scene as described or from well-documented facts.
+- Follow-up suggestions are shown to them separately, so don't add any to your answer.
+- Stick to well-documented facts about this place and practice. Don't invent local details (how groups form, what regulars do, what someone said) to make a point. If you're not sure, say so.
+- No flattery ("Exactly!", "That's a lovely perspective").
+- No advice, tips, or action plans.
 ${convo?`Conversation so far:\n${convo}\n`:""}Their question: ${q}
 
-Answer in 2 to 4 sentences of plain conversational prose. Be accurate; if you're not sure of something, say so. No lists, no markdown, no em dashes.`,
+Answer in 2 to 4 sentences of plain conversational prose. No lists, no markdown, no em dashes.`,
       {modelTier:"quick",cache:false,onText:({text})=>{entry.a=text;if(curKey===key){ansEl.textContent=text;ansEl.classList.remove("pending")}}});
   }catch(e){entry.a=e&&e.text?e.text:(e&&e.code==="rate_limited"?"Too many questions at once. Try again in a moment.":e&&e.code==="bad_code"?"The study code wasn't accepted.":"That question didn't go through. Try asking again.");if(e&&e.code==="not_granted")aiOff=true;if(curKey===key)ansEl.textContent=entry.a}
   ansEl.classList.remove("pending");$("askBtn").disabled=false;asking=false;if(curKey===key)renderChat();
@@ -1354,31 +1366,30 @@ Answer in 2 to 4 sentences of plain conversational prose. Be accurate; if you're
 /* After each answer, suggest the next step toward noticing the shift on their own. */
 async function suggestNext(key,P,M){
   const log=S.chats[key]||[],i=M.internal||{};
-  if(!i.shift)return;
+  if(!i.visible_outcome)return;
   try{
     const r=await (await getSample()).json(`You suggest the next questions a person might tap while exploring a place in WorldMirror, a reflection tool that never gives advice. The person came in with: "${S.refined}"
 Place: ${P.name}, ${P.country}
 Moment: ${M.title}. ${M.scene}
 Background: ${M.meaning}
-What this moment is quietly meant to let them notice (never shown to them): they share "${i.thread_detail}"; someone there who might feel like them: "${i.feeling_cue}"; the practice that carries it: "${i.practice_feature}"; the shift: "${i.shift}"
+What this moment is designed to do (never shown to them): they're meant to step into the place of "${i.protagonist}" (${i.role_clarity}), project their own belief "${i.projected_belief}", expect "${i.predicted_outcome}", and then see what actually happens: "${i.visible_outcome}". The rule that explains it: "${i.scene_belief}".
 Conversation with the local guide so far:
 ${log.map(c=>`Q: ${c.q}\nA: ${c.a}`).join("\n")}
 
-Write 2 short questions in their voice, asked to the guide, that each move them one step closer to seeing the hidden meaning of the practice: what it quietly says about the thing they're struggling with. Work out where they are on this path and take the next step, not several at once:
-1. Understand the scene: if their questions show confusion about what's happening, clarify that first.
-2. Notice the practice and the person: what people do there, what happens after a miss, a flaw, or a quiet moment, how the person who might feel like them handles it.
-3. See what it means: questions that make the meaning visible inside the scene itself (what a result says or doesn't say about the thing, why people there don't treat it the way the user might), so the user can make the connection on their own. Stay in the scene: don't ask them to find a similar person or moment in their own life.
-Never state or hint at the shift inside the question. For example, at a flower auction where the shift is that an unsold cart reflects that morning's fit and timing rather than the flowers' worth, a user who has asked "Who names the price?" and "Wouldn't people just wait?" now understands the mechanics but not yet the point. Good next steps: "When a cart doesn't sell, is something wrong with those flowers?" and "Does the same lot always sell for the same price?" Then: "What does a grower make of a cart that didn't sell today?" Bad: "So rejection is about timing, not my worth?" because it hands them the conclusion.
-Build on what they just asked and how they reacted. Don't repeat questions already asked. Keep each under 15 words.
+Write one reaction and one question in their voice, to the guide, that each move them one step along this path. The reaction is a short first-person comment they might be feeling right now, after the last answer, that names a feeling or a surprise ("I didn't expect anyone to go for the stamped ones."). The question moves them from what they see to why. Work out where they are and take the next step, not several at once:
+1. Understand the scene and find their role: if their questions show confusion about what's happening or who's who, clarify that first, pointing them toward the person they're meant to identify with.
+2. Step into that person's place: questions that invite them to imagine being that person and say what they expect will happen to them.
+3. See what actually happens, and why: questions that bring the visible outcome into view, then ask what explains it, staying inside the scene. Don't ask them to find a similar moment in their own life.
+If the scene offers both the judge's role and the judged role, once they understand the scene, a question that lets them swap sides is the strongest step.
+Never state or hint at the rule that explains the outcome. For example, in a pottery seconds shop, a user who asked "Why are these ones cheaper?" understands the scene. Good next steps: "Would anyone actually pick the mug with the wonky handle?" and "Which shelf do shoppers go to first?" Then: "If I were that mug, what would being on this shelf mean?" Bad: "So flaws make things more valuable?" because it hands them the conclusion.
+Tie both to something specific in this moment. Build on what they just asked and how they reacted. Don't repeat anything already asked. Keep each under about 12 words, the way a person would talk.
 
-Also write one "reflect" prompt: a short, gentle invitation to jot down their own reaction in their journal, tied to what just came up in the conversation, such as what they felt watching it, what surprised them, or what they first assumed. It's about their reaction, never a conclusion they should reach. Under 15 words, second person, for example: "What did you feel watching a cart roll past unsold?"
 Finally, judge "stuck": true if, from their questions and reactions, they still don't seem to see what the scene has to do with what they came in with (they're circling the mechanics, asking why it matters, or saying they don't get it); false if they're engaging with the meaning or making connections of their own.
 No em dashes.
-Respond with ONLY JSON: {"questions":["...","..."],"reflect":"...","stuck":false}`,{modelTier:"quick",cache:false});
-    const qs=(r&&Array.isArray(r.questions)?r.questions:[]).map(String).filter(Boolean).slice(0,2);
-    if(r&&r.reflect)S.nextReflect[key]=String(r.reflect);
+Respond with ONLY JSON: {"reaction":"...","question":"...","stuck":false}`,{modelTier:"quick",cache:false});
+    const nx={reactions:r&&r.reaction?[String(r.reaction)]:[],questions:r&&r.question?[String(r.question)]:[]};
     if(r)S.stuck[key]=r.stuck===true;
-    if(qs.length){S.nextQs[key]=qs;if(curKey===key&&!asking)renderChat()}
+    if(nx.reactions.length||nx.questions.length){S.nextQs[key]=nx;if(curKey===key&&!asking)renderChat()}
   }catch(e){}
 }
 
@@ -1405,11 +1416,10 @@ function synthPrompt(){
   return `You are the companion inside WorldMirror, helping a person make sense of their walk. Their problem is NOT solved. Your job is to look across everything they asked for a pattern, and connect that pattern back to their problem gently, not to hand them a diagnosis or a to-do list.
 
 What they wrote at the start: "${S.problem}"
-${S.intake.length?`Their answers to the opening questions (belief, setting, feeling, action): ${JSON.stringify(S.intake)}`:""}
+${S.intake.length?`Their answers to the opening questions (each tagged with what it was asking about): ${JSON.stringify(S.intake)}`:""}
 How it reads now: "${S.refined}"
 Their journey (places, moments, the questions they asked at each one, time spent): ${JSON.stringify(journey())}
-${S.problemMap?`An earlier structured read of their problem: ${JSON.stringify(S.problemMap)}`:""}
-${S.journal?`Their running journal, written freely as they walked: "${S.journal}"`:""}
+${S.userChain?`An earlier structured read of their challenge (position, problem, belief, feeling, outcome, and the sub-beliefs under the belief): ${JSON.stringify(S.userChain)}`:""}
 ${S.elaboration?`They also added more about what's going on, directly: "${S.elaboration}"`:""}
 ${fb.length?`They already responded to earlier guesses about the cause. Keep what they confirmed, drop what they rejected, and revise what was partly right using their comments: ${JSON.stringify(fb)}`:""}
 
@@ -1531,7 +1541,7 @@ function finish(){
     ${challengesHtml()}
     <h3 class="sec">Where this points</h3>${pointsHtml(r)}
     <h3 class="sec">What you noticed</h3>${obsList(r)}`;
-  $("log").textContent=JSON.stringify({initial_statement:S.problem,intake:S.intake,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
+  $("log").textContent=JSON.stringify({initial_statement:S.problem,intake:S.intake,current_statement:S.refined,user_chain:S.userChain,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
   show("final");
 }
 $("summaryBody").addEventListener("click",e=>{const c=e.target.closest(".relive");if(!c)return;S.returnToFinal=true;enterPlace(+c.dataset.r,+c.dataset.p,+c.dataset.m)});
@@ -1543,9 +1553,9 @@ $("restartTop").onclick=()=>$("restart").onclick();
 fetch("/api/config").then(r=>r.json()).then(c=>{if(c&&c.codeRequired&&!STUDY_CODE)$("codeWrap").classList.remove("hidden")}).catch(()=>{});
 function sessionLog(event){
   return{session_id:SESSION_ID,participant_id:PID,event,sent_at:new Date().toISOString(),
-    initial_statement:S.problem,intake:S.intake,current_statement:S.refined,problem_map:S.problemMap,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
+    initial_statement:S.problem,intake:S.intake,current_statement:S.refined,user_chain:S.userChain,refinements:S.refHistory,causes:S.causes,cause_feedback:S.feedback,synthesis_versions:S.synths,choices:S.choices,
     rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),
-    journey:S.rounds.length?journey():[],qa:qaLog(),journal:S.journal,elaboration:S.elaboration,stats:S.rounds.length?computeStats():null,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
+    journey:S.rounds.length?journey():[],qa:qaLog(),elaboration:S.elaboration,stats:S.rounds.length?computeStats():null,minutes_total:Math.round((Date.now()-S.started)/6000)/10};
 }
 function sendLog(event,beacon){
   if(!S.problem)return;
