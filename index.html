@@ -3,311 +3,442 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070D">
 <title>WorldMirror</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<style>:root{
-  --bg:#E4E9EC; --paper:rgba(255,255,255,.5); --ink:#18222D; --muted:#44535D; --line:rgba(28,39,51,.16);
-  --accent:#8A5806; --accent-soft:rgba(243,227,191,.72); --btn:#1C2733; --btn-ink:#F7F9FA;
-  --glass:rgba(244,247,250,.7); --glass-strong:rgba(247,249,251,.82); --glass-edge:rgba(255,255,255,.6);
-  --glass-shadow:0 24px 70px rgba(6,10,22,.32);
-  --serif:"Literata", Georgia, "Times New Roman", serif;
-  --sans:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
-  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+<style>
+:root{
+  --bg:#05070D; --ink:#EEF1FA; --ink2:#D5DAE6; --muted:#B7BFD1; --dim:#9AA3B8;
+  --accent:#F4B56A; --accent-hover:#FFC583; --accent-ink:#1A1206; --accent-text:#F4CD9A; --accent-soft:rgba(244,181,106,.1);
+  --card:rgba(14,18,30,.8); --field:rgba(14,18,30,.85); --line:rgba(255,255,255,.12); --line2:rgba(255,255,255,.18); --glass:rgba(8,10,20,.72);
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141B21;--paper:rgba(30,40,50,.5);--ink:#E8EDF1;--muted:#A6B4BE;--line:rgba(255,255,255,.14);--accent:#F0C060;--accent-soft:rgba(70,56,30,.6);--btn:#E8EDF1;--btn-ink:#141B21;--glass:rgba(16,22,30,.6);--glass-strong:rgba(18,25,33,.76);--glass-edge:rgba(255,255,255,.14)}}
-:root[data-theme="dark"]{--bg:#141B21;--paper:rgba(30,40,50,.5);--ink:#E8EDF1;--muted:#A6B4BE;--line:rgba(255,255,255,.14);--accent:#F0C060;--accent-soft:rgba(70,56,30,.6);--btn:#E8EDF1;--btn-ink:#141B21;--glass:rgba(16,22,30,.6);--glass-strong:rgba(18,25,33,.76);--glass-edge:rgba(255,255,255,.14)}
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-/* painted backdrop behind everything, with frosted-glass panels on top */
-#backdrop{position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 90% at 60% 62%,#C98A78 0%,#5A4E80 38%,#1E2850 70%,#0A1028 100%)}
-#backdrop .bd{position:absolute;inset:0;background-size:cover;background-position:30% 58%;opacity:0;transition:opacity 1.4s ease}
-#backdrop .bd.on{opacity:1}
-#backdrop::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,12,26,.18),rgba(8,12,26,0) 28%,rgba(8,12,26,0) 70%,rgba(8,12,26,.3))}
-.glass{background:var(--glass);-webkit-backdrop-filter:blur(28px) saturate(1.35);backdrop-filter:blur(28px) saturate(1.35);border:1px solid var(--glass-edge);box-shadow:var(--glass-shadow),inset 0 1px 0 rgba(255,255,255,.4);border-radius:32px}
-section.glass{padding:clamp(24px,4.5vw,48px)}
-body{margin:0;background:#141B26;color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
-button,textarea,input{font:inherit;color:inherit}
+*,*::before,*::after{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--ink);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
+a{color:var(--accent)}a:hover{color:#FFD29C}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
-.brand{font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:22px;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.45)}
-.brand span{color:rgba(255,255,255,.75);font-weight:400}
 .hidden{display:none!important}
-h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5.4vw,58px);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:17ch}
-h2{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3.6vw,38px);line-height:1.15;letter-spacing:-.01em;margin:0 0 10px}
-.lede{font-size:18px;color:var(--muted);max-width:54ch;margin:0 0 28px}
-.small{font-size:13px;color:var(--muted)}
-textarea,input[type=text]{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--paper);font-family:var(--serif);font-size:17px;line-height:1.55}
-textarea{resize:vertical}
-textarea:focus,input:focus{outline:none;border-color:var(--ink)}
-#problem{min-height:140px;font-size:20px;max-width:720px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ---------- top bar ---------- */
+#topbar{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:calc(24px + env(safe-area-inset-top,0px)) 40px 24px}
+.brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;letter-spacing:.02em}
+.tr{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.toplink{background:none;border:0;padding:0;min-height:44px;font-size:14px;color:var(--muted);text-decoration:none}
+.toplink:hover{color:var(--ink)}
+.qprog{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--dim)}
+.qprog .dots{display:flex;gap:6px}
+.qprog .dots span{width:18px;height:4px;border-radius:2px;background:rgba(255,255,255,.18)}
+.qprog .dots span.on{background:var(--accent)}
+@media (max-width:640px){#topbar{padding:calc(16px + env(safe-area-inset-top,0px)) 16px 16px}.qprog .dots{display:none}}
+
+/* ---------- shared ---------- */
+.screen{position:relative;min-height:100vh;min-height:100dvh;overflow:hidden;display:flex;flex-direction:column;padding:104px 24px 48px}
+.screen.center{align-items:center;justify-content:center;text-align:center}
+.stack{position:relative;z-index:2;width:100%;max-width:680px;display:flex;flex-direction:column;align-items:center;gap:28px}
+.col{position:relative;z-index:2;width:100%;max-width:720px;margin:0 auto}
+.display{margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(44px,6vw,64px);line-height:1.05;letter-spacing:-.01em}
+.display.md{font-size:clamp(38px,4.6vw,52px)}
+h2{margin:0 0 10px;font-family:var(--serif);font-weight:400;font-size:clamp(36px,4.4vw,48px);line-height:1.08;letter-spacing:-.005em}
+.lede{margin:0;max-width:520px;font-size:17px;line-height:1.55;color:var(--muted)}
+.lede.sm{font-size:16px}
+.col .lede{max-width:60ch;margin-bottom:24px}
+.eyebrow{margin:0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.eyebrow.accent{font-size:12px;letter-spacing:.12em;color:var(--accent-text)}
+.lbl{font-size:13px;color:var(--dim);padding-left:4px}
+.small{font-size:13px;color:var(--dim)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.btn{border-radius:999px;padding:10px 18px;border:1px solid var(--line);background:transparent;font-size:15px}
-.btn:hover{border-color:var(--ink)}
-.btn.primary{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.row.center{justify-content:center}
+.formcol{width:100%;max-width:640px;display:flex;flex-direction:column;gap:10px;text-align:left}
+.field{display:flex;align-items:flex-end;gap:12px;padding:10px 10px 10px 22px;border-radius:28px;background:var(--field);border:1px solid rgba(255,255,255,.16);transition:border-color .15s,box-shadow .15s}
+.field:focus-within{border-color:rgba(244,181,106,.7);box-shadow:0 0 0 4px rgba(244,181,106,.12)}
+.field textarea,.field input{flex:1;min-width:0;background:transparent;border:0;outline:none;color:var(--ink);font:400 17px/1.5 var(--sans);padding:10px 0;resize:none;max-height:40vh}
+.field ::placeholder{color:#8B93A7}
+.go{flex:none;width:48px;height:48px;border-radius:999px;background:var(--accent);border:0;display:flex;align-items:center;justify-content:center;transition:background .15s,opacity .15s}
+.go:hover{background:var(--accent-hover)}
+.go:disabled{opacity:.35;cursor:default}
+.btn{min-height:44px;padding:0 18px;border-radius:999px;background:transparent;border:1px solid var(--line2);color:var(--ink2);font:500 14px var(--sans);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:border-color .15s,background .15s,color .15s}
+.btn:hover{border-color:rgba(255,255,255,.35);color:var(--ink)}
+.btn.lg{min-height:48px;padding:0 22px;font-size:15px;color:var(--ink);border-color:rgba(255,255,255,.22)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:var(--accent-ink)}
+.btn.light{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
+.btn.light:hover{background:#fff;color:var(--bg)}
 .btn:disabled{opacity:.4;cursor:default}
-.textbtn{background:none;border:0;padding:6px 0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:14px}
+.textbtn{background:none;border:0;padding:0;min-height:44px;color:var(--muted);font-size:14px;text-decoration:none;display:inline-flex;align-items:center}
 .textbtn:hover{color:var(--ink)}
-.statement{font-family:var(--serif);font-style:italic;font-size:19px;line-height:1.55;color:var(--muted);max-width:60ch;margin:0 0 28px}
-
-/* loading */
-#loading{min-height:min(70vh,640px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
-#loading .statement{margin:0}
-.loadglobe{width:120px;height:120px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#17293a,#060b12)}
-.loadglobe canvas{width:100%!important;height:100%!important;display:block;cursor:grab;touch-action:none}
-.loadglobe canvas:active{cursor:grabbing}
-.factbox{min-height:42px;max-width:46ch}
-.factbox p{margin:0;font-size:14px;color:var(--muted);transition:opacity .5s ease}
-.factbox p.fade{opacity:0}
-
-/* reveal */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:26px}
-.pcard{text-align:left;padding:0;border:1px solid var(--glass-edge);background:var(--paper);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s ease,box-shadow .25s ease}
-.pcard:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(6,10,22,.25)}
-.thumb{aspect-ratio:16/10;background:linear-gradient(180deg,#26305A,#B07A78 70%,#1A2140)}
-.thumb img{opacity:0;transition:opacity .6s ease}
-.thumb img.ready{opacity:1}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.pc-body{padding:14px 16px 18px;display:flex;flex-direction:column;gap:2px}
-.pc-body b{font-weight:500;font-size:18px}
-.pc-body small{color:var(--muted);font-size:13px}
-.pc-body span{font-family:var(--serif);font-size:16px;margin-top:6px}
-
-/* walk */
-.walkhead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tab{border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-radius:999px;padding:7px 15px;font-size:14px;display:flex;align-items:center;gap:7px}
-.tab.on{background:var(--glass-strong);font-weight:500;box-shadow:0 4px 18px rgba(6,10,22,.2)}
-.walkhead .textbtn{color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
-#tabsHint{color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.5)}
-.seen{width:7px;height:7px;border-radius:50%;background:var(--accent)}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:26px;align-items:start}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
-.card{overflow:hidden;background:var(--glass-strong);border-radius:28px}
-.side.glass{padding:22px 20px;border-radius:28px}
-.viewer{position:relative;aspect-ratio:16/9;background:#1E2836;user-select:none;-webkit-user-select:none}
-@media (max-width:640px){.viewer{aspect-ratio:4/3}}
-.viewer canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
-.viewer canvas.gl:active{cursor:grabbing}
-.viewer.no3d::after{content:"The 3D view couldn't load in this browser.";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cdd6de;font-size:14px}
-.ov{position:absolute;color:#fff;font-size:13px;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-.vplace{left:16px;top:12px;font-weight:500}
-.vcount{left:16px;top:30px;opacity:.85}
-.hint3d{left:16px;bottom:14px;background:rgba(10,14,24,.55);padding:7px 12px;border-radius:10px;text-shadow:none;transition:opacity .6s}
-.hint3d.gone{opacity:0;pointer-events:none}
-.vbtn{position:absolute;border:0;background:rgba(10,14,24,.5);color:#fff;border-radius:10px;width:40px;height:40px;font-size:16px;display:flex;align-items:center;justify-content:center;touch-action:none}
-.vbtn:hover{background:rgba(10,14,24,.75)}
-#recenter{right:12px;top:12px;width:auto;padding:0 12px;font-size:13px}
-.pad{position:absolute;right:12px;bottom:12px;width:132px;height:90px}
-.pad .vbtn[data-move=f]{left:46px;top:0}.pad .vbtn[data-move=l]{left:0;top:46px}.pad .vbtn[data-move=b]{left:46px;top:46px}.pad .vbtn[data-move=r]{left:92px;top:46px}
-.mbody{padding:22px 24px 24px}
-.mtitle{font-size:14px;font-weight:500;color:var(--accent);margin:0 0 6px}
-.mscene{font-family:var(--serif);font-size:clamp(19px,2.2vw,23px);line-height:1.5;margin:0 0 14px;max-width:62ch}
-.meaning{font-family:var(--serif);font-size:16px;line-height:1.65;color:var(--muted);border-left:2px solid var(--accent);padding-left:14px;margin:0 0 14px;max-width:62ch}
-.term{position:relative;border-bottom:1px dotted var(--accent);cursor:help}
-.term .termtip{display:none;position:absolute;left:0;bottom:100%;margin-bottom:6px;width:230px;max-width:70vw;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:10px;font-family:var(--sans);font-size:13px;line-height:1.45;font-style:normal;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.term:hover .termtip,.term:focus .termtip,.term.pinned .termtip{display:block}
-.ask{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
-.ask h3{font-size:15px;font-weight:500;margin:0 0 8px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:14px;text-align:left}
-.chip:hover{border-color:var(--ink)}
+.textbtn.u{text-decoration:underline;text-underline-offset:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line2);background:rgba(14,18,30,.6);border-radius:999px;padding:7px 14px;font-size:14px;line-height:1.35;color:var(--ink2);text-align:left}
+.chip:hover{border-color:rgba(244,181,106,.6);color:var(--ink)}
 .chip.react{font-style:italic}
-.qa{margin-bottom:14px}
-.qa .q{font-weight:500;margin:0 0 4px;font-size:15px}
-.qa .a{font-family:var(--serif);margin:0;line-height:1.6;max-width:64ch}
-.qa .a.pending{color:var(--muted);font-style:italic}
-#askForm{display:flex;gap:8px}
-#askForm input{font-family:var(--sans);font-size:15px;padding:10px 14px;border-radius:999px;background:var(--bg)}
-.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
-.transition{margin-top:18px;padding:16px 18px;border-radius:14px;background:var(--accent-soft)}
-.transition p{margin:0 0 10px}
+.foot{position:relative;z-index:2;margin:auto auto 0;padding-top:40px;font-size:12px;line-height:1.5;color:var(--dim);text-align:center;max-width:540px}
+.err{color:var(--accent-text);font-size:14px;margin-top:10px}
 
-.side{display:flex;flex-direction:column;gap:22px}
-@media (min-width:901px){.side{position:sticky;top:calc(20px + env(safe-area-inset-top,0px))}}
-.side h3{font-size:14px;font-weight:500;margin:0 0 6px;color:var(--muted)}
-.sideglobe{width:100%;max-width:150px;aspect-ratio:1;margin:0 auto;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#17293a,#060b12)}
-.sideglobe canvas{width:100%!important;height:100%!important;display:block;cursor:grab;touch-action:none}
-.sideglobe canvas:active{cursor:grabbing}
-.orig{font-family:var(--serif);font-size:15px;color:var(--muted);margin:0}
-.ref{font-family:var(--serif);font-size:18px;line-height:1.5;margin:0}
-#refBlock{padding:14px 16px;border-radius:12px;background:var(--accent-soft)}
-#refBlock.pulse{animation:pulse 1.4s ease}
-@keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent)}100%{box-shadow:0 0 0 10px transparent}}
-.shift{font-size:13px;color:var(--muted);margin:6px 0 0}
-.research{font-size:13px;color:var(--muted)}
+/* decorations */
+.horizon{position:absolute;left:50%;transform:translateX(-50%);width:1500px;max-width:none;bottom:-1190px;pointer-events:none;user-select:none}
+.flatmap{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.13;pointer-events:none}
+.glow{position:absolute;left:50%;top:46%;width:760px;max-width:100%;height:460px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(244,181,106,.16),rgba(244,181,106,0));pointer-events:none}
+@keyframes wmPulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+/* ---------- 01 intro ---------- */
+#intro{min-height:max(720px,100vh);min-height:max(720px,100dvh);align-items:center;text-align:center}
+#intro .stack{margin-top:clamp(24px,8vh,80px)}
+#codeWrap{max-width:260px}
+#codeWrap input{width:100%;background:var(--field);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:10px 14px;color:var(--ink)}
+
+/* ---------- 02 intake ---------- */
+#intake .stack{text-align:left;align-items:stretch;gap:24px}
+.thinkpill{align-self:center;display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;background:rgba(244,181,106,.08);border:1px solid rgba(244,181,106,.25);font-size:13px;color:var(--accent-text)}
+.thinkpill .dot{width:8px;height:8px;border-radius:999px;background:var(--accent);animation:wmPulse 1.6s ease-in-out infinite}
+.prevqa{opacity:.45;display:flex;flex-direction:column;gap:6px}
+.prevqa p{margin:0;font-size:14px;color:var(--muted)}
+.prevqa .it{font-size:15px;color:var(--ink);font-style:italic}
+#intakeBody{display:flex;flex-direction:column;gap:20px}
+.qtitle{display:block;margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(32px,4vw,44px);line-height:1.15}
+.qnav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.camein{position:absolute;z-index:2;left:40px;bottom:32px;max-width:280px;padding:14px 16px;border-radius:14px;background:rgba(14,18,30,.7);border:1px solid rgba(255,255,255,.1);text-align:left}
+.camein p:last-child{margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--ink2)}
+@media (max-width:1100px){.camein{position:relative;left:auto;bottom:auto;margin:36px auto 0;max-width:680px;width:100%}}
+
+/* ---------- 03 loading ---------- */
+#loading .stack{gap:36px}
+#loading .titles{display:flex;flex-direction:column;gap:10px;align-items:center}
+.spinglobe{width:min(320px,68vw);aspect-ratio:1;border-radius:999px;background:#0B1222 url("assets/flatmap.svg") 0 0/200% 100% repeat-x;animation:wmSpin 16s linear infinite;box-shadow:inset -60px -30px 90px rgba(2,3,8,.92),inset 18px 14px 50px rgba(143,179,255,.16),0 0 90px rgba(143,179,255,.16)}
+@keyframes wmSpin{from{background-position:0 0}to{background-position:200% 0}}
+.progress{display:flex;flex-direction:column;align-items:center;gap:10px}
+.bar{width:180px;height:3px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar div{width:100%;height:100%;background:var(--accent);transform-origin:left center;animation:wmDash 2.4s ease-in-out infinite}
+@keyframes wmDash{0%{transform:scaleX(.15);opacity:.5}50%{transform:scaleX(1);opacity:1}100%{transform:scaleX(.15);opacity:.5}}
+.progress p{margin:0;font-size:13px;color:var(--dim)}
+.fact{width:100%;max-width:520px;padding:18px 22px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-align:left;display:flex;gap:16px;align-items:flex-start}
+.fact div{display:flex;flex-direction:column;gap:4px}
+#factText{margin:0;font-size:15px;line-height:1.5;color:var(--ink);transition:opacity .5s ease}
+#factText.fade{opacity:0}
+
+/* ---------- 04 reveal ---------- */
+.reveal-grid{flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:48px;padding:8px 16px 24px}
+.globewrap{position:relative;flex:0 1 540px;aspect-ratio:1;min-width:280px;max-width:100%}
+.globe3d{position:absolute;inset:0}
+.globewrap::before{content:"";position:absolute;inset:6%;border-radius:999px;box-shadow:0 0 90px rgba(143,179,255,.16),0 0 30px rgba(143,179,255,.10);pointer-events:none}
+.globe3d canvas{width:100%!important;height:100%!important;display:block;cursor:grab;touch-action:none}
+.globe3d canvas:active{cursor:grabbing}
+.globe3d.flat{border-radius:999px;background:#0B1222 url("assets/flatmap.svg") 0 0/200% 100%;box-shadow:inset -60px -30px 90px rgba(2,3,8,.92)}
+.gpin{position:absolute;left:0;top:0;pointer-events:none;transform:translate(-50%,-100%);transition:opacity .25s}
+.gpin svg{display:block;transition:transform .25s;transform-origin:50% 100%}
+.gpin.sel svg{transform:scale(1.18);filter:drop-shadow(0 0 10px rgba(244,181,106,.55))}
+.reveal-side{flex:1 1 380px;max-width:480px;display:flex;flex-direction:column;gap:20px}
+.reveal-side .lede{max-width:none}
+.placelist{display:flex;flex-direction:column;gap:10px}
+.pc{display:flex;gap:14px;align-items:flex-start;text-align:left;padding:16px 18px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);transition:border-color .15s,background .15s}
+.pc:hover{border-color:rgba(255,255,255,.3)}
+.pc .n{flex:none;width:26px;height:26px;border-radius:999px;border:1px solid rgba(255,255,255,.3);color:var(--ink2);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.pc .t{display:flex;flex-direction:column;gap:3px}
+.pc b{font-size:16px;font-weight:600}
+.pc small{font-size:13px;color:var(--dim)}
+.pc .why{display:none;font-size:14px;line-height:1.45;color:var(--ink2);margin-top:4px}
+.pc[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.pc[aria-pressed="true"] .n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.pc[aria-pressed="true"] small{color:var(--muted)}
+.pc[aria-pressed="true"] .why{display:block}
+.pc .seen{font-size:11px;color:var(--accent-text);margin-top:2px}
+
+/* ---------- 05 landing ---------- */
+#landing{min-height:max(720px,100vh);min-height:max(720px,100dvh);align-items:center;text-align:center}
+#landing .horizon{bottom:-1000px}
+#landing .stack{gap:14px;margin-top:24px}
+#landing .lede{max-width:480px}
+#landing .row{margin-top:8px}
+.flight{position:absolute;left:0;bottom:360px;width:calc(50% - 30px);height:300px;overflow:visible;pointer-events:none}
+.plane{position:absolute;left:calc(50% - 74px);bottom:372px;animation:wmArrive 1.6s cubic-bezier(.2,.7,.3,1) both,wmGlide 3.5s ease-in-out 1.6s infinite;pointer-events:none}
+@keyframes wmArrive{from{transform:translate(-38vw,-140px) rotate(8deg);opacity:0}30%{opacity:1}to{transform:translate(0,0) rotate(18deg)}}
+@keyframes wmGlide{0%,100%{transform:translate(0,0) rotate(18deg)}50%{transform:translate(6px,-6px) rotate(14deg)}}
+.landpin{position:absolute;left:calc(50% + 16px);bottom:318px;width:40px;display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.ring{width:44px;height:14px;margin-top:-8px;border-radius:999px;border:1.5px solid var(--accent);animation:wmRing 2.2s ease-out infinite}
+@media (max-width:640px){.flight{display:none}}
+@keyframes wmRing{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+
+/* ---------- 06 walk ---------- */
+body.walking{overflow:hidden}
+body.walking #topbar{display:none}
+#walk{position:fixed;inset:0;z-index:1;overflow:hidden;background:radial-gradient(120% 90% at 40% 62%,#3A2E4E 0%,#1A2040 45%,#05070D 100%)}
+.world{position:absolute;inset:0;overflow:hidden;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.world:active{cursor:grabbing}
+.worldimg{position:absolute;left:0;top:0;background-size:100% 100%;background-repeat:no-repeat;will-change:transform;opacity:0;transition:opacity .9s ease}
+.worldimg.on{opacity:1}
+.worldimg.ease{transition:opacity .9s ease,transform .6s ease,width .6s ease,height .6s ease}
+.wglass{background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line)}
+.walk-top{position:absolute;z-index:2;left:24px;right:24px;top:calc(20px + env(safe-area-inset-top,0px));display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;pointer-events:none}
+.walk-top>*{pointer-events:auto}
+.gchip{padding:10px 14px;border-radius:12px;display:flex;flex-direction:column;gap:2px;max-width:320px}
+.gchip .v{font-size:14px;font-weight:500}
+.gchip .v2{font-size:14px;color:var(--ink2)}
+#refBlock.pulse{animation:chipPulse 1.4s ease}
+@keyframes chipPulse{0%{box-shadow:0 0 0 0 rgba(244,181,106,.6)}100%{box-shadow:0 0 0 12px rgba(244,181,106,0)}}
+.gpill{padding:10px 14px;border-radius:999px;font-size:13px;color:var(--ink2)}
+.gbtn{min-height:44px;padding:0 16px;border-radius:999px;color:var(--ink);font:500 14px var(--sans);display:inline-flex;align-items:center}
+.gbtn:hover{border-color:rgba(255,255,255,.35)}
+.panel{position:absolute;z-index:2;right:32px;top:50%;transform:translateY(-50%);width:400px;max-width:calc(100% - 48px);max-height:calc(100vh - 190px);max-height:calc(100dvh - 190px);padding:22px;border-radius:20px;border-color:rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:14px;animation:wmFloat 6s ease-in-out infinite}
+@keyframes wmFloat{0%,100%{translate:0 0}50%{translate:0 -6px}}
+.panel-scroll{overflow-y:auto;display:flex;flex-direction:column;gap:14px;margin:0 -8px;padding:0 8px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.mtitle{display:flex;align-items:center;gap:8px;margin:0;font-size:12px;color:var(--accent-text)}
+.mtitle::before{content:"";flex:none;width:8px;height:8px;border-radius:999px;background:var(--accent)}
+.mscene{margin:0;font-family:var(--serif);font-size:25px;line-height:1.26}
+.meaning{margin:0;font-size:15px;line-height:1.55;color:var(--ink2)}
+#chatlog:empty{display:none}
+.qa{padding-top:12px;border-top:1px solid var(--line)}
+.qa+.qa{margin-top:12px}
+.qa .q{margin:0 0 4px;font-size:14px;font-weight:500;color:var(--accent-text)}
+.qa .a{margin:0;font-size:15px;line-height:1.55;color:var(--ink2)}
+.qa .a.pending{color:var(--dim);font-style:italic}
+#askForm{display:flex;flex-direction:column;gap:8px}
+#askForm .field{border-radius:12px;padding:6px 6px 6px 14px;background:rgba(255,255,255,.06);align-items:center}
+#askForm .field:focus-within{box-shadow:none}
+#askForm input{font-size:15px;padding:8px 0}
+#askBtn{width:44px;height:44px;border-radius:10px}
+.pnav{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.research{font-size:12px;color:var(--dim)}
 .research summary{cursor:pointer}
-.research dt{font-weight:500;color:var(--ink);margin-top:10px}
-.research dd{margin:2px 0 0;font-family:var(--serif);font-size:14px}
+.research dt{font-weight:600;color:var(--ink2);margin-top:8px}
+.research dd{margin:2px 0 0}
+.walk-foot{position:absolute;z-index:2;left:24px;bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.keys{flex-direction:row;align-items:center;gap:12px;font-size:13px;color:var(--ink2)}
+.kbd{display:flex;gap:4px;font-weight:600;font-size:11px}
+.kbd span{width:22px;height:22px;border-radius:4px;border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center}
+@media (max-width:760px){
+  .walk-top{left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px))}
+  .gchip{max-width:none}
+  #refBlock,.walk-foot{display:none}
+  .panel{left:12px;right:12px;width:auto;max-width:none;top:auto;bottom:calc(12px + env(safe-area-inset-bottom,0px));transform:none;max-height:58vh;max-height:58dvh;padding:18px;animation:none}
+  .mscene{font-size:22px}
+}
 
-/* checkin */
-.narrow{max-width:760px;margin-inline:auto}
-.intake-q{display:block;font-family:var(--serif);font-size:22px;line-height:1.45;margin:0 0 14px}
-#intakeAnswer{min-height:90px}
-.cmp{display:grid;gap:16px;margin:22px 0 30px}
-.cmp label{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
-.cmp .orig{font-size:17px}
-#ciNow{font-size:20px;min-height:96px;background:var(--accent-soft);border-color:transparent}
+/* ---------- check in, reflect, summary ---------- */
+.cmp{display:grid;gap:18px;margin:6px 0 30px}
+.cmp label{display:block;font-size:13px;color:var(--dim);margin-bottom:6px}
+.orig{margin:0;font-size:16px;line-height:1.55;color:var(--muted)}
+.box,#ciNow,#missing,#elaborateInput{width:100%;background:var(--field);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px 16px;color:var(--ink);font:400 16px/1.55 var(--sans);resize:vertical;outline:none}
+.box:focus,#ciNow:focus,#missing:focus,#elaborateInput:focus{border-color:rgba(244,181,106,.7)}
+#ciNow{min-height:110px;font-family:var(--serif);font-size:24px;line-height:1.3;background:rgba(244,181,106,.06);border-color:rgba(244,181,106,.4)}
 .opts{display:grid;gap:10px}
-.opt{text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:16px 18px}
-.opt:hover{border-color:var(--ink)}
-.opt b{display:block;font-weight:500;font-size:17px}
-.opt span{color:var(--muted);font-family:var(--serif);font-size:15px}
-#missingWrap{margin-top:14px}
-#missingWrap textarea{min-height:80px}
-
-/* reflect/final */
-.observation{font-family:var(--serif);font-size:21px;line-height:1.6;margin:0 0 24px}
-.threads{list-style:none;padding:0;margin:0 0 26px;display:flex;flex-direction:column;gap:12px}
-.threads b{font-weight:500;font-size:15px;display:block}
-.threads span{font-family:var(--serif);color:var(--muted);font-size:15px}
-.question{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.5;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 0 20px}
-.thinking{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:19px}
-.note-label{display:block;font-size:14px;color:var(--muted);margin:0 0 6px}
-.final-line{font-family:var(--serif);font-size:clamp(26px,3.6vw,38px);line-height:1.35;margin:6px 0 30px;letter-spacing:-.01em}
-.sec{font-size:14px;font-weight:500;color:var(--muted);margin:30px 0 12px}
-.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
-.stat{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:14px 16px;text-align:center}
-.stat b{display:block;font-family:var(--serif);font-size:24px;font-weight:500}
-.stat span{font-size:12px;color:var(--muted)}
-.pcard.relive .pc-body small{display:block;margin-top:2px}
-.pcard.relive .pc-body em{font-style:normal;color:var(--accent);font-size:13px;display:block;margin-top:6px}
-.causes{display:grid;gap:12px}
-.cause{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--paper)}
-.ctext{font-family:var(--serif);font-size:19px;line-height:1.5;margin:0}
-.verdicts .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.ccomment{margin-top:10px;font-family:var(--sans);font-size:15px;padding:9px 13px;background:var(--bg)}
+.opt{text-align:left;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:16px 18px;color:var(--ink);transition:border-color .15s}
+.opt:hover{border-color:var(--accent)}
+.opt b{display:block;font-weight:600;font-size:16px}
+.opt span{color:var(--muted);font-size:14px}
+#missingWrap{margin-top:16px}
+#missing{min-height:84px}
+.note-label{display:block;font-size:13px;color:var(--dim);margin:0 0 6px}
+.thinking{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:24px}
+.observation{margin:0 0 22px;font-family:var(--serif);font-size:clamp(23px,2.6vw,28px);line-height:1.32}
+.sec{margin:36px 0 12px;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.threads{list-style:none;padding:0;margin:0 0 10px;display:flex;flex-direction:column;gap:14px}
+.threads b{display:block;font-size:14px;font-weight:600}
+.threads span{color:var(--muted);font-size:15px;line-height:1.5}
 .tries{list-style:none;padding:0;margin:0;display:grid;gap:10px}
-.tries li{background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-family:var(--serif);font-size:17px;line-height:1.5}
-.tries .from{display:block;font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:2px}
-.elaborate{margin-top:30px;padding-top:16px;border-top:1px solid var(--line)}
-.err{color:var(--muted);font-size:14px;margin-top:10px}
-details.log{margin-top:40px;font-size:14px;color:var(--muted)}
-details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:360px;overflow:auto;font-size:12px;color:var(--ink)}
+.tries li{background:var(--accent-soft);border:1px solid rgba(244,181,106,.25);border-radius:14px;padding:12px 16px;font-size:16px;line-height:1.5}
+.tries .from{display:block;font-size:12px;color:var(--accent-text);margin-bottom:2px}
+.causes{display:grid;gap:12px}
+.cause{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:16px 18px}
+.ctext{margin:0;font-family:var(--serif);font-size:23px;line-height:1.28}
+.verdicts .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ccomment{width:100%;margin-top:10px;background:var(--field);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:10px 16px;color:var(--ink);font-size:15px;outline:none}
+.elaborate{margin-top:34px;padding-top:6px;border-top:1px solid var(--line)}
+#elaborateInput{min-height:84px}
+.ref{margin:0;font-family:var(--serif);font-size:clamp(24px,2.8vw,30px);line-height:1.3}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.stat{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:14px 12px;text-align:center}
+.stat b{display:block;font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.1}
+.stat span{font-size:12px;color:var(--dim)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pcard{text-align:left;padding:0;border:1px solid var(--line);background:var(--card);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;color:var(--ink);transition:border-color .15s}
+.pcard:hover{border-color:var(--accent)}
+.thumb{aspect-ratio:16/10;background:linear-gradient(180deg,#1A2040,#6E4E5E 70%,#0B1222)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .6s ease}
+.thumb img.ready{opacity:1}
+.pc-body{padding:12px 14px 16px;display:flex;flex-direction:column;gap:2px}
+.pc-body b{font-weight:600;font-size:15px}
+.pc-body small{color:var(--dim);font-size:13px}
+.pc-body em{font-style:normal;color:var(--accent);font-size:13px;margin-top:6px}
+details.log{margin-top:40px;font-size:13px;color:var(--dim)}
+details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;max-height:360px;overflow:auto;font-size:12px;color:var(--ink2)}
 </style>
 </head>
 <body>
-<div id="backdrop" aria-hidden="true"><div class="bd"></div><div class="bd"></div></div>
-<div class="wrap">
-  <div class="brand">WorldMirror <span>prototype</span></div>
 
-  <section id="intro" class="glass narrow">
-    <h1>What's been on your mind?</h1>
-    <p class="lede">Write it however it comes out. It doesn't need to be clear yet. We'll show you a few places in the world that might have something to say about it, and you can walk through them.</p>
-    <label for="problem" class="small" style="display:block;margin-bottom:6px">In your own words</label>
-    <textarea id="problem" placeholder="Lately I've been..."></textarea>
-    <div id="codeWrap" class="hidden" style="margin-top:14px;max-width:260px">
-      <label for="studyCode" class="small" style="display:block;margin-bottom:6px">Study code</label>
-      <input type="text" id="studyCode" autocomplete="off">
-    </div>
-    <div class="row" style="margin-top:16px">
-      <button class="btn primary" id="startBtn" disabled>Show me places</button>
-      <button class="textbtn" id="exampleBtn">Use an example</button>
-    </div>
-    <p class="small" style="margin-top:26px;max-width:62ch">What you write here and while walking is sent to Anthropic's Claude AI through this study's server, so it can choose places, answer your questions, and notice what's shifting. Your session, including your notes and questions, is saved for the research team.</p>
-  </section>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
 
-  <section id="intake" class="hidden narrow glass">
-    <h2>A few questions first</h2>
-    <p class="lede" style="margin-bottom:14px">So the places fit what's actually going on. Answer in a few words, or skip any you'd rather not.</p>
-    <p class="statement" id="intakeStatement" style="margin-bottom:22px"></p>
-    <p class="thinking" id="intakeThinking">Thinking about what to ask...</p>
-    <div id="intakeBody" class="hidden">
-      <p class="small" id="intakeCount" style="margin:0 0 6px"></p>
-      <label class="intake-q" for="intakeAnswer" id="intakeQ"></label>
-      <div class="chips" id="intakeChips"></div>
-      <textarea id="intakeAnswer" placeholder="In your own words..."></textarea>
-      <div class="row" style="margin-top:14px">
-        <button class="btn primary" id="intakeNext">Next</button>
-        <button class="btn" id="intakeSkip">Skip this one</button>
-        <button class="textbtn" id="intakeBack">← Previous</button>
+<header id="topbar">
+  <div class="brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4B56A" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+    WorldMirror
+  </div>
+  <div class="tr hidden" data-for="intake">
+    <div class="qprog"><span id="intakeCount"></span><div class="dots" id="intakeDots" aria-hidden="true"></div></div>
+    <button class="toplink" id="intakeSkipAll">Skip the questions →</button>
+  </div>
+  <div class="tr hidden" data-for="loading"><button class="btn" id="stopGen">Stop</button></div>
+  <div class="tr hidden" data-for="reveal"><button class="toplink" id="restartTop">Start over</button></div>
+  <div class="tr hidden" data-for="landing"><span class="small" id="landCount"></span></div>
+</header>
+
+<section id="intro" class="screen">
+  <img class="horizon" src="assets/globe_horizon.svg" alt="" aria-hidden="true">
+  <div class="stack">
+    <h1 class="display">What's on your mind?</h1>
+    <p class="lede">Write freely: a worry, a decision, a feeling you can't quite name. We'll find places in the world that echo it.</p>
+    <div class="formcol">
+      <label for="problem" class="lbl">In your own words</label>
+      <div class="field">
+        <textarea id="problem" rows="1" placeholder="I keep going back and forth about…"></textarea>
+        <button class="go" id="startBtn" disabled aria-label="Continue"><svg width="22" height="22" style="color:#1A1206"><use href="#i-arrow"/></svg></button>
+      </div>
+      <div id="codeWrap" class="hidden" style="margin-top:6px">
+        <label for="studyCode" class="lbl" style="display:block;margin-bottom:6px">Study code</label>
+        <input type="text" id="studyCode" autocomplete="off">
       </div>
     </div>
-    <p style="margin-top:26px"><button class="textbtn" id="intakeSkipAll">Skip the questions and show me places</button></p>
-  </section>
-
-  <section id="loading" class="hidden glass narrow">
-    <div class="loadglobe" id="loadGlobe" aria-hidden="true"></div>
-    <p id="loadingMsg" style="font-size:18px;margin:0;max-width:46ch"></p>
-    <p class="statement" id="loadingStatement"></p>
-    <div class="factbox"><p id="factText"></p></div>
-    <p class="small" style="margin:0">This can take up to a minute.</p>
-    <button class="btn" id="stopGen">Stop</button>
-    <div id="loadingErr"></div>
-  </section>
-
-  <section id="reveal" class="hidden glass">
-    <h2 id="revealTitle"></h2>
-    <p class="statement" id="revealStatement"></p>
-    <div class="cards" id="cards"></div>
-    <div class="row"><button class="btn primary" id="walkBtn">Start walking</button><span class="small">Or pick a place to begin there.</span></div>
-  </section>
-
-  <section id="walk" class="hidden">
-    <div class="walkhead"><div class="tabs" id="tabs"></div><div class="row"><button class="textbtn hidden" id="backToSummary">← Back to your summary</button><button class="textbtn" id="restartTop">Start over</button></div></div>
-    <p class="small" id="tabsHint" style="margin:-6px 0 14px"></p>
-    <div class="grid">
-      <article class="card glass">
-        <div class="viewer" id="viewer">
-          <div class="ov vplace" id="placeName"></div>
-          <div class="ov vcount" id="mcount"></div>
-          <div class="ov hint3d">Drag to look around. Use W A S D or the arrows to walk.</div>
-          <button class="vbtn" id="recenter">Recenter</button>
-          <div class="pad">
-            <button class="vbtn" data-move="f" aria-label="Walk forward">↑</button>
-            <button class="vbtn" data-move="l" aria-label="Turn left">←</button>
-            <button class="vbtn" data-move="b" aria-label="Walk back">↓</button>
-            <button class="vbtn" data-move="r" aria-label="Turn right">→</button>
-          </div>
-        </div>
-        <div class="mbody">
-          <p class="mtitle" id="mtitle"></p>
-          <p class="mscene" id="mscene"></p>
-          <p class="meaning" id="mmeaning"></p>
-          <div class="ask">
-            <h3>Ask questions, converse about your thoughts</h3>
-            <div class="chips" id="suggest"></div>
-            <div id="chatlog" aria-live="polite"></div>
-            <form id="askForm"><input type="text" id="askInput" placeholder="Ask anything about this moment or place" autocomplete="off"><button class="btn" id="askBtn">Ask</button></form>
-          </div>
-          <div class="nav" id="navRow"><button class="btn" id="prevM">Back</button><button class="btn primary" id="nextM">Next moment →</button></div>
-          <div class="transition hidden" id="transitionCard">
-            <p class="small" id="transitionMsg"></p>
-            <button class="btn primary" id="transitionBtn"></button>
-          </div>
-        </div>
-      </article>
-      <aside class="side glass">
-        <div>
-          <h3>Where you are</h3>
-          <div class="sideglobe" id="sideGlobe"></div>
-          <p class="small" id="sideGlobeLabel" style="text-align:center;margin:8px 0 0"></p>
-        </div>
-        <div>
-          <h3>What you came in with</h3>
-          <p class="orig" id="origStmt"></p>
-        </div>
-        <div id="refBlock" class="hidden">
-          <h3 style="color:inherit">How it's taking shape</h3>
-          <p class="ref" id="refStmt"></p>
-          <p class="shift" id="refShift"></p>
-        </div>
-        <p class="small" id="refStatus" aria-live="polite" style="margin:-10px 0 0"></p>
-        <button class="btn primary" id="checkSide">Pause and check in</button>
-        <details class="research"><summary>Researcher view</summary><dl id="readout"></dl></details>
-      </aside>
+    <div class="row center">
+      <button class="btn" id="exampleBtn">Use an example</button>
+      <button class="btn" id="justShow" disabled>Just show me places</button>
     </div>
-  </section>
+  </div>
+  <p class="foot">What you write here and while walking is sent to Claude through this study's server, and your session is saved for the research team.</p>
+</section>
 
-  <section id="checkin" class="hidden narrow glass">
+<section id="intake" class="screen center hidden">
+  <img class="flatmap" src="assets/flatmap.svg" alt="" aria-hidden="true">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="stack">
+    <div class="thinkpill" id="intakeThinking"><span class="dot" aria-hidden="true"></span><span id="intakeThinkingText">Thinking… percolating on what you shared</span></div>
+    <div class="prevqa hidden" id="intakePrev"><p id="intakePrevQ"></p><p class="it" id="intakePrevA"></p></div>
+    <div id="intakeBody" class="hidden">
+      <label class="qtitle" for="intakeAnswer" id="intakeQ"></label>
+      <div class="formcol" style="max-width:none">
+        <span class="lbl">Your answer (optional)</span>
+        <div class="field">
+          <textarea id="intakeAnswer" rows="1" placeholder="In your own words…"></textarea>
+          <button class="go" id="intakeNext" aria-label="Next question"><svg width="22" height="22" style="color:#1A1206"><use href="#i-arrow"/></svg></button>
+        </div>
+      </div>
+      <div class="chips" id="intakeChips"></div>
+      <div class="qnav">
+        <button class="textbtn" id="intakeBack">← Previous</button>
+        <div class="row" style="margin-left:auto">
+          <button class="btn" id="intakeSkip">Skip this one</button>
+          <button class="btn light" id="intakeNextBtn">Next question</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <aside class="camein"><p class="eyebrow">What you came in with</p><p id="intakeStatement"></p></aside>
+</section>
+
+<section id="loading" class="screen center hidden">
+  <div class="stack">
+    <div class="titles">
+      <h1 class="display">Let's take a trip.</h1>
+      <p class="lede sm" id="loadingMsg"></p>
+    </div>
+    <div class="spinglobe" role="img" aria-label="A spinning dotted globe"></div>
+    <div class="progress"><div class="bar" aria-hidden="true"><div></div></div><p id="loadingStatus">This can take up to a minute.</p></div>
+    <section class="fact">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F4B56A" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:2px"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>
+      <div><p class="eyebrow">Fun fact while you wait</p><p id="factText"></p></div>
+    </section>
+    <div id="loadingErr"></div>
+  </div>
+</section>
+
+<section id="reveal" class="screen hidden">
+  <div class="reveal-grid">
+    <div class="globewrap"><div class="globe3d" id="revealGlobe"></div></div>
+    <div class="reveal-side">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <h1 class="display md" id="revealTitle"></h1>
+        <p class="lede sm" id="revealStatement">Each one holds a piece of what you described. Pick one to step into, or travel through all of them in order.</p>
+      </div>
+      <div class="placelist" id="cards"></div>
+      <div class="row" style="margin-top:4px">
+        <button class="btn primary lg" id="choosePlace">Choose this place</button>
+        <button class="btn lg" id="walkBtn">Walk through the journey</button>
+      </div>
+      <button class="textbtn u" id="noneFit" style="align-self:flex-start;min-height:32px">None of these feel right? Show different places</button>
+    </div>
+  </div>
+</section>
+
+<section id="landing" class="screen hidden">
+  <img class="horizon" src="assets/globe_horizon.svg" alt="" aria-hidden="true">
+  <svg class="flight" viewBox="0 0 700 360" preserveAspectRatio="none" aria-hidden="true"><path d="M-20 30 C 180 -10, 360 60, 470 150 S 640 300, 700 330" fill="none" stroke="#EEF1FA" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="4 8" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
+  <div class="plane" aria-hidden="true"><svg width="72" height="56" viewBox="0 0 72 56" fill="none" stroke="#EEF1FA" stroke-width="1.6" stroke-linejoin="round"><path d="M2 22 L70 4 L46 52 L34 32 Z" fill="#141A2B"/><path d="M70 4 L34 32"/><path d="M34 32 L30 46 L42 38"/></svg></div>
+  <div class="landpin" aria-hidden="true"><svg width="40" height="52" viewBox="0 0 30 38"><path d="M15 37C15 37 2 22.5 2 14a13 13 0 0 1 26 0c0 8.5-13 23-13 23z" fill="#F4B56A" stroke="#05070D" stroke-width="1.5"/><circle cx="15" cy="14" r="4.5" fill="#05070D"/></svg><div class="ring"></div></div>
+  <div class="stack">
+    <p class="eyebrow accent">Now arriving</p>
+    <h1 class="display" id="landName"></h1>
+    <p class="lede sm" id="landWhy"></p>
+    <div class="row center">
+      <button class="btn primary lg" id="stepInside">Step inside</button>
+      <button class="btn lg" id="landBack">Back to the places</button>
+    </div>
+  </div>
+</section>
+
+<section id="walk" class="hidden" aria-label="Walking through a place">
+  <div class="world" id="world" tabindex="0" aria-label="A painted view of this place. Drag to look around; use W A S D or the arrow keys to move."><div class="worldimg" id="worldImg"></div></div>
+  <div class="walk-top">
+    <div class="row" style="align-items:stretch">
+      <div class="gchip wglass"><span class="eyebrow">Where you are</span><span class="v" id="placeName"></span></div>
+      <div class="gchip wglass" id="refBlock"><span class="eyebrow" id="stmtLabel">What you came in with</span><span class="v2" id="refStmt"></span><span class="small" id="refStatus" aria-live="polite"></span></div>
+    </div>
+    <div class="row">
+      <span class="gpill wglass" id="mcount"></span>
+      <button class="gbtn wglass" id="endWalk">End walk</button>
+    </div>
+  </div>
+  <section class="panel wglass" aria-label="This moment">
+    <div class="panel-scroll" id="panelScroll">
+      <p class="mtitle" id="mtitle"></p>
+      <p class="mscene" id="mscene"></p>
+      <p class="meaning" id="mmeaning"></p>
+      <div class="chips" id="suggest"></div>
+      <div id="chatlog" aria-live="polite"></div>
+    </div>
+    <form id="askForm">
+      <label for="askInput" class="lbl" style="padding:0;font-size:12px">Ask or respond</label>
+      <div class="field">
+        <input type="text" id="askInput" placeholder="Type what you notice…" autocomplete="off">
+        <button class="go" id="askBtn" aria-label="Send"><svg width="20" height="20" style="color:#1A1206"><use href="#i-arrow"/></svg></button>
+      </div>
+    </form>
+    <div class="pnav">
+      <button class="textbtn" id="prevM">← Back</button>
+      <button class="btn light" id="nextM">Next place</button>
+    </div>
+    <details class="research"><summary>Researcher view</summary><dl id="readout"></dl></details>
+  </section>
+  <div class="walk-foot">
+    <div class="gchip keys wglass"><span class="kbd" aria-hidden="true"><span>W</span><span>A</span><span>S</span><span>D</span></span>Walk · drag to look around</div>
+    <button class="gbtn wglass" id="recenter">Recenter</button>
+  </div>
+</section>
+
+<section id="checkin" class="screen hidden">
+  <div class="col">
     <h2>Let's check in</h2>
-    <p class="lede" style="margin-bottom:0">Here's where you started, and how it reads now based on what you noticed and asked. Edit it if it's not quite right.</p>
+    <p class="lede">Here's where you started, and how it reads now based on what you noticed and asked. Edit it if it's not quite right.</p>
     <div class="cmp">
       <div><label>You started with</label><p class="orig" id="ciOrig"></p></div>
-      <div><label for="ciNow">Now it sounds like</label><textarea id="ciNow"></textarea><p class="small hidden" id="ciUpdating">Still updating from your last place...</p></div>
+      <div><label for="ciNow">Now it sounds like</label><textarea id="ciNow"></textarea><p class="small hidden" id="ciUpdating">Still updating from your last place…</p></div>
     </div>
     <div class="opts">
       <button class="opt" id="optSatisfied"><b>I feel satisfied</b><span>This says it. Help me make sense of what I noticed.</span></button>
@@ -316,349 +447,107 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     </div>
     <div id="missingWrap" class="hidden">
       <label class="note-label" for="missing">What's missing? Even a rough sense helps.</label>
-      <textarea id="missing" placeholder="It's less about... and more about..."></textarea>
-      <div class="row" style="margin-top:12px"><button class="btn primary" id="pivotBtn">Show me different places</button></div>
+      <textarea id="missing" placeholder="It's less about… and more about…"></textarea>
+      <div class="row" style="margin-top:12px"><button class="btn primary lg" id="pivotBtn">Show me different places</button></div>
     </div>
-    <p style="margin-top:22px"><button class="textbtn" id="backToWalk">Go back to the places</button></p>
-  </section>
+    <p style="margin-top:22px"><button class="textbtn" id="backToWalk">← Go back to the places</button></p>
+  </div>
+</section>
 
-  <section id="reflect" class="hidden narrow glass">
+<section id="reflect" class="screen hidden">
+  <div class="col">
     <h2>What your walk is pointing to</h2>
     <p class="lede">This isn't an answer yet. It's a working read of what you noticed, and you can push back on any of it.</p>
     <div id="reflectBody"></div>
-  </section>
+  </div>
+</section>
 
-  <section id="final" class="hidden narrow glass">
+<section id="final" class="screen hidden">
+  <div class="col">
     <h2>Your working summary</h2>
     <p class="lede">Where things stand for now. You can keep exploring from here whenever you want.</p>
     <div id="summaryBody"></div>
     <div class="row" style="margin-top:28px">
-      <button class="btn primary" id="finalExplore">Explore places for this</button>
-      <button class="btn" id="restart">Start a new walk</button>
+      <button class="btn primary lg" id="finalExplore">Explore places for this</button>
+      <button class="btn lg" id="restart">Start a new walk</button>
     </div>
     <details class="log"><summary>Session log (for the research team)</summary><pre id="log"></pre></details>
-  </section>
-</div>
+  </div>
+</section>
 
 <script>
-/* ================= 3D scene engine ================= */
-const HAS3D = typeof THREE !== "undefined";
-const SKIES={
-  dawn:{top:"#7F93B8",bot:"#F2C4A2",sun:"#FFD9B0",amb:.62,sunI:.85,fog:"#E3C3AE",sunPos:[-30,8,-40]},
-  day:{top:"#5F9FD3",bot:"#DCEBF2",sun:"#FFF4DD",amb:.78,sunI:1.0,fog:"#D3E2EC",sunPos:[20,40,10]},
-  dusk:{top:"#2D3866",bot:"#E68A65",sun:"#FFB070",amb:.5,sunI:.7,fog:"#B07A6C",sunPos:[30,6,-40]},
-  night:{top:"#060B1C",bot:"#1C2A48",sun:"#9FB4E0",amb:.28,sunI:.22,fog:"#0F1729",sunPos:[-20,30,-30]}
-};
-const SKIN=["#F1D3B8","#E0B48F","#C68E62","#9E6B45","#7A4E30","#5A3922"];
-const CLOTH=["#B5473A","#2F5D8A","#E0A526","#3E7D5A","#7B4E8C","#D9D3C7","#2B2B2B","#C2603A","#4F7FA8","#8E3B5A"];
-const KINDS=["person","table_long","table_small","bench","stool","stall","lanterns","bunting","lantern","candles","fire","tree","maple_tree","building","pagoda","gate","drum","bicycle","motorbike","car","boat","bowl","crates","umbrella","petals","kite","steps","water","fountain","wall","raked_gravel","rock"];
-function hex(c,d){return /^#[0-9a-fA-F]{6}$/.test(c||"")?c:d}
-function srng(seed){let h=2166136261;for(const ch of String(seed)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
-
-function buildScene(spec, seed){
-  const T=THREE, r=srng(seed||"x");
-  const scene=new T.Scene(), anim=[], lights=[];
-  const time=SKIES[spec.time]?spec.time:"day", sky=SKIES[time], night=time==="night", dusk=time==="dusk";
-  const pal={ground:hex(spec.palette?.ground,"#8C7B66"),walls:hex(spec.palette?.walls,"#C9B79C"),accent:hex(spec.palette?.accent,"#C9852E")};
-  const M=(c,o={})=>new T.MeshStandardMaterial({color:c,roughness:.92,metalness:0,flatShading:true,...o});
-  const glow=c=>new T.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:night?1.6:dusk?1.1:.5});
-  const mesh=(g,m,x=0,y=0,z=0)=>{const o=new T.Mesh(g,m);o.position.set(x,y,z);return o};
-  const box=(w,h,d,c)=>mesh(new T.BoxGeometry(w,h,d),typeof c==="string"?M(c):c);
-  const cyl=(a,b,h,c,s=10)=>mesh(new T.CylinderGeometry(a,b,h,s),typeof c==="string"?M(c):c);
-  const sph=(rad,c,s=10)=>mesh(new T.SphereGeometry(rad,s,Math.max(6,s-2)),typeof c==="string"?M(c):c);
-  const pick=a=>a[Math.floor(r()*a.length)];
-  const shade=(c,k)=>{const o=new T.Color(c);o.multiplyScalar(k);return"#"+o.getHexString()};
-  const addLight=(color,x,y,z,i=1.2,d=8)=>{if(lights.length>=5)return;const l=new T.PointLight(color,night||dusk?i:i*.3,d,2);l.position.set(x,y,z);scene.add(l);lights.push(l)};
-
-  /* sky */
-  const interior=spec.setting==="interior";
-  if(!interior){
-    const sg=new T.SphereGeometry(120,24,12);
-    const sm=new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{top:{value:new T.Color(sky.top)},bot:{value:new T.Color(sky.bot)}},
-      vertexShader:"varying float h;void main(){h=normalize(position).y;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
-      fragmentShader:"uniform vec3 top;uniform vec3 bot;varying float h;void main(){gl_FragColor=vec4(mix(bot,top,clamp(h*1.6,0.,1.)),1.);}"});
-    scene.add(new T.Mesh(sg,sm));
-    if(night){const g=new T.BufferGeometry(),p=[];for(let i=0;i<500;i++){const th=r()*Math.PI*2,ph=r()*1.2+.15;p.push(110*Math.cos(th)*Math.cos(ph),110*Math.sin(ph),110*Math.sin(th)*Math.cos(ph))}g.setAttribute("position",new T.Float32BufferAttribute(p,3));scene.add(new T.Points(g,new T.PointsMaterial({color:0xffffff,size:.5})))}
-    const sunM=sph(night?2.5:4,new T.MeshBasicMaterial({color:sky.sun}));sunM.position.set(...sky.sunPos.map(v=>v*2.2));scene.add(sunM);
-    scene.fog=new T.Fog(sky.fog,18,70);
-  } else { scene.background=new T.Color(shade(pal.walls,.4)); }
-  scene.add(new T.HemisphereLight(sky.top,shade(pal.ground,.8),interior?.55:sky.amb));
-  const sun=new T.DirectionalLight(sky.sun,interior?.25:sky.sunI);sun.position.set(...sky.sunPos);scene.add(sun);
-
-  /* ground */
-  const ground=mesh(new T.PlaneGeometry(200,200),M(pal.ground));ground.rotation.x=-Math.PI/2;scene.add(ground);
-
-  /* setting */
-  const wallCols=[pal.walls,shade(pal.walls,.85),shade(pal.walls,1.12),pal.accent];
-  const building=(x,z,w,h,d,c,lit=true)=>{const g=new T.Group();g.add(box(w,h,d,c).translateY(h/2));
-    if(lit){const wm=night||dusk?glow("#FFC46B"):M(shade(c,.55));const rows=Math.floor(h/1.6),cols=Math.max(1,Math.floor(w/1.4));
-      for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){if(r()<(night?.45:.7)){const win=box(.5,.75,.05,wm);win.position.set(-w/2+.7+j*(w-1)/Math.max(1,cols-1||1),1.2+i*1.6,d/2+.03);g.add(win)}}}
-    g.position.set(x,0,z);scene.add(g);return g};
-  const s=spec.setting;
-  if(s==="street"||s==="market"){for(const side of[-1,1]){let z=-22;while(z<14){const w=3+r()*3,h=4+r()*6;const b=building(side*7.5,z+w/2,4,h,w,pick(wallCols));b.rotation.y=-side*Math.PI/2;z+=w+.1}}
-    if(s==="market"){for(let i=0;i<4;i++)addStall(-5+i*3.3,-7.5,pick(CLOTH))}}
-  else if(s==="plaza"){for(let a=0;a<14;a++){const th=a/14*Math.PI*2;const b=building(Math.cos(th)*15,Math.sin(th)*15,5+r()*3,5+r()*7,4,pick(wallCols));b.rotation.y=-th-Math.PI/2}}
-  else if(s==="waterfront"||s==="riverside"){
-    const edge=s==="riverside"?-3:-5.3, wy=s==="riverside"?-1.5:-.4;
-    ground.geometry.dispose();ground.geometry=new T.PlaneGeometry(200,100);ground.position.z=edge+50;
-    const water=mesh(new T.PlaneGeometry(200,100),M(night?"#1B2A44":"#4E7FA0",{roughness:.3,metalness:.1}));water.rotation.x=-Math.PI/2;water.position.set(0,wy,edge-50);scene.add(water);
-    anim.push(t=>{water.position.y=wy+Math.sin(t*.8)*.03});
-    if(s==="riverside"){for(let i=0;i<6;i++){const st=box(200,.25,1,shade(pal.ground,1-i*.05));st.position.set(0,-.125-i*.25,edge-.5-i);scene.add(st)}
-      for(let i=0;i<6;i++){building(-20+i*8,edge+8+r()*3,5,6+r()*6,4,pick(wallCols))}
-      for(let i=0;i<6;i++)building(-25+i*10,edge-45,6,4+r()*4,4,shade(pal.ground,.7),false)}
-    else{const quay=box(200,.6,.8,shade(pal.ground,.75));quay.position.set(0,-.1,edge+.4);scene.add(quay);
-      for(let i=0;i<9;i++)building(-28+i*7+r(),edge-40-r()*8,5,4+r()*8,4,pick(wallCols));
-      for(let i=0;i<6;i++){const b=building(-16+i*6.5,13,5,5+r()*6,4,pick(wallCols));b.rotation.y=Math.PI}}}
-  else if(s==="garden"||s==="courtyard"){const wc=s==="garden"?"#7D6A55":pal.walls;const back=box(40,2.2,.6,wc);back.position.set(0,1.1,-11);scene.add(back);
-    if(s==="courtyard"){for(const x of[-11,11]){const sw=box(.6,4,30,wc);sw.position.set(x,2,0);scene.add(sw)}back.scale.y=1.8;back.position.y=2}
-    else{for(let i=0;i<8;i++)addTree(-14+r()*28,-13-r()*6,1+r()*.8,r()>.6?"#B5452A":"#4E6B3A")}}
-  else if(s==="hillside"){for(let i=0;i<6;i++){const h=sph(10+r()*10,shade(pal.ground,.85+r()*.2),12);h.scale.y=.35;h.position.set(-40+i*16,-1,-35-r()*15);scene.add(h)}}
-  else if(s==="interior"){const room=box(16,4,16,M(pal.walls,{side:T.BackSide}));room.position.set(0,2,1);scene.add(room);const beams=new T.Group();for(let i=-3;i<=3;i++){beams.add(box(16,.2,.25,shade(pal.walls,.5)).translateZ(i*2.2).translateY(3.85))}scene.add(beams);addLight("#FFD39A",0,3.3,0,1.4,14);ground.material=M(shade(pal.ground,1))}
-
-  /* helpers for objects */
-  function addTree(x,z,k=1,leaf="#4E6B3A"){const g=new T.Group();g.add(cyl(.12*k,.18*k,1.8*k,"#5A4330").translateY(.9*k));for(let i=0;i<3;i++){const c=sph((.8+r()*.4)*k,leaf,7);c.position.set((r()-.5)*.8*k,(1.9+r()*.8)*k,(r()-.5)*.8*k);g.add(c)}g.position.set(x,0,z);scene.add(g);return g}
-  function addStall(x,z,c){const g=new T.Group();for(const dx of[-1.1,1.1])for(const dz of[-.6,.6])g.add(cyl(.05,.05,2.2,"#5A4330").translateX(dx).translateZ(dz).translateY(1.1));g.add(box(2.4,.9,1.1,"#7A5A3C").translateY(.45));const aw=box(2.7,.08,1.6,c);aw.position.y=2.25;aw.rotation.x=.12;g.add(aw);for(let i=0;i<5;i++)g.add(box(.3,.25,.3,pick(["#D9822B","#C23B2E","#7FA03A","#E4C44A"])).translateX(-.9+i*.45).translateY(1.02));g.position.set(x,0,z);scene.add(g);return g}
-
-  function person(pose,color){
-    const g=new T.Group(), skin=pick(SKIN), cloth=color||pick(CLOTH), seated=pose==="seated";
-    const body=new T.Group();g.add(body);
-    if(!seated){body.add(cyl(.09,.09,.8,"#2E2B2A",6).translateX(-.1).translateY(.4));body.add(cyl(.09,.09,.8,"#2E2B2A",6).translateX(.1).translateY(.4))}
-    else{const l1=box(.18,.16,.55,"#2E2B2A");l1.position.set(-.1,.48,.22);const l2=l1.clone();l2.position.x=.1;body.add(l1,l2);body.add(cyl(.07,.07,.45,"#2E2B2A",6).translateX(-.1).translateY(.22).translateZ(.48));body.add(cyl(.07,.07,.45,"#2E2B2A",6).translateX(.1).translateY(.22).translateZ(.48))}
-    const base=seated?.5:.8;
-    body.add(cyl(.2,.26,.62,cloth,8).translateY(base+.31));
-    const head=sph(.13,skin,8);head.position.y=base+.78;body.add(head);
-    if(r()>.5){const hair=sph(.135,pick(["#1E1A17","#3B2A1E","#6B4A2E","#B9B2A6"]),8);hair.scale.y=.6;hair.position.y=base+.86;body.add(hair)}
-    const armL=new T.Group(),armR=new T.Group();armL.position.set(-.25,base+.58,0);armR.position.set(.25,base+.58,0);
-    armL.add(box(.09,.5,.09,cloth).translateY(-.25));armR.add(box(.09,.5,.09,cloth).translateY(-.25));body.add(armL,armR);
-    const ph=r()*6;
-    if(pose==="drumming"){armL.rotation.x=-1.1;armR.rotation.x=-1.1;anim.push(t=>{armL.rotation.x=-1.1+Math.sin(t*9+ph)*.35;armR.rotation.x=-1.1+Math.sin(t*9+ph+Math.PI)*.35})}
-    else if(pose==="dancing"){anim.push(t=>{body.rotation.y=Math.sin(t*1.8+ph)*.6;body.position.y=Math.abs(Math.sin(t*3.6+ph))*.08;armL.rotation.z=.6+Math.sin(t*3.6+ph)*.5;armR.rotation.z=-.6-Math.sin(t*3.6+ph)*.5})}
-    else if(pose==="working"){armL.rotation.x=-.9;armR.rotation.x=-.9;body.rotation.x=.15;anim.push(t=>{armR.rotation.x=-.9+Math.sin(t*2+ph)*.25})}
-    else if(pose==="seated"){armL.rotation.x=-.7;armR.rotation.x=-.7;anim.push(t=>{head.rotation.y=Math.sin(t*.7+ph)*.4;armR.rotation.x=-.7+Math.max(0,Math.sin(t*.9+ph))*.4})}
-    else{anim.push(t=>{head.rotation.y=Math.sin(t*.5+ph)*.35;body.position.y=Math.sin(t*1.2+ph)*.008})}
-    return g;
-  }
-  const builders={
-    table_long:o=>{const L=o.length||4,g=new T.Group();g.add(box(L,.08,1,"#7A5636").translateY(.76));for(const x of[-L/2+.2,L/2-.2])for(const z of[-.4,.4])g.add(box(.08,.76,.08,"#5A3F27").translateX(x).translateZ(z).translateY(.38));for(const z of[-.85,.85])g.add(box(L,.06,.3,"#6A4A2E").translateZ(z).translateY(.45));return g},
-    table_small:()=>{const g=new T.Group();g.add(cyl(.55,.55,.06,"#7A5636",14).translateY(.76));g.add(cyl(.05,.05,.76,"#3A2C20",6).translateY(.38));return g},
-    bench:o=>{const L=o.length||2,g=new T.Group();g.add(box(L,.08,.4,"#6A4A2E").translateY(.45));for(const x of[-L/2+.1,L/2-.1])g.add(box(.08,.45,.35,"#4A3420").translateX(x).translateY(.22));return g},
-    stool:()=>{const g=new T.Group();g.add(cyl(.18,.15,.35,pick(["#C23B2E","#2F6FB0","#3E8E5A"]),8).translateY(.18));return g},
-    lanterns:o=>{const L=o.length||8,g=new T.Group(),n=Math.round(L/.8);for(let i=0;i<n;i++){const b=sph(.13,glow(i%2?hex(o.color,"#FF9F43"):"#FFD27A"),8);b.position.set(-L/2+i*L/n,3.2+Math.sin(i/n*Math.PI)*-.4,0);g.add(b)}addLight("#FFB566",o.x||0,3,o.z||0,1.5,10);return g},
-    bunting:o=>{const L=o.length||8,g=new T.Group(),n=Math.round(L/.5);for(let i=0;i<n;i++){const f=mesh(new T.ConeGeometry(.16,.35,3),M(pick(CLOTH)));f.rotation.x=Math.PI;f.position.set(-L/2+i*L/n,3.4+Math.sin(i/n*Math.PI)*-.5,0);g.add(f)}const ph=r()*5;anim.push(t=>{g.rotation.x=Math.sin(t*1.3+ph)*.05});return g},
-    lantern:o=>{const g=new T.Group();g.add(cyl(.01,.01,.8,"#222",4).translateY(3.1));const l=cyl(.2,.2,.45,glow(hex(o.color,"#F2B35A")),10);l.position.y=2.5;g.add(l);addLight("#FFB566",o.x||0,2.4,o.z||0,1.2,7);return g},
-    candles:o=>{const g=new T.Group();const c=cyl(.03,.03,.14,"#F2EDE0",6);c.position.y=.07;const f=sph(.025,glow("#FFC35A"),6);f.position.y=.17;f.scale.y=1.8;g.add(c,f);const ph=r()*9;anim.push(t=>{f.scale.y=1.6+Math.sin(t*14+ph)*.3});if(r()>.5)addLight("#FFB566",(o.x||0),(o.y||0)+.6,(o.z||0),.9,4);return g},
-    fire:o=>{const g=new T.Group();for(let i=0;i<5;i++)g.add(box(.6,.08,.08,"#4A3420").rotateY(i*1.2).translateY(.05));const f=mesh(new T.ConeGeometry(.35,.9,7),glow("#FF8A2A"));f.position.y=.45;g.add(f);anim.push(t=>{f.scale.set(1+Math.sin(t*11)*.08,1+Math.sin(t*7)*.15,1)});addLight("#FF8A2A",o.x||0,1,o.z||0,2,10);return g},
-    tree:o=>{const g=addTree(0,0,o.size||1,hex(o.color,"#4E6B3A"));scene.remove(g);return g},
-    maple_tree:o=>{const g=addTree(0,0,o.size||1.1,hex(o.color,pick(["#C2402A","#D9622B","#B8322A"])));scene.remove(g);return g},
-    building:o=>{const g=building(0,0,o.width||5,(o.size||1)*6,4,hex(o.color,pick(wallCols)));scene.remove(g);g.position.set(0,0,0);return g},
-    pagoda:o=>{const g=new T.Group(),c=hex(o.color,"#7A3B2A");for(let i=0;i<4;i++){const w=3.2-i*.6;g.add(box(w,1,w,"#C9B79C").translateY(.5+i*1.25));const roof=box(w+1.2,.18,w+1.2,c);roof.position.y=1.08+i*1.25;g.add(roof)}g.add(cyl(.05,.05,1.4,"#9A7A3A",4).translateY(5.6));return g},
-    gate:o=>{const g=new T.Group(),c=hex(o.color,"#C23B22");for(const x of[-1.4,1.4])g.add(cyl(.15,.18,3.6,c,10).translateX(x).translateY(1.8));g.add(box(4.2,.22,.35,"#2B2B2B").translateY(3.7));g.add(box(3.4,.18,.25,c).translateY(3.2));return g},
-    drum:o=>{const g=new T.Group();g.add(cyl(.22,.17,1,hex(o.color,"#8A5A35"),12).translateY(.5));g.add(cyl(.225,.225,.03,"#E8DCC4",12).translateY(1.01));return g},
-    bicycle:o=>{const g=new T.Group(),c=hex(o.color,pick(CLOTH));for(const x of[-.5,.5]){const w=mesh(new T.TorusGeometry(.33,.03,6,16),M("#222"));w.position.set(x,.33,0);g.add(w)}g.add(box(1,.05,.05,c).translateY(.6));g.add(box(.05,.5,.05,c).translateY(.55).translateX(.35).rotateZ(.3));g.add(box(.05,.5,.05,c).translateY(.5).translateX(-.25).rotateZ(-.4));g.add(box(.25,.05,.12,"#222").translateY(.85).translateX(-.3));g.add(box(.05,.05,.45,"#222").translateY(.95).translateX(.45));return g},
-    motorbike:o=>{const g=builders.bicycle({color:hex(o.color,"#2F5D8A")});g.add(box(.7,.3,.3,hex(o.color,"#2F5D8A")).translateY(.55));return g},
-    car:o=>{const g=new T.Group(),c=hex(o.color,pick(["#5FA8C9","#D9534F","#E8C547","#7DB46C","#E6E1D3"]));g.add(box(3.8,.6,1.7,c).translateY(.6));g.add(box(2,.55,1.5,c).translateY(1.15).translateX(-.2));for(const x of[-1.2,1.2])for(const z of[-.85,.85]){const w=cyl(.35,.35,.25,"#1E1E1E",12);w.rotation.x=Math.PI/2;w.position.set(x,.35,z);g.add(w)}return g},
-    boat:o=>{const g=new T.Group(),c=hex(o.color,"#8A5A35");const h=box(3.2,.45,1.1,c);h.position.y=.25;g.add(h);const p=mesh(new T.ConeGeometry(.55,.9,4),M(c));p.rotation.z=-Math.PI/2;p.position.set(2,.25,0);p.scale.z=.9;g.add(p);const ph=r()*6;anim.push(t=>{g.rotation.z=Math.sin(t*1.1+ph)*.04;g.position.y=(o.y||0)+Math.sin(t*1.3+ph)*.04});return g},
-    bowl:o=>{const g=new T.Group(),k=o.size||1;const b=mesh(new T.SphereGeometry(.16*k,16,8,0,Math.PI*2,Math.PI/2,Math.PI/2),M(hex(o.color,"#3B2F2A"),{side:T.DoubleSide}));b.position.y=.16*k;g.add(b);
-      const gold=new T.MeshStandardMaterial({color:"#E8C04A",emissive:"#8A6A10",emissiveIntensity:.6,metalness:.8,roughness:.3});
-      for(let i=0;i<3;i++){const seam=mesh(new T.TorusGeometry(.155*k,.008*k,4,20,Math.PI*.6),gold);seam.rotation.set(Math.PI/2+r()*.6,r()*6,r()*6);seam.position.y=.12*k;g.add(seam)}
-      anim.push(t=>{g.rotation.y=t*.15});return g},
-    crates:o=>{const g=new T.Group();g.add(box(.6,.45,.45,hex(o.color,"#8A6A45")).translateY(.23));g.add(box(.5,.12,.4,pick(["#D9822B","#C23B2E","#7FA03A"])).translateY(.5));return g},
-    umbrella:o=>{const g=new T.Group();g.add(cyl(.03,.03,2.3,"#444",5).translateY(1.15));const c=mesh(new T.ConeGeometry(1.3,.6,10),M(hex(o.color,pick(CLOTH))));c.position.y=2.4;g.add(c);return g},
-    petals:o=>{const g=new T.Group(),L=o.length||6;for(let i=0;i<L*14;i++){const p=box(.08,.01,.08,pick(["#F39A1E","#F2B530","#E8731A"]));p.position.set((r()-.5)*.7,.01,-i/14);p.rotation.y=r()*3;g.add(p)}return g},
-    kite:o=>{const g=new T.Group();const k=mesh(new T.PlaneGeometry(.8,.8),M(hex(o.color,"#D94A3A"),{side:T.DoubleSide}));k.rotation.z=Math.PI/4;g.add(k);g.position.y=8;const ph=r()*5;anim.push(t=>{g.position.y=(o.y||8)+Math.sin(t*.9+ph)*.5;g.rotation.y=Math.sin(t*.6)*.4});return g},
-    steps:o=>{const g=new T.Group(),L=o.length||6;for(let i=0;i<5;i++){g.add(box(L,.25,.8,shade(pal.ground,1-i*.05)).translateY(.12+i*.25).translateZ(-i*.8))}return g},
-    water:o=>{const w=mesh(new T.PlaneGeometry((o.size||1)*6,(o.size||1)*4),M(night?"#1B2A44":"#4E7FA0",{roughness:.3}));w.rotation.x=-Math.PI/2;w.position.y=.03;return w},
-    fountain:()=>{const g=new T.Group();g.add(cyl(1.4,1.5,.5,"#B8AE9C",16).translateY(.25));const w=cyl(1.3,1.3,.05,M("#5E8FB0",{roughness:.2}),16);w.position.y=.48;g.add(w);g.add(cyl(.15,.2,1.4,"#B8AE9C",8).translateY(.7));return g},
-    wall:o=>box(o.length||6,2,.4,hex(o.color,pal.walls)).translateY(1),
-    raked_gravel:o=>{const g=new T.Group(),R=o.spread||3;for(let i=1;i<=7;i++){const ring=mesh(new T.TorusGeometry(R*i/7+.6,.025,3,40),M("#E9E4DA"));ring.rotation.x=Math.PI/2;ring.position.y=.02;g.add(ring)}return g},
-    rock:o=>{const k=o.size||1;const m=mesh(new T.DodecahedronGeometry(.6*k,0),M(hex(o.color,"#6E6A64")));m.scale.y=.6;m.position.y=.25*k;m.rotation.y=r()*3;return m}
-  };
-  builders.stall=o=>{const g=addStall(0,0,hex(o.color,pick(CLOTH)));scene.remove(g);g.position.set(0,0,0);return g};
-
-  /* place objects */
-  const objs=(spec.objects||[]).slice(0,14);
-  for(const o of objs){
-    const kind=KINDS.includes(o.kind)?o.kind:"crates";
-    const n=Math.max(1,Math.min(14,Math.round(o.count||1)));
-    const cx=clamp(+o.x||0,-10,10), cz=clamp(+o.z||0,-9,7), sp=o.spread||(n>1?1.5:0), arr=o.arrange||(n>1?"circle":"single");
-    for(let i=0;i<n;i++){
-      let x=cx,z=cz,face=(o.rot||0)*Math.PI/180;
-      if(n>1){
-        if(arr==="circle"){const a=i/n*Math.PI*2;x=cx+Math.cos(a)*sp;z=cz+Math.sin(a)*sp;face=Math.atan2(cx-x,cz-z)}
-        else if(arr==="row"){x=cx-sp+(2*sp)*i/(n-1);}
-        else if(arr==="both_sides"){const half=Math.ceil(n/2),j=i%half,side=i<half?-1:1;x=cx-sp+(2*sp)*(half>1?j/(half-1):.5);z=cz+side*.95;face=side<0?0:Math.PI}
-        else {x=cx+(r()-.5)*2*sp;z=cz+(r()-.5)*2*sp;face=r()*Math.PI*2}
-      }
-      let g;
-      if(kind==="person"){const pose=["standing","seated","walking","drumming","dancing","working"].includes(o.pose)?o.pose:"standing";g=person(pose,o.color?hex(o.color):null);
-        if(pose==="walking"){const sx=x,dir=r()>.5?1:-1,sp2=.6+r()*.5,off=r()*20;g.rotation.y=dir>0?Math.PI/2:-Math.PI/2;anim.push(t=>{g.position.x=((sx+dir*(t*sp2+off))%16+24)%16-8;g.children[0].position.y=Math.abs(Math.sin(t*6+off))*.04})}
-        else g.rotation.y=face;
-        if(pose==="seated"&&arr==="both_sides")g.position.z=0;
-      } else {g=builders[kind](o);if(!g)continue;if(arr==="circle"&&n>1)g.rotation.y=face;else g.rotation.y=face}
-      if(o.size&&kind!=="bowl"&&kind!=="rock"&&kind!=="water"&&kind!=="tree"&&kind!=="maple_tree"&&kind!=="building")g.scale.multiplyScalar(clamp(o.size,.4,3));
-      g.position.x=x;g.position.z=z;g.position.y=(+o.y||0)+(kind==="person"&&o.pose==="walking"?0:0);
-      scene.add(g);
-    }
-  }
-  return{scene,anim};
-}
+/* ================= Dotted globe ================= */
+/* The matched places on a turning globe. The texture is assets/flatmap.svg, the dotted world map
+   from "How to Generate the WorldMirror Visuals" (recipe 1); pins are HTML laid over the canvas. */
+const HAS3D=typeof THREE!=="undefined";
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-function disposeScene(sc){sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose())}})}
-
-/* viewer with walk + look controls */
-const Viewer=(()=>{
-  let renderer,camera,cur=null,host,raf=null,visible=true,clock,keys={},yaw=0,pitch=-.05,pos=null,drag=null,hold={};
-  const START={x:0,y:1.6,z:8.5};
-  function init(el){
-    host=el;
-    try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){return false}
-    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
-    renderer.outputEncoding=THREE.sRGBEncoding;
-    camera=new THREE.PerspectiveCamera(62,16/9,.1,300);
-    host.prepend(renderer.domElement);renderer.domElement.className="gl";renderer.domElement.tabIndex=0;
-    renderer.domElement.setAttribute("aria-label","3D scene. Drag to look around. Use W A S D or the arrow buttons to walk.");
-    new ResizeObserver(size).observe(host);size();
-    clock=new THREE.Clock();
-    const c=renderer.domElement;
-    c.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};c.setPointerCapture(e.pointerId);hideHint()});
-    c.addEventListener("pointermove",e=>{if(!drag)return;yaw-=(e.clientX-drag.x)*.005;pitch=clamp(pitch-(e.clientY-drag.y)*.004,-1,.8);drag={x:e.clientX,y:e.clientY}});
-    c.addEventListener("pointerup",()=>drag=null);c.addEventListener("pointercancel",()=>drag=null);
-    window.addEventListener("keydown",e=>{if(/TEXTAREA|INPUT/.test(e.target.tagName)||!host.offsetParent)return;const k=e.key.toLowerCase();if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){keys[k]=true;e.preventDefault();hideHint()}});
-    window.addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false});
-    new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible)loop()}).observe(host);
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden)loop()});
-    return true;
-  }
-  function size(){if(!renderer)return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
-  function hideHint(){const h=host.querySelector(".hint3d");if(h)h.classList.add("gone")}
-  function load(spec,seed){
-    if(cur){disposeScene(cur.scene)}
-    cur=buildScene(spec,seed);
-    reset();loop();
-  }
-  function reset(){pos={...START};const interior=cur&&cur.scene.background&&!cur.scene.fog;if(interior)pos.z=4.5;yaw=0;pitch=-.08}
-  function setHold(dir,on){hold[dir]=on}
-  function loop(){if(raf||!cur)return;raf=requestAnimationFrame(frame)}
-  function frame(){
-    raf=null; if(!visible||document.hidden||!host.offsetParent)return;
-    const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
-    const f=(keys.w||keys.arrowup||hold.f?1:0)-(keys.s||keys.arrowdown||hold.b?1:0);
-    const turn=(keys.a||keys.arrowleft||hold.l?1:0)-(keys.d||keys.arrowright||hold.r?1:0);
-    yaw+=turn*1.6*dt;
-    pos.x=clamp(pos.x-Math.sin(yaw)*f*2.6*dt,-12,12);pos.z=clamp(pos.z-Math.cos(yaw)*f*2.6*dt,-12,12);
-    camera.position.set(pos.x,pos.y+(f?Math.sin(t*9)*.025:0),pos.z);
-    camera.rotation.order="YXZ";camera.rotation.set(pitch,yaw,0);
-    cur.anim.forEach(a=>a(t));
-    renderer.render(cur.scene,camera);
-    raf=requestAnimationFrame(frame);
-  }
-  return{init,load,reset,setHold};
-})();
-
-/* ---------- A real shaded 3D globe (reuses the THREE.js already loaded for scenes) ---------- */
-function buildWorldTexture(){
-  const w=1024,h=512;
-  const c=document.createElement("canvas");c.width=w;c.height=h;
-  const ctx=c.getContext("2d");
-  const og=ctx.createLinearGradient(0,0,0,h);
-  og.addColorStop(0,"#070A14");og.addColorStop(.5,"#121A30");og.addColorStop(1,"#070A14");
-  ctx.fillStyle=og;ctx.fillRect(0,0,w,h);
-  const proj=(lon,lat)=>[(lon+180)/360*w,(90-lat)/180*h];
-  const LAND=[
-    [[-168,66],[-165,60],[-150,70],[-130,70],[-95,68],[-80,62],[-75,55],[-65,50],[-55,52],[-60,45],[-70,42],[-75,35],[-80,26],[-82,25],[-97,26],[-97,18],[-90,14],[-83,9],[-80,8],[-105,20],[-115,30],[-120,34],[-124,40],[-124,48],[-130,55],[-140,60],[-155,58],[-160,55]],
-    [[-77,8],[-70,10],[-60,8],[-50,0],[-35,-5],[-35,-10],[-40,-15],[-42,-20],[-45,-23],[-48,-27],[-55,-34],[-62,-40],[-68,-45],[-70,-52],[-68,-55],[-72,-52],[-73,-45],[-72,-35],[-71,-25],[-70,-18],[-71,-10],[-78,-5],[-80,0]],
-    [[-17,21],[-16,15],[-17,12],[-13,8],[-10,5],[-8,4],[0,5],[9,4],[9,2],[8,-2],[12,-5],[12,-18],[18,-23],[16,-28],[18,-34],[25,-34],[28,-30],[32,-28],[35,-22],[40,-16],[40,-10],[48,0],[51,10],[43,12],[42,15],[38,18],[36,22],[33,31],[25,32],[10,37],[-6,35],[-10,30]],
-    [[-9,43],[-9,36],[0,38],[10,37],[15,38],[19,41],[26,40],[30,36],[35,33],[36,31],[35,27],[40,20],[42,15],[48,12],[52,24],[56,27],[61,25],[68,24],[72,20],[77,8],[80,13],[85,20],[92,22],[95,16],[98,8],[103,1],[104,10],[106,20],[110,21],[115,23],[120,30],[122,31],[122,37],[128,37],[130,42],[135,45],[140,43],[142,46],[143,51],[160,60],[170,68],[180,70],[170,70],[150,72],[130,73],[110,74],[90,73],[70,72],[55,69],[40,68],[30,68],[20,69],[10,65],[5,62],[0,58],[-5,55]],
-    [[113,-22],[115,-20],[122,-18],[128,-15],[130,-12],[136,-12],[142,-11],[145,-16],[146,-19],[150,-22],[153,-27],[153,-31],[150,-34],[147,-38],[144,-38],[140,-38],[137,-35],[135,-32],[132,-32],[129,-31],[126,-32],[122,-34],[115,-34],[113,-26]],
-    [[-45,60],[-42,60],[-20,70],[-20,77],[-30,83],[-45,82],[-55,70],[-55,65]],
-    [[130,33],[133,34],[138,35],[141,40],[142,45],[140,45],[139,38],[132,34]],
-    [[-5,50],[-5,56],[-2,58],[0,53],[-2,51]],
-    [[44,-12],[47,-16],[47,-22],[44,-25],[43,-20],[44,-15]],
-    [[131,-2],[141,-3],[150,-6],[148,-9],[140,-9]],
-    [[172,-41],[175,-37],[178,-38],[176,-42]]
-  ];
-  /* Dotted style from the visuals guide (recipe 1): dots spread evenly over the sphere,
-     bright on land and faint on ocean. Dots are stretched sideways toward the poles so they
-     stay round once wrapped onto the globe. */
-  const mask=document.createElement("canvas");mask.width=w;mask.height=h;
-  const mctx=mask.getContext("2d");mctx.fillStyle="#fff";
-  LAND.forEach(poly=>{mctx.beginPath();poly.forEach(([lon,lat],i)=>{const [x,y]=proj(lon,lat);i?mctx.lineTo(x,y):mctx.moveTo(x,y)});mctx.closePath();mctx.fill()});
-  const md=mctx.getImageData(0,0,w,h).data,step=2.2;
-  for(let lat=-86;lat<=86;lat+=step){
-    const cosl=Math.cos(lat*Math.PI/180),n=Math.max(1,Math.round(360*cosl/step));
-    for(let i=0;i<n;i++){
-      const [x,y]=proj(-180+(i+.5)*360/n,lat),land=md[(Math.min(h-1,y|0)*w+Math.min(w-1,x|0))*4]>128;
-      ctx.fillStyle=land?"rgba(233,238,255,.92)":"rgba(255,255,255,.1)";
-      ctx.beginPath();ctx.ellipse(x,y,(land?1.9:1.3)/Math.max(.15,cosl),land?1.9:1.3,0,0,Math.PI*2);ctx.fill();
-    }
-  }
-  return c;
-}
 const Globe3D=(()=>{
-  let renderer,camera,scene,group,sphere,pin,halo,raf=null,clock,host=null,mode="spin",targetYaw=0,dragging=false,drag=null,pitch=0;
+  let renderer,camera,scene,group,host=null,raf=null,clock,routeObj=null,pins=[],target=null,drag=null,ro=null;
+  const R=1.5;
+  const vec=(lat,lon,r)=>{const phi=(90-lat)*Math.PI/180,th=(lon+180)*Math.PI/180;return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(th),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(th))};
   function ensure(){
     if(renderer||!HAS3D)return;
-    try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true})}catch(e){return}
-    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
-    renderer.outputEncoding=THREE.sRGBEncoding;
-    camera=new THREE.PerspectiveCamera(30,1,.1,20);camera.position.set(0,0,5.6);
+    try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true})}catch(e){renderer=null;return}
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));renderer.outputEncoding=THREE.sRGBEncoding;
+    camera=new THREE.PerspectiveCamera(30,1,.1,20);camera.position.set(0,0,6.3);
     scene=new THREE.Scene();
-    scene.add(new THREE.AmbientLight(0xffffff,.4));
-    const sun=new THREE.DirectionalLight(0xffffff,1.25);sun.position.set(2.4,1.6,3.2);scene.add(sun);
+    scene.add(new THREE.AmbientLight(0xffffff,.32));
+    const key=new THREE.DirectionalLight(0xdfe8ff,.75);key.position.set(-2.6,2.2,3);scene.add(key);
     group=new THREE.Group();scene.add(group);
-    const tex=new THREE.CanvasTexture(buildWorldTexture());
-    sphere=new THREE.Mesh(new THREE.SphereGeometry(1.5,48,48),new THREE.MeshPhongMaterial({map:tex,shininess:6,specular:0x111522}));
-    group.add(sphere);
-    const glow=new THREE.Mesh(new THREE.SphereGeometry(1.64,32,32),new THREE.MeshBasicMaterial({color:0x9DBBFF,transparent:true,opacity:.16,side:THREE.BackSide}));
-    scene.add(glow);
-    pin=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xFFB866}));
-    pin.visible=false;group.add(pin);
-    halo=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xFFA54A,transparent:true,opacity:.35}));
-    pin.add(halo);
+    const c=document.createElement("canvas");c.width=2048;c.height=1024;const ctx=c.getContext("2d");
+    const g=ctx.createLinearGradient(0,0,0,1024);g.addColorStop(0,"#05080F");g.addColorStop(.5,"#0B1222");g.addColorStop(1,"#05080F");ctx.fillStyle=g;ctx.fillRect(0,0,2048,1024);
+    const tex=new THREE.CanvasTexture(c);tex.anisotropy=4;tex.encoding=THREE.sRGBEncoding;
+    const img=new Image();img.onload=()=>{ctx.globalAlpha=.8;ctx.drawImage(img,0,0,2048,1024);ctx.globalAlpha=1;tex.needsUpdate=true};img.src="assets/flatmap.svg";
+    group.add(new THREE.Mesh(new THREE.SphereGeometry(R,64,64),new THREE.MeshPhongMaterial({map:tex,shininess:3,specular:0x0b0f1a})));
     clock=new THREE.Clock();
-    const c=renderer.domElement;
-    c.tabIndex=0;c.setAttribute("aria-label","Drag to spin the globe.");
-    c.addEventListener("pointerdown",e=>{dragging=true;drag={x:e.clientX,y:e.clientY};c.setPointerCapture(e.pointerId)});
-    c.addEventListener("pointermove",e=>{if(!drag)return;group.rotation.y+=(e.clientX-drag.x)*.008;pitch=clamp(pitch+(e.clientY-drag.y)*.008,-1.15,1.15);group.rotation.x=pitch;drag={x:e.clientX,y:e.clientY}});
-    c.addEventListener("pointerup",()=>{dragging=false;drag=null});
-    c.addEventListener("pointercancel",()=>{dragging=false;drag=null});
-  }
-  function latLonToVec3(lat,lon,r){
-    const phi=(90-lat)*Math.PI/180, theta=(lon+180)*Math.PI/180;
-    return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+    const el=renderer.domElement;el.setAttribute("aria-label","Globe showing the matched places. Drag to turn it.");
+    el.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};target=null;el.setPointerCapture(e.pointerId)});
+    el.addEventListener("pointermove",e=>{if(!drag)return;group.rotation.y+=(e.clientX-drag.x)*.008;group.rotation.x=clamp(group.rotation.x+(e.clientY-drag.y)*.006,-1.1,1.1);drag={x:e.clientX,y:e.clientY}});
+    const up=()=>{drag=null};el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up);
   }
   function size(){if(!host||!renderer)return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
   function attach(el){
-    if(!HAS3D)return;
-    ensure();if(!renderer)return;
-    if(host!==el){host=el;el.innerHTML="";el.appendChild(renderer.domElement);new ResizeObserver(size).observe(el);size()}
-    loop();
+    if(HAS3D)ensure();
+    if(!renderer){el.classList.add("flat");return false}
+    if(host!==el){host=el;el.prepend(renderer.domElement);if(ro)ro.disconnect();ro=new ResizeObserver(size);ro.observe(el);size()}
+    loop();return true;
   }
-  function spin(){mode="spin";if(pin)pin.visible=false}
-  let lastLat=null,lastLon=null;
-  function point(lat,lon){
-    if(!HAS3D||!renderer)return;
-    const latN=clamp(Number(lat)||0,-90,90),lonN=clamp(Number(lon)||0,-180,180);
-    if(lastLat===null||latN!==lastLat||lonN!==lastLon){pitch=0;group.rotation.x=0}
-    lastLat=latN;lastLon=lonN;
-    mode="point";pin.visible=true;
-    const p=latLonToVec3(latN,lonN,1.53);
-    pin.position.copy(p);
-    targetYaw=Math.atan2(-p.x,p.z);
+  const pinSvg=n=>`<svg width="30" height="38" viewBox="0 0 30 38"><path d="M15 37C15 37 2 22.5 2 14a13 13 0 0 1 26 0c0 8.5-13 23-13 23z" fill="#F4B56A" stroke="#05070D" stroke-width="2"/><text x="15" y="18.5" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#1A1206">${n}</text></svg>`;
+  function setPlaces(list){
+    if(!renderer||!host)return;
+    pins.forEach(p=>p.el.remove());
+    pins=list.map((p,i)=>{const el=document.createElement("div");el.className="gpin";el.innerHTML=pinSvg(i+1);host.appendChild(el);return{el,pos:vec(p.lat,p.lon,R*1.005),lat:p.lat,lon:p.lon}});
+    if(routeObj){group.remove(routeObj);routeObj.geometry.dispose();routeObj.material.dispose();routeObj=null}
+    if(pins.length>1){
+      const pts=[];
+      for(let i=0;i<pins.length-1;i++){
+        const a=pins[i].pos.clone().normalize(),b=pins[i+1].pos.clone().normalize(),ang=a.angleTo(b),sn=Math.sin(ang)||1e-6;
+        for(let k=0;k<=48;k++){const t=k/48;
+          const v=ang<1e-4?a.clone():a.clone().multiplyScalar(Math.sin((1-t)*ang)/sn).add(b.clone().multiplyScalar(Math.sin(t*ang)/sn));
+          pts.push(v.normalize().multiplyScalar(R*(1.01+.12*Math.sin(Math.PI*t)*Math.min(1,ang))))}
+      }
+      routeObj=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineDashedMaterial({color:0xF4B56A,dashSize:.06,gapSize:.07,transparent:true,opacity:.85}));
+      routeObj.computeLineDistances();group.add(routeObj);
+    }
+  }
+  function select(i){
+    pins.forEach((p,j)=>p.el.classList.toggle("sel",j===i));
+    const p=pins[i];if(!p)return;
+    const v=vec(p.lat,p.lon,1);target={y:Math.atan2(-v.x,v.z),x:clamp(p.lat*Math.PI/180,-.9,.9)};loop();
   }
   function loop(){if(raf||!renderer)return;raf=requestAnimationFrame(frame)}
   function frame(){
-    raf=requestAnimationFrame(frame);
-    if(!host||!host.offsetParent)return;
-    const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
-    if(!dragging){
-      if(mode==="spin"){group.rotation.y+=dt*.2}
-      else{let d=targetYaw-group.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));group.rotation.y+=d*Math.min(1,dt*2.4);if(Math.abs(d)<.015)group.rotation.y+=dt*.04}
-    }
-    if(pin.visible)halo.scale.setScalar(1.8+Math.sin(t*2.2)*.4);
+    raf=null;if(!host||!host.offsetParent)return;
+    const dt=Math.min(.05,clock.getDelta());
+    if(target&&!drag){let d=target.y-group.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));const k=Math.min(1,dt*2.6);group.rotation.y+=d*k;group.rotation.x+=(target.x-group.rotation.x)*k}
+    group.updateMatrixWorld();
+    const w=host.clientWidth,h=host.clientHeight;
+    pins.forEach(p=>{const wp=p.pos.clone().applyMatrix4(group.matrixWorld),facing=wp.clone().normalize().dot(camera.position.clone().sub(wp).normalize()),sc=wp.clone().project(camera);
+      p.el.style.left=((sc.x+1)/2*w)+"px";p.el.style.top=((1-sc.y)/2*h)+"px";p.el.style.opacity=facing>.05?1:0});
     renderer.render(scene,camera);
+    raf=requestAnimationFrame(frame);
   }
-  return{attach,spin,point};
+  return{attach,setPlaces,select};
 })();
 
 /* ---------- Loading screen facts carousel ---------- */
@@ -697,53 +586,25 @@ const FALLBACK=[
  {name:"Kyoto",country:"Japan",lat:35.0116,lon:135.7681,why:"A city that keeps its cracks visible.",
   moments:[
    {title:"The kintsugi workshop",scene:"A craftsman bends over a cracked tea bowl, tracing the break with lacquer. Later the seam will be dusted with gold. The bowl goes back into daily use.",meaning:"Kintsugi repairs broken pottery with lacquer mixed with powdered gold. The repair becomes part of the object's history instead of something hidden.",questions:["Why use gold instead of hiding the crack?","How long does a repair take?"],
-    terms:[{term:"Kintsugi",definition:"A Japanese technique for mending broken pottery with lacquer mixed with powdered gold, so the repair becomes part of the object's history instead of something to hide."},{term:"lacquer",definition:"A hard, glossy coating, traditionally made from tree sap, used here to glue and seal the broken pieces before the gold is added."}],
     internal:{target_sub_belief:"",protagonist:"the owner of the cracked bowl, watching the repair",position_match:{shared_relationship:"having something visibly damaged that others will see",surface_difference:"a tea bowl in a repair workshop"},problem_match:"a visible flaw where the standard is unbroken",projected_belief:"a broken thing is worth less and the break should be hidden",predicted_outcome:"the crack gets disguised, or the bowl is put away",visible_outcome:"the crack is traced in gold so it stands out, and the bowl goes back into daily use",scene_belief:"the break is part of the bowl's history, worth showing",feeling_cue:"the cracked bowl on the table, in plain view",role_clarity:"the bowl, or the person it belongs to, not the craftsman",distance_check:{not_too_far:"",not_too_close:""},lever:"meaning",reapply_question:"What would it look like to keep a crack visible instead of hiding it?"},
-    backdrop:{time:"dusk",land:"forest",water:"river",town:"pagodas",mist:.7,clouds:.3,lights:.6},
-    scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}}
+    backdrop:{time:"dusk",land:"forest",water:"river",town:"pagodas",mist:.7,clouds:.3,lights:.6},}
   ]},
  {name:"Pelourinho, Salvador",country:"Brazil",lat:-12.9714,lon:-38.5014,why:"Old streets where music starts without asking.",
   moments:[
-   {title:"The atabaque drum circle",scene:"Street corners in the old town. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
-    terms:[{term:"atabaque",definition:"A tall, hand-played drum central to Afro-Brazilian music and to Candomblé religious ceremonies."},{term:"Candomblé",definition:"An Afro-Brazilian religion blending West African traditions with elements absorbed during colonization, in which drumming and music play a central role."}],
+   {title:"The atabaque drum circle",scene:"On a cobbled street in Pelourinho, Salvador's old town, a group of drummers plays atabaques, tall hand drums, in a circle. A teenager with a smaller drum joins at the edge and comes in a beat late. The lead drummer turns to face him and plays the rhythm slower until he locks in, and the circle carries on with him in it.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
     internal:{target_sub_belief:"",protagonist:"someone newer to the circle picking up a drum",position_match:{shared_relationship:"being watched by more experienced people while still learning",surface_difference:"drumming on a street corner"},problem_match:"less skill than the people around them",projected_belief:"you have to be good enough before you join in",predicted_outcome:"the newcomer hangs back, or gets waved off",visible_outcome:"the newcomer starts playing and the circle keeps going around them",scene_belief:"anyone can start playing; the circle carries the beat",feeling_cue:"a newer player standing at the edge of the circle",role_clarity:"the newcomer, not the experienced drummers",distance_check:{not_too_far:"",not_too_close:""},lever:"meaning",reapply_question:"What would it look like to start before you feel ready?"},
-    backdrop:{time:"dusk",land:"hills",water:"sea",town:"houses",town_color:"#E8B44A",mist:.3,clouds:.5,lights:.6},
-    scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}}
+    backdrop:{time:"dusk",land:"hills",water:"sea",town:"houses",town_color:"#E8B44A",mist:.3,clouds:.5,lights:.6},}
   ]},
  {name:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683,why:"A city that makes warmth on purpose.",
   moments:[
    {title:"Candles at 4 p.m.",scene:"It's already dark in December. In the café, every table has a candle, and two friends lean in over theirs.",meaning:"Danes burn more candles per person than almost anyone. Warmth, or hygge, is something people make on purpose in the long winter.",questions:["What does hygge actually mean?","Why so many candles?"],
-    terms:[{term:"hygge",definition:"A Danish word for a deliberate, cozy sense of warmth and contentment, often built around candles, company, and simple comforts."}],
     internal:{target_sub_belief:"",protagonist:"one of the two friends, tempted to keep pushing through the dark afternoon",position_match:{shared_relationship:"getting through a hard stretch with others around",surface_difference:"a candlelit cafe in a Danish winter"},problem_match:"a heavy stretch of time with no end in sight",projected_belief:"a hard feeling has to be pushed through alone",predicted_outcome:"they keep going on their own until it passes",visible_outcome:"they stop at four in the afternoon, light a candle, and sit together",scene_belief:"a hard stretch can be given a regular, shared time and place",feeling_cue:"the dark outside the window at four in the afternoon",role_clarity:"either friend",distance_check:{not_too_far:"",not_too_close:""},lever:"holding",reapply_question:"What small, repeatable ritual could hold a hard feeling for you?"},
-    backdrop:{time:"night",land:"flat",water:"river",town:"houses",town_color:"#C9852E",mist:.35,clouds:.3,lights:.85},
-    scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}}
+    backdrop:{time:"night",land:"flat",water:"river",town:"houses",town_color:"#C9852E",mist:.35,clouds:.3,lights:.85},}
   ]}
 ];
 /* ================= App ================= */
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
-function highlightTerms(text,terms){
-  const list=(terms||[]).filter(t=>t&&t.term&&t.definition);
-  if(!list.length)return esc(text);
-  const marks=[];
-  list.forEach(t=>{
-    const re=new RegExp(`\\b${escapeRegExp(t.term)}\\b`,"i");
-    const m=re.exec(text);
-    if(m){const start=m.index,end=start+m[0].length;if(!marks.some(x=>start<x.end&&end>x.start))marks.push({start,end,def:t.definition})}
-  });
-  if(!marks.length)return esc(text);
-  marks.sort((a,b)=>a.start-b.start);
-  let out="",pos=0;
-  marks.forEach(m=>{out+=esc(text.slice(pos,m.start));out+=`<span class="term" tabindex="0">${esc(text.slice(m.start,m.end))}<span class="termtip">${esc(m.def)}</span></span>`;pos=m.end});
-  out+=esc(text.slice(pos));
-  return out;
-}
-document.addEventListener("click",e=>{
-  const t=e.target.closest(".term");
-  document.querySelectorAll(".term.pinned").forEach(x=>{if(x!==t)x.classList.remove("pinned")});
-  if(t)t.classList.toggle("pinned");
-});
 
 /* ---------- Painted backdrops ----------
    Every place gets a painted landscape instead of a photo, drawn in code the way the
@@ -1005,41 +866,65 @@ self.onmessage=e=>{const d=e.data;try{const px=paintBackdrop(d.spec,d.w,d.h,d.se
   }
   return{url};
 })();
-/* The backdrop for a moment: what the AI described, or a best guess from the 3D scene for older data. */
-function backdropFor(P,M){
-  if(M&&M.backdrop&&typeof M.backdrop==="object"&&Object.keys(M.backdrop).length)return M.backdrop;
-  const s=(M&&M.scene3d)||{},set=s.setting;
-  return{time:["dawn","day","dusk","night"].includes(s.time)?s.time:"dusk",
-    land:set==="hillside"?"hills":set==="garden"?"forest":"hills",
-    water:set==="waterfront"?"sea":set==="riverside"?"river":"none",
-    town:set==="garden"||set==="hillside"?"none":set==="courtyard"?"flat_roofs":"houses",
-    town_color:s.palette&&s.palette.walls,mist:.4,clouds:.4};
-}
-const Backdrop=(()=>{
-  let cur="",token=0;
+/* The painted scene for a moment: what the AI described, or the default dusk scene. */
+function backdropFor(P,M){return M&&M.backdrop&&typeof M.backdrop==="object"&&Object.keys(M.backdrop).length?M.backdrop:BACKDROP_DEFAULT}
+/* The walk view: one wide painting. Drag or A/D to look along it, W/S (or scroll) to move in. */
+const World=(()=>{
+  const box=document.getElementById("world"),img=document.getElementById("worldImg");
+  const PW=2400,PH=1080,ASPECT=PW/PH,HOME=.35;
+  let x=HOME,z=1,cur="",token=0,keys={},raf=null,drag=null,last=0;
+  const active=()=>!document.getElementById("walk").classList.contains("hidden");
+  function layout(){
+    const W=box.clientWidth,H=box.clientHeight;if(!W||!H)return;
+    let h=H*z,w=h*ASPECT;if(w<W*z){w=W*z;h=w/ASPECT}
+    img.style.width=w+"px";img.style.height=h+"px";img.style.transform=`translate(${-(w-W)*x}px,${-(h-H)*.5}px)`;
+  }
   function set(spec,seed){
     const key=JSON.stringify([spec,seed]);if(key===cur)return;cur=key;const my=++token;
-    const w=window.innerWidth*(window.devicePixelRatio||1)>2000?1920:1600,h=Math.round(w*9/16);
-    /* A small, quick render fades in first (it's mostly behind frosted glass anyway); the sharp one replaces it in place. */
-    let layer=null;
-    const show=u=>{if(my!==token)return;
-      if(!layer){const on=document.querySelector("#backdrop .bd.on");layer=[...document.querySelectorAll("#backdrop .bd")].find(l=>l!==on);layer.style.backgroundImage=`url("${u}")`;layer.classList.add("on");if(on)on.classList.remove("on")}
-      else layer.style.backgroundImage=`url("${u}")`};
-    const quick=Painter.url(spec,480,270,seed),full=Painter.url(spec,w,h,seed);let fullDone=false;full.then(()=>{fullDone=true},()=>{});
-    quick.then(u=>{if(!fullDone)show(u)}).catch(()=>{}).then(()=>full).then(show).catch(()=>{});
+    img.classList.remove("on");x=HOME;z=1;layout();
+    /* a small, quick render first, then the sharp one replaces it in place */
+    const quick=Painter.url(spec,480,216,seed),full=Painter.url(spec,PW,PH,seed);let fullDone=false;full.then(()=>{fullDone=true},()=>{});
+    const put=u=>{if(my!==token)return;img.style.backgroundImage=`url("${u}")`;img.classList.add("on")};
+    quick.then(u=>{if(!fullDone)put(u)}).catch(()=>{}).then(()=>full).then(put).catch(()=>{});
   }
-  return{set};
+  function recenter(){img.classList.add("ease");x=HOME;z=1;layout();setTimeout(()=>img.classList.remove("ease"),650)}
+  function frame(t){
+    raf=null;if(!active()){keys={};return}
+    const dt=last?Math.min(.05,(t-last)/1000):0;last=t;
+    const dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dz=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
+    if(dx||dz){x=clamp(x+dx*dt*.22,0,1);z=clamp(z+dz*dt*.35,1,1.45);layout();raf=requestAnimationFrame(frame)}else last=0;
+  }
+  box.addEventListener("pointerdown",e=>{drag={x:e.clientX};box.setPointerCapture(e.pointerId)});
+  box.addEventListener("pointermove",e=>{if(!drag)return;const W=box.clientWidth,w=img.offsetWidth;if(w>W)x=clamp(x-(e.clientX-drag.x)/(w-W),0,1);drag={x:e.clientX};layout()});
+  const end=()=>{drag=null};box.addEventListener("pointerup",end);box.addEventListener("pointercancel",end);
+  box.addEventListener("wheel",e=>{e.preventDefault();z=clamp(z-e.deltaY*.0012,1,1.45);layout()},{passive:false});
+  window.addEventListener("keydown",e=>{
+    if(!active()||/TEXTAREA|INPUT/.test(e.target.tagName))return;
+    const k=e.key.toLowerCase();
+    if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){e.preventDefault();if(!keys[k]){keys[k]=true;if(!raf)raf=requestAnimationFrame(frame)}}
+  });
+  window.addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false});
+  window.addEventListener("blur",()=>{keys={}});
+  new ResizeObserver(layout).observe(box);
+  return{set,recenter,layout};
 })();
 /* Paint the small card images for a list of [img element, place, moment]. */
 function paintThumbs(list){
   list.forEach(([img,P,M])=>{if(!img)return;Painter.url(backdropFor(P,M),480,300,P.name+M.title).then(u=>{img.src=u;img.classList.add("ready")}).catch(()=>{})});
 }
-Backdrop.set(BACKDROP_DEFAULT,"worldmirror");
 let S;
 function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,elaboration:"",userChain:null,intake:[],nextQs:{},stuck:{}}}
 S=fresh();
-const SCREENS=["intro","intake","loading","reveal","walk","checkin","reflect","final"];
-function show(id){SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));window.scrollTo({top:0});if(id==="loading"){Globe3D.attach($("loadGlobe"));Globe3D.spin();startFacts()}else stopFacts()}
+const SCREENS=["intro","intake","loading","reveal","landing","walk","checkin","reflect","final"];
+function show(id){
+  SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));
+  document.querySelectorAll("#topbar [data-for]").forEach(el=>el.classList.toggle("hidden",el.dataset.for!==id));
+  document.body.classList.toggle("walking",id==="walk");
+  window.scrollTo({top:0});
+  if(id==="loading")startFacts();else stopFacts();
+  if(id==="reveal")Globe3D.attach($("revealGlobe"));
+  if(id==="walk")World.layout();
+}
 const mk=(r,p,m)=>`${r}.${p}.${m}`;
 let tStart=null,curKey=null;
 function tick(){if(curKey&&tStart!=null)S.dwell[curKey]=(S.dwell[curKey]||0)+(Date.now()-tStart);tStart=document.hidden?null:Date.now()}
@@ -1097,9 +982,17 @@ function placeLog(p){
 }
 
 /* ---------- Intro ---------- */
-$("problem").addEventListener("input",()=>{$("startBtn").disabled=$("problem").value.trim().length<8});
-$("startBtn").onclick=()=>{if(!$("codeWrap").classList.contains("hidden"))STUDY_CODE=$("studyCode").value.trim();S=fresh();S.problem=$("problem").value.trim();S.refined=S.problem;startIntake()};
-$("exampleBtn").onclick=()=>{$("problem").value="I keep putting off starting things until I feel ready, and I'm starting to feel like everyone around me is further along.";$("startBtn").disabled=false;$("problem").focus()};
+function autoGrow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight,window.innerHeight*.4)+"px"}
+$("problem").addEventListener("input",()=>{const ok=$("problem").value.trim().length>=8;$("startBtn").disabled=!ok;$("justShow").disabled=!ok;autoGrow($("problem"))});
+$("problem").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!$("startBtn").disabled)$("startBtn").click()}});
+function begin(skipQuestions){
+  if(!$("codeWrap").classList.contains("hidden"))STUDY_CODE=$("studyCode").value.trim();
+  S=fresh();S.problem=$("problem").value.trim();S.refined=S.problem;
+  if(skipQuestions)makeRound("initial","");else startIntake();
+}
+$("startBtn").onclick=()=>begin(false);
+$("justShow").onclick=()=>begin(true);
+$("exampleBtn").onclick=()=>{$("problem").value="I keep putting off starting things until I feel ready, and I'm starting to feel like everyone around me is further along.";$("problem").dispatchEvent(new Event("input"));$("problem").focus()};
 
 /* ---------- Intake: adaptive questions that fill in the user's chain and separate the sub-beliefs ---------- */
 const INTAKE_DIMS=["position","problem","belief","feeling","outcome","sub_beliefs"];
@@ -1145,14 +1038,15 @@ function cleanIntakeQ(r){
 let intakeQs=[],intakeI=0,intakeToken=0,intakeAI=true;
 async function startIntake(){
   S.intake=[];intakeQs=[];intakeI=0;intakeAI=!aiOff;
-  $("intakeStatement").textContent=`"${S.problem}"`;
+  $("intakeStatement").textContent=S.problem;$("intakePrev").classList.add("hidden");$("intakeCount").textContent="";$("intakeDots").innerHTML="";
   show("intake");
   nextIntakeQ();
 }
 async function nextIntakeQ(){
   const token=++intakeToken;
   $("intakeThinking").classList.remove("hidden");$("intakeBody").classList.add("hidden");
-  $("intakeThinking").textContent=intakeQs.length?"Thinking about what you said...":"Thinking about what to ask...";
+  $("intakeThinkingText").textContent=intakeQs.length?"Thinking… percolating on what you shared":"Thinking about what to ask…";
+  showPrevQ(intakeQs[intakeQs.length-1]);
   if(intakeQs.length>=INTAKE_MAX){finishIntake();return}
   let q=null;
   if(intakeAI){
@@ -1171,14 +1065,21 @@ async function nextIntakeQ(){
   $("intakeThinking").classList.add("hidden");$("intakeBody").classList.remove("hidden");
   renderIntake();
 }
+function showPrevQ(prev){
+  $("intakePrev").classList.toggle("hidden",!prev);
+  if(prev){$("intakePrevQ").textContent=prev.question;$("intakePrevA").textContent=prev.answer?`“${prev.answer}”`:"(skipped)"}
+}
 function renderIntake(){
   const q=intakeQs[intakeI];
   $("intakeCount").textContent=`Question ${intakeI+1}`;
+  $("intakeDots").innerHTML=Array.from({length:INTAKE_MAX},(_,i)=>`<span class="${i<=intakeI?"on":""}"></span>`).join("");
+  showPrevQ(intakeQs[intakeI-1]);
   $("intakeQ").textContent=q.question;
   $("intakeChips").innerHTML=q.options.map(o=>`<button class="chip" type="button">${esc(o)}</button>`).join("");
   $("intakeChips").querySelectorAll(".chip").forEach((b,i)=>b.onclick=()=>{$("intakeAnswer").value=q.options[i];$("intakeAnswer").focus()});
   $("intakeAnswer").value=q.answer||"";
   $("intakeBack").classList.toggle("hidden",intakeI===0);
+  autoGrow($("intakeAnswer"));
   $("intakeAnswer").focus();
 }
 function intakeStep(answer){
@@ -1197,7 +1098,8 @@ function finishIntake(){
   S.intake=intakeQs.map(q=>({targets:q.targets,question:q.question,answer:(q.answer||"").trim()})).filter(x=>x.answer);
   makeRound("initial","");
 }
-$("intakeNext").onclick=()=>intakeStep($("intakeAnswer").value.trim());
+$("intakeNext").onclick=$("intakeNextBtn").onclick=()=>intakeStep($("intakeAnswer").value.trim());
+$("intakeAnswer").addEventListener("input",e=>autoGrow(e.target));
 $("intakeSkip").onclick=()=>intakeStep("");
 $("intakeBack").onclick=()=>{intakeQs[intakeI].answer=$("intakeAnswer").value.trim();if(intakeI>0){intakeI--;renderIntake()}};
 $("intakeSkipAll").onclick=()=>finishIntake();
@@ -1205,146 +1107,16 @@ $("intakeAnswer").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey
 
 /* ---------- Generate a round of places ---------- */
 /* MATCHER:BEGIN (eval/matcher-eval.js runs this block, from here to MATCHER:END) */
-const VOCAB=`"scene3d": {
-  "setting": one of "street","plaza","market","waterfront","riverside","garden","courtyard","interior","hillside",
-  "time": "dawn" | "day" | "dusk" | "night",
-  "palette": {"ground":"#hex","walls":"#hex","accent":"#hex"},
-  "objects": up to 14 of {"kind": see list, "x": -8 to 8, "z": -6 to 6 (the viewer stands at z=8.5 looking toward z=0; negative z is farther away), "count": 1 to 12, "arrange": "circle" | "row" | "both_sides" (people seated along a table) | "scatter", "spread": meters, "pose": "standing" | "seated" | "walking" | "drumming" | "dancing" | "working" (people only), "color": "#hex", "length": meters (tables, lanterns, bunting, petals, benches, steps), "size": 0.5 to 3, "rot": degrees, "y": height (0.79 puts small things on a table)}
-}
-Object kinds: person, table_long, table_small, bench, stool, stall, lanterns, bunting, lantern, candles, fire, tree, maple_tree, building, pagoda, gate, drum, bicycle, motorbike, car, boat, bowl, crates, umbrella, petals, kite, steps, water, fountain, wall, raked_gravel, rock.
-Put the heart of the moment at x=0, z=0 so the viewer sees it first. When a moment involves people, show them doing the thing (drummers in a circle, people seated both sides of a long table). Pick the setting and time that match the moment.
-Match scene3d to the "scene" text closely: the same number of people doing the same thing, the specific objects it names (a drum, a cracked bowl, a bicycle, candles on a table), and a time of day and setting that fit the words used (a dim room at night for candlelight, a street at dawn for an empty market). If a concrete visual detail is in the sentence, it should be an object in scene3d.`;
-const BACKDROP_VOCAB=`"backdrop": {
-  "time": "dawn" | "day" | "golden" | "dusk" | "night",
-  "land": "peaks" (sharp, snowy mountains) | "hills" | "forest" (tree-covered hills) | "dunes" (desert sand) | "flat" (plains, or a city on level ground),
-  "water": "sea" | "lake" | "river" | "none" (water in front, mirroring the view; "none" means dry ground),
-  "town": "cabins" (a few wooden huts) | "houses" (a row of gabled town houses) | "flat_roofs" (a medina or adobe town) | "domes" (domes and minarets) | "pagodas" (tiered East Asian roofs) | "tents" | "none",
-  "town_color": "#hex", the main wall color of the buildings,
-  "ground": "#hex", the color of the land (optional),
-  "mist": 0 to 1, "clouds": 0 to 1, "lights": 0 to 1 (how many windows glow)
-}
-It is a quiet, painted view of the wider place, seen from a little way off, that sits behind the whole screen and sets the mood. Choose what someone would really see looking out over this place: the actual landform, whether there is water, the kind of buildings, and a time of day that fits the moment (a candlelit café at four in a Danish winter is "night"; an early market is "dawn").`;
-
 function scenesUsed(){
   const out=[];
   S.rounds.forEach(R=>R.places.forEach(P=>{const m=P.moments[0],i=m&&m.internal;if(i&&(i.target_sub_belief||i.scene_belief))out.push({place:`${P.name}, ${P.country}`,target_sub_belief:i.target_sub_belief_text||i.target_sub_belief,scene_belief:i.scene_belief})}));
   return out;
 }
-function roundPrompt(mode,missing){
+/* The instructions live in prompts/place-matching.md. This fills in its {{round_context}} with what we know about this person. */
+function roundContext(mode,missing){
   const visited=[];S.rounds.forEach(R=>R.places.forEach(P=>visited.push(`${P.name}, ${P.country}`)));
   const used=scenesUsed();
-  return `You choose places for WorldMirror, a reflection tool. A user describes an everyday challenge. You pick three real places in the world where someone is in a position like the user's, facing the same kind of problem, but holding a different belief about it, and the scene shows what happens as a result. The user explores each place and asks questions about it.
-
-WorldMirror does not give advice. It helps users see their challenge differently on their own. You never state the new view yourself.
-
-The five parts of a challenge
-
-Every challenge, the user's and that of the person in the scene (the protagonist), has five parts:
-Position: the external context, role, and audience.
-Problem: the gap between what the person has and what the position demands. Test: it is not about who they are.
-Belief: the rule the person uses to read the problem: what it means about them, and why it would be bad. Test: someone else could think differently about it.
-Feeling: the emotional state that position, problem, and belief create. Test: "I feel ___."
-Outcome: the observable action they choose as a result. This is the behavior that can change.
-
-How a scene changes the user: projection
-
-1. The user takes the protagonist's position: "I would..." or "If I were there..."
-2. Because the position and problem are similar, the user's own belief seems to apply, so they project it onto the protagonist: "Wouldn't people judge you?" "No one wants a flawed mug."
-3. From that belief they predict a bad outcome: "He'll give up." "It won't get picked."
-4. The scene shows a different outcome, visibly. The juggler drops a ball, laughs, and keeps going. Someone picks the flawed mug first.
-5. Surprise: "Why didn't that happen?"
-6. The user finds the protagonist's belief, the rule that explains the outcome: drops are part of the show; flaws make it unique.
-7. The user brings that belief back to their own life.
-The change comes from the gap between what the user predicts, using their own belief, and what the scene shows.
-
-What must match, and what must differ
-
-Position, the relationship to others (being judged, watched, chosen, compared): the same, so the user can step into the role.
-Position, the surface (place, activity, culture, object): different, so there is distance and the user isn't defending themselves.
-Problem, the kind of gap: the same, so the user's belief applies and they project it.
-Feeling: the same at first, or easy to imagine, so the change lands while the feeling is active.
-Belief: different. This is the rule the user discovers.
-Outcome: different and visible. This breaks the prediction and creates the surprise.
-
-How similar is similar enough
-
-Too far: the position or problem doesn't match, so there is nothing to project onto. The user gets curious about the mechanics, or stays detached. From real sessions: at a flower auction, a user took the buyer's role and spent the scene saying "I don't understand this scene." A chess game, for someone who felt incompetent. A user looking for connection was shown communal meals where everyone already belonged; no one there was in her position, so she compared herself to them and felt worse.
-Too close: the same surface as the user's own life, such as an office worker being rejected, for a user who has been rejected at work. There is no distance, so the user feels their own problem directly, defends, or ruminates.
-Just right: the same position and problem, a different surface, and a different outcome the user can see. A flawed mug in a pottery seconds shop, for a student whose work is graded: the mug is judged against a factory standard. A street performer going on after a strong act, for someone who feels watched in class.
-The position match has to be clear enough at the start to begin projection. The matching problem can surface as the user asks questions.
-
-Step 1: Map the user's chain
-
-From everything you know about the person below, fill in their position, problem, belief, feeling, and outcome. Apply the tests: the problem must not be about who they are, and the belief must be something someone else could think differently about.
-
-Then break the belief into 2 to 4 candidate sub-beliefs: the separate rules that hold up the root belief. "I'm not good enough" can rest on "my effort should equal the outcome," "a mistake makes my work worth less," and "being watched means being measured on everything." For each, give the evidence (their own words, quoted, or what you inferred it from), whether it is stated or inferred, and your confidence.
-
-Don't invent a cause the user didn't hint at. Never speculate about their past ("it seems possible you've been judged before"). If the challenge is mostly a feeling with nowhere to go rather than a belief, keep the sub-beliefs modest and mark them low confidence instead of forcing a distorted belief onto them.
-
-Step 2: Design each scene around one sub-belief
-
-Each place targets one sub-belief. Across the three places, cover different sub-beliefs where possible. A scene aimed at the wrong sub-belief fails even if it is well built: a fish auction showing "there's always a next tub" didn't help a user who wasn't afraid of missing chances; she was afraid of being judged. Our most successful session addressed each sub-belief with a different scene. If there are only two sub-beliefs, give the one with stronger evidence two clearly different scenes.
-
-For each place, work out:
-Protagonist: who in the scene the user should identify with.
-Position match: the shared relationship (being judged, watched, chosen, compared), and how the surface differs from the user's life.
-Problem match: the shared kind of gap.
-Projected belief: what the protagonist would believe if they held the user's sub-belief.
-Predicted outcome: what the user would therefore expect to happen.
-Visible outcome: what the scene actually shows, and how it differs. It must be something you can see happen, not a rule that has to be explained.
-Scene belief: the rule that explains the visible outcome.
-Feeling cue: what in the scene invites the user's feeling (a nervous newcomer, a dropped ball, a stamp marking a flaw).
-Role clarity: scenes with more than one role need the right role to be obvious. At the flower auction the user took the buyer's role, where nothing contradicted her belief; the change was only available from the grower's side. Say which role the user should take and how the scene text makes it obvious. If the scene naturally offers both the judge's role and the judged role, note it: in the seconds shop the user first judged the flawed pieces as a shopper, then took the mug's view, and that role swap produced the strongest change of any session.
-Distance check: one sentence on why it isn't too far (position and problem match), and one on why it isn't too close (the surface differs from the user's life).
-Lever: the kind of change the scene offers, for the research team: meaning (the same situation carries a different meaning), holding (the same feeling is carried differently, with a time, place, object, or company), setting (a different social arrangement makes the situation work differently), scale (the weight changes among many lives or something vast), or direction (a life organized around a different value).
-
-Step 3: Reject places that fail
-
-Reject a place if any of these are true:
-No one in the scene is in the user's position.
-The kind of gap doesn't match, so the user's belief wouldn't apply.
-The outcome that breaks the prediction can't be seen, only explained.
-The scene shows the user's want already fulfilled for people who never had the problem. This triggers comparison, not projection.
-The surface is essentially the user's own setting.
-The difference depends on laws or systems the user can't control (shorter legal work weeks, national healthcare).
-The place or practice isn't real or well documented.
-It isn't transferable: the user couldn't find a small version of the scene belief in their own life without moving countries or changing institutions.
-
-Places must be real, accurate, and respectful. Describe them as they are. Don't exaggerate, romanticize, or present one practice as how everyone in a country behaves. Describe religious, mourning, and community practices with care, never as spectacle.
-
-Make the moment belong to its place
-
-Among scenes that pass the steps above, pick a moment that could only happen here, or happens here in a way it wouldn't anywhere else. Ask yourself: if the caption were removed, could someone who knows this place recognize it?
-Prefer everyday rituals (how people greet, eat, commute, shop, wait, celebrate, or mourn), small details locals stop noticing (street sounds, shop signs, how people queue, gestures, the rhythm of a market), the texture of the place (weather, light, architecture, crowds or their absence, the pace of life), and things tied to local history, beliefs, food, language, music, or social norms, including old and new side by side.
-Avoid generic scenes that could be anywhere (a highway, a chain store, a hotel room), postcard cliches unless they show something unexpected about how locals actually relate to the landmark, anything that reduces a culture to a stereotype or treats people as exotic props, and picking the most dramatic option over the most revealing one.
-For each place, note what is unique to this place here, what a visitor would notice that a local wouldn't, and the feeling of the moment (calm, chaotic, warm, formal, playful...).
-
-Step 4: Write the user-facing text
-
-The "why" and "scene" fields are shown to the user. They must:
-Put the protagonist in view, in the user's position, with the feeling cue.
-Show the visible outcome as something that happens in the scene.
-Describe what happens, without stating the lesson, the scene belief, or what the user should take away.
-
-Don't write: "Kintsugi reframes mistakes as material to work with."
-Write: "A craftsperson traces the crack in a broken bowl with gold, so the break stays visible."
-
-Don't write: "Shows that mistakes are part of the process."
-Write: "A juggler drops a club in front of the crowd, laughs, scoops it up, and keeps going. People clap."
-
-Don't write: "Flawed items are valued here."
-Write: "Mugs with lopsided handles and uneven glaze sit on the seconds shelf, each stamped as imperfect. A shopper picks one up, turns it over, and takes it to the till."
-
-The chain, the sub-beliefs, and the scene design go only in the internal fields, which the user never sees.
-
-Worked example
-
-These show the reasoning, not a list of places to reuse. Don't pick a place named in this prompt unless nothing else fits the user as well.
-
-"I keep comparing myself to other people at the gym. I feel like everyone is judging me." Chain: position, a beginner exercising in a shared space where others can see them; problem, their strength and skill are visibly below others'; belief, being seen struggling means people think less of me; feeling, exposed and self-conscious; outcome, they avoid the equipment others use, or skip going. Sub-beliefs: sb1 "people watching are judging my performance" (stated, high); sb2 "I have to be at their level before I belong there" (inferred from "comparing myself", medium). Good for sb2: a capoeira roda in Salvador, Brazil. Protagonist: a beginner stepping into the circle to play opposite an experienced player. Projected belief: "a beginner doesn't belong in there with them." Predicted outcome: the experienced player shows them up, or they get waved out. Visible outcome: the experienced player slows the game to the beginner's pace, and the circle keeps clapping and singing them through it. Scene belief: the roda is played with whoever steps in. Not too far: being watched while less skilled than others. Not too close: a music-and-movement circle, not a gym. Bad: another gym or fitness class (too close). Bad: a yoga retreat where everyone is already calm and flexible (the want is already fulfilled for people who never had the problem, so it triggers comparison).
-
-Context for this round:
-What they wrote at the start: "${S.problem}"
+  return `What they wrote at the start: "${S.problem}"
 ${S.intake.length?`Their answers to the opening questions (each tagged with what it was asking about): ${JSON.stringify(S.intake)}`:""}
 How it reads now, after exploring: "${S.refined}"
 ${S.userChain?`Your last read of their chain and sub-beliefs: ${JSON.stringify(S.userChain)}`:""}
@@ -1353,26 +1125,10 @@ ${S.synth&&S.synth.summary?`Current read of where it points: "${S.synth.summary}
 `:""}${mode==="initial"?"This is their first set of places.":mode==="tailored"?"Choose places that speak directly to the causes they confirmed or partly confirmed. Leave out angles tied to causes they rejected.":mode==="deeper"?"They said this is helping but they're not there yet. Go further in the direction that's resonating, based on the questions they asked below.":`They said none of the places so far reflect their problem.${missing?` What they said is missing: "${missing}".`:""} Revisit their chain and sub-beliefs with this in mind, and take clearly different angles from before.`}
 Already visited (don't repeat): ${JSON.stringify(visited)}
 ${used.length?`Scenes already shown, with the sub-belief each one targeted and the scene belief it offered. Move toward sub-beliefs not yet addressed, or ones their questions show are still active: ${JSON.stringify(used)}`:""}
-Their journey so far: ${JSON.stringify(journey())}
-
-Additional technical requirements for this app, on top of everything above:
-- Give each place exactly one moment. "scene" is present tense, 2 to 3 short concrete sentences, following the Step 4 rules above.
-- Also write "meaning": 1 to 2 sentences of real cultural or historical background, in plain language, shown to the user right under the scene. It follows the same describe-don't-teach rule as "scene" and "why": no lesson, no scene belief, no "this teaches you to..."
-- Write for someone who has never been to this place and doesn't know its customs or vocabulary: say plainly where things are and what's happening before leaning on any specific name, never assume outside knowledge. Any specific cultural term, ritual name, local word, or named object used in "scene" or "meaning" also needs an entry in "terms" so it can be explained on hover, but the sentences must already read clearly on their own, even before anyone hovers anything.
-- Tappable chat starters. Most users don't know what to ask: they see something interesting but can't name why. Model how a curious traveler reacts, noticing a feeling first and then looking for the reason, without lecturing.
-  "reactions": 1 to 2 short first-person comments the user might be feeling looking at this moment, which they can tap to explore ("This market feels louder and friendlier than I expected." "I'd hate to be the one going on after that act."). At least one names a feeling or a surprise, ideally about the protagonist's position.
-  "questions": 3 to 4 questions in the user's voice, asked to a local guide, moving from what they see to why it's like that: one about something visible, which also helps them find the protagonist ("Who's the person at the edge of the circle?"); one about why ("Why do they stamp the flawed ones instead of throwing them out?"); one about how it feels to be there, ideally from inside the protagonist's position, so they say what they'd expect ("Would anyone pick the mug with the wonky handle?"); and one comparing the custom with home ("How is this different from how we'd do it at home?"), about the custom, not about their challenge.
-  Tie every starter to something specific in this moment, never generic ones like "Tell me about this culture." Keep each under about 12 words, the way a person would talk. Never give away the answer or the scene belief: "So flaws don't matter here?" gives it away.
-- "lat" and "lon" are the real decimal-degree coordinates of the specific place, used to show it on a small map.
-- No em dashes anywhere in user-facing text.
-- The moment also needs a 3D scene description that matches "scene" closely, with the protagonist at the heart of it:
-${VOCAB}
-- And a painted backdrop of the place around it:
-${BACKDROP_VOCAB}
-
-Respond with ONLY JSON, no markdown:
-{"user_chain":{"position":"","problem":"","belief":"","feeling":"","outcome":"","sub_beliefs":[{"id":"sb1","belief":"","evidence":"","source":"stated | inferred","confidence":"low | medium | high"}]},
-"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","reactions":["..."],"questions":["...","...","..."],"terms":[{"term":"...","definition":"..."}],"scene3d":{...},"backdrop":{...}},"internal":{"target_sub_belief":"sb1","protagonist":"","position_match":{"shared_relationship":"","surface_difference":""},"problem_match":"","projected_belief":"","predicted_outcome":"","visible_outcome":"","scene_belief":"","feeling_cue":"","role_clarity":"","distance_check":{"not_too_far":"","not_too_close":""},"lever":"meaning | holding | setting | scale | direction","place_specific":{"unique_here":"","visitor_notice":"","mood":""},"reapply_question":"One open question, never advice."}}]}`;
+Their journey so far: ${JSON.stringify(journey())}`.replace(/\n{3,}/g,"\n\n").trim();
+}
+function roundPrompt(mode,missing,template){
+  return String(template||"").replace(/<!--[\s\S]*?-->/g,"").replace("{{round_context}}",()=>roundContext(mode,missing)).trim();
 }
 function cleanChain(c){
   if(!c||typeof c!=="object")return null;
@@ -1407,8 +1163,6 @@ function cleanRound(r){
       lat:clamp(Number(p.lat)||0,-90,90),lon:clamp(Number(p.lon)||0,-180,180),
       why:String(p.why||""),
       moments:[{title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),reactions:(Array.isArray(m.reactions)?m.reactions:[]).slice(0,2).map(String),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,4).map(String),
-        terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
-        scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]},
         backdrop:cleanBackdrop(m.backdrop),
         internal:cleanInternal(p.internal,userChain)}]};
   });
@@ -1417,24 +1171,33 @@ function cleanRound(r){
 }
 /* MATCHER:END */
 let genCtl=null;
+/* Fetched fresh each round, so edits to the file show up on the next round. */
+async function placePrompt(){
+  let res;
+  try{res=await fetch("prompts/place-matching.md",{cache:"no-cache"})}catch(e){throw{code:"prompt_missing"}}
+  if(!res.ok)throw{code:"prompt_missing"};
+  const t=await res.text();
+  if(!t.includes("{{round_context}}"))throw{code:"prompt_missing"};
+  return t;
+}
 async function makeRound(mode,missing){
   show("loading");
-  $("loadingStatement").textContent=`"${S.refined}"`;
-  $("loadingMsg").textContent=mode==="tailored"?"Finding places for what you've worked out so far...":mode==="pivot"?"Looking in a different direction...":"Looking for places that might have something to say about this...";
+  $("loadingMsg").textContent=mode==="tailored"?"Finding places for what you've worked out so far…":mode==="pivot"?"Looking in a different direction…":mode==="deeper"?"Going a little further in…":"Looking for places that echo what you shared…";
+  $("loadingStatus").textContent="This can take up to a minute.";
   $("loadingErr").innerHTML="";
   const sample=aiOff?null:await getSample();
   let places=null, err="";
   if(sample){
     genCtl=new AbortController();
-    try{const cleaned=cleanRound(await sample.json(roundPrompt(mode,missing),{signal:genCtl.signal,modelTier:"default",cache:false}));
+    try{const cleaned=cleanRound(await sample.json(roundPrompt(mode,missing,await placePrompt()),{signal:genCtl.signal,modelTier:"default",cache:false}));
       if(cleaned){places=cleaned.places;S.userChain=cleaned.userChain||S.userChain}else err="The places that came back were incomplete."}
     catch(e){if(e&&e.code==="cancelled"){show(S.synth?"reflect":S.rounds.length?"checkin":"intro");return}
       if(e&&e.code==="not_granted")aiOff=true;
-      err=e&&e.code==="rate_limited"?"Too many requests right now. Wait a minute and try again.":e&&e.code==="bad_code"?"That study code wasn't accepted. Check it and start again.":"Finding places didn't work this time."}
+      err=e&&e.code==="prompt_missing"?"The place-matching prompt (prompts/place-matching.md) couldn't be loaded.":e&&e.code==="rate_limited"?"Too many requests right now. Wait a minute and try again.":e&&e.code==="bad_code"?"That study code wasn't accepted. Check it and start again.":"Finding places didn't work this time."}
   } else err="The AI isn't available in this view, so places can't be chosen for you.";
   if(!places){
-    $("loadingMsg").textContent=err;
-    $("loadingErr").innerHTML=`<div class="row" style="justify-content:center">${aiOff?"":`<button class="btn primary" id="retryGen">Try again</button>`}${S.usedFallback?"":`<button class="btn" id="useFallback">Walk through example places</button>`}<button class="btn" id="backGen">Back</button></div>`;
+    $("loadingMsg").textContent=err;$("loadingStatus").textContent="";
+    $("loadingErr").innerHTML=`<div class="row" style="justify-content:center">${aiOff?"":`<button class="btn primary lg" id="retryGen">Try again</button>`}${S.usedFallback?"":`<button class="btn" id="useFallback">Walk through example places</button>`}<button class="btn" id="backGen">Back</button></div>`;
     $("retryGen")&&($("retryGen").onclick=()=>makeRound(mode,missing));
     $("useFallback")&&($("useFallback").onclick=()=>{S.usedFallback=true;startRound(mode,FALLBACK.map(p=>JSON.parse(JSON.stringify(p))))});
     $("backGen").onclick=()=>show(S.rounds.length?"checkin":"intro");
@@ -1446,28 +1209,51 @@ $("stopGen").onclick=()=>genCtl&&genCtl.abort();
 
 function startRound(mode,places,missing){
   S.rounds.push({mode,missing:missing||"",places,refinedAtStart:S.refined});
-  renderReveal();show("reveal");
+  selPlace=0;show("reveal");renderReveal();
 }
 
-/* ---------- Reveal ---------- */
+/* ---------- Reveal: the matched places on a globe ---------- */
+let selPlace=0;
 function renderReveal(){
-  const ri=S.rounds.length-1,R=S.rounds[ri];
-  $("revealTitle").textContent=ri===0?"A few places that might have something to say about this":R.mode==="pivot"?"Somewhere different this time":R.mode==="tailored"?"Places for what you've found so far":"A little further in";
-  $("revealStatement").textContent=S.refined;
-  $("cards").innerHTML=R.places.map((P,pi)=>`<button class="pcard" data-p="${pi}"><div class="thumb"><img alt=""></div><div class="pc-body"><b>${esc(P.name)}</b><small>${esc(P.country)}</small><span>${esc(P.why)}</span></div></button>`).join("");
-  paintThumbs(R.places.map((P,pi)=>[$("cards").querySelector(`[data-p="${pi}"] img`),P,P.moments[0]]));
+  const R=S.rounds[S.rounds.length-1],n=R.places.length;
+  selPlace=Math.min(selPlace,n-1);
+  $("revealTitle").textContent=R.mode==="pivot"?"Somewhere different this time":R.mode==="tailored"?"Places for what you've found":R.mode==="deeper"?"A little further in":`${n} places matched to you`;
+  drawPlaceList();
+  if(Globe3D.attach($("revealGlobe"))){Globe3D.setPlaces(R.places);Globe3D.select(selPlace)}
 }
-$("cards").addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c)enterPlace(S.rounds.length-1,+c.dataset.p,0)});
-$("walkBtn").onclick=()=>enterPlace(S.rounds.length-1,0,0);
+function drawPlaceList(){
+  const ri=S.rounds.length-1,R=S.rounds[ri];
+  $("cards").innerHTML=R.places.map((P,pi)=>{const M=P.moments[0]||{};
+    return `<button class="pc" data-p="${pi}" aria-pressed="${pi===selPlace}"><span class="n">${pi+1}</span><span class="t"><b>${esc(M.title||P.name)}</b><small>${esc(P.name)}${P.country?`, ${esc(P.country)}`:""}</small><span class="why">${esc(P.why)}</span>${S.visited[`${ri}.${pi}`]?`<span class="seen">Visited</span>`:""}</span></button>`}).join("");
+}
+$("cards").addEventListener("click",e=>{const c=e.target.closest(".pc");if(!c)return;selPlace=+c.dataset.p;drawPlaceList();Globe3D.select(selPlace)});
+$("choosePlace").onclick=()=>land(S.rounds.length-1,selPlace);
+$("walkBtn").onclick=()=>land(S.rounds.length-1,0);
+$("noneFit").onclick=()=>{tick();curKey=null;show("checkin");renderCheckin();$("missingWrap").classList.remove("hidden");$("missing").focus()};
+
+/* ---------- Landing: "now arriving", while the place is painted ---------- */
+let landingAt=null;
+function land(ri,pi){
+  tick();curKey=null;
+  landingAt={r:ri,p:pi};
+  const R=S.rounds[ri],P=R.places[pi],M=P.moments[0]||{};
+  $("landName").textContent=P.country?`${P.name}, ${P.country}`:P.name;
+  $("landWhy").textContent=P.why;
+  $("landCount").textContent=`Place ${pi+1} of ${R.places.length}`;
+  $("landBack").textContent=`Back to the ${R.places.length} places`;
+  const plane=document.querySelector("#landing .plane");plane.style.animation="none";void plane.offsetWidth;plane.style.animation="";
+  World.set(backdropFor(P,M),P.name+M.title);
+  show("landing");
+}
+$("stepInside").onclick=()=>enterPlace(landingAt.r,landingAt.p,0);
+$("landBack").onclick=()=>{selPlace=landingAt.p;show("reveal");renderReveal()};
 
 /* ---------- Walk ---------- */
-let viewerOK=false;
 function enterPlace(ri,pi,mi){
   const prev=S.cur;
   if(prev&&(prev.r!==ri||prev.p!==pi))refine(prev.r,prev.p);
   S.cur={r:ri,p:pi,m:mi};S.visited[`${ri}.${pi}`]=true;
   show("walk");
-  if(!viewerOK&&HAS3D){viewerOK=Viewer.init($("viewer"))}
   renderWalk(true);
 }
 function curPlace(){return S.rounds[S.cur.r].places[S.cur.p]}
@@ -1475,65 +1261,34 @@ function curMoment(){return curPlace().moments[S.cur.m]}
 function renderWalk(newScene){
   tick();
   const {r:ri,p:pi,m:mi}=S.cur,R=S.rounds[ri],P=curPlace(),M=curMoment(),k=mk(ri,pi,mi);curKey=k;tStart=Date.now();
-  $("tabs").innerHTML=R.places.map((p,j)=>`<button class="tab${j===pi?" on":""}" data-p="${j}">${S.visited[`${ri}.${j}`]&&j!==pi?'<span class="seen" aria-label="visited"></span>':""}${esc(p.name)}</button>`).join("");
-  $("tabsHint").textContent=R.places.length>1?`${R.places.length} places to explore in this set — tap a tab above to jump to any of them, anytime.`:"";
-  $("backToSummary").classList.toggle("hidden",!S.returnToFinal);
-  $("placeName").textContent=`${P.name}, ${P.country}`;
-  $("mcount").textContent=P.moments.length>1?`Moment ${mi+1} of ${P.moments.length}`:"";
-  Globe3D.attach($("sideGlobe"));Globe3D.point(P.lat,P.lon);$("sideGlobeLabel").textContent=`${P.name}, ${P.country}`;
-  if(newScene){if(viewerOK){Viewer.load(M.scene3d,P.name+M.title);$("viewer").classList.remove("no3d")}else{$("viewer").classList.add("no3d")}
-    const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")
-    Backdrop.set(backdropFor(P,M),P.name+M.title);}
-  $("mtitle").textContent=M.title;$("mscene").innerHTML=highlightTerms(M.scene,M.terms);$("mmeaning").innerHTML=highlightTerms(M.meaning,M.terms);
+  $("placeName").textContent=P.country?`${P.name}, ${P.country}`:P.name;
+  $("mcount").textContent=`Place ${pi+1} of ${R.places.length}`;
+  $("endWalk").textContent=S.returnToFinal?"Back to your summary":"End walk";
+  if(newScene){World.set(backdropFor(P,M),P.name+M.title);$("panelScroll").scrollTop=0}
+  $("mtitle").textContent=M.title;$("mscene").textContent=M.scene;$("mmeaning").textContent=M.meaning;
   renderChat();
-  const last=mi===P.moments.length-1, allSeen=R.places.every((_,j)=>S.visited[`${ri}.${j}`]);
-  $("navRow").classList.toggle("hidden",P.moments.length<=1);
-  $("prevM").disabled=mi===0;
-  const tc=$("transitionCard");
-  if(!last){
-    $("nextM").classList.remove("hidden");tc.classList.add("hidden");
-  } else {
-    $("nextM").classList.add("hidden");tc.classList.remove("hidden");
-    if(!allSeen){
-      let n=R.places.findIndex((_,j)=>!S.visited[`${ri}.${j}`]);if(n<0)n=(pi+1)%R.places.length;
-      $("transitionMsg").textContent=`You've seen everything in ${P.name}, ${P.country}.`;
-      $("transitionBtn").textContent=`Continue to ${R.places[n].name} →`;
-      $("transitionBtn").dataset.act="place";$("transitionBtn").dataset.n=n;
-    } else {
-      $("transitionMsg").textContent=`You've walked through all ${R.places.length} places in this set.`;
-      $("transitionBtn").textContent="Pause and check in";
-      $("transitionBtn").dataset.act="check";
-    }
-  }
+  $("nextM").textContent=pi<R.places.length-1?"Next place":"Pause and check in";
+  $("prevM").textContent=S.returnToFinal?"← Summary":"← Back";
   renderSide();
 }
-$("tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(!t)return;const pi=+t.dataset.p;if(pi!==S.cur.p)enterPlace(S.cur.r,pi,0)});
-$("prevM").onclick=()=>{S.cur.m--;renderWalk(true)};
-$("nextM").onclick=()=>{S.cur.m++;renderWalk(true)};
-$("transitionBtn").onclick=()=>{const a=$("transitionBtn").dataset.act;
-  if(a==="place")enterPlace(S.cur.r,+$("transitionBtn").dataset.n,0);
-  else goCheckin()};
-$("checkSide").onclick=goCheckin;
-$("backToSummary").onclick=()=>finish();
-$("recenter").onclick=()=>Viewer.reset();
-document.querySelectorAll("[data-move]").forEach(b=>{const d=b.dataset.move;const on=e=>{e.preventDefault();Viewer.setHold(d,true);const h=$("viewer").querySelector(".hint3d");h&&h.classList.add("gone")},off=()=>Viewer.setHold(d,false);
-  b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off)});
+$("prevM").onclick=()=>{if(S.returnToFinal)finish();else land(S.cur.r,S.cur.p)};
+$("nextM").onclick=()=>{const R=S.rounds[S.cur.r];if(S.cur.p<R.places.length-1)land(S.cur.r,S.cur.p+1);else goCheckin()};
+$("endWalk").onclick=()=>{if(S.returnToFinal)finish();else goCheckin()};
+$("recenter").onclick=()=>World.recenter();
 
-/* ---------- Side panel ---------- */
+/* ---------- What they came in with, and how it's taking shape ---------- */
 function renderSide(){
-  $("origStmt").textContent=S.problem;
   const changed=S.refined!==S.problem;
-  $("refBlock").classList.toggle("hidden",!changed);
-  $("refStmt").textContent=S.refined;
-  const last=S.refHistory[S.refHistory.length-1];$("refShift").textContent=last&&last.shift?last.shift:"";
+  $("stmtLabel").textContent=changed?"How it's taking shape":"What you came in with";
+  $("refStmt").textContent=changed?S.refined:S.problem;
   renderResearch();
 }
 function renderResearch(){
   const R=S.rounds[S.cur?S.cur.r:S.rounds.length-1];if(!R)return;
   const ch=S.userChain;
-  $("readout").innerHTML=(ch?`<dt>User chain</dt><dd>${esc(ch.belief)}</dd>${ch.sub_beliefs.map(b=>`<dd class="small">${esc(b.id)}: ${esc(b.belief)} (${esc(b.source)}, ${esc(b.confidence)})</dd>`).join("")}`:"")+
+  $("readout").innerHTML=(ch?`<dt>User chain</dt><dd>${esc(ch.belief)}</dd>${ch.sub_beliefs.map(b=>`<dd>${esc(b.id)}: ${esc(b.belief)} (${esc(b.source)}, ${esc(b.confidence)})</dd>`).join("")}`:"")+
     R.places.map(p=>{const intl=(p.moments[0]&&p.moments[0].internal)||{};
-      return `<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>${intl.target_sub_belief||intl.lever?`<dd class="small">Targets ${esc(intl.target_sub_belief_text||intl.target_sub_belief)}${intl.lever?` · lever: ${esc(intl.lever)}`:""}</dd>`:""}${intl.visible_outcome?`<dd class="small">Predicted: ${esc(intl.predicted_outcome)} → Shows: ${esc(intl.visible_outcome)}</dd>`:""}`;
+      return `<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>${intl.target_sub_belief||intl.lever?`<dd>Targets ${esc(intl.target_sub_belief_text||intl.target_sub_belief)}${intl.lever?` · lever: ${esc(intl.lever)}`:""}</dd>`:""}${intl.visible_outcome?`<dd>Predicted: ${esc(intl.predicted_outcome)} → Shows: ${esc(intl.visible_outcome)}</dd>`:""}`;
     }).join("")+(S.refHistory.length?`<dt>Refinements</dt>`+S.refHistory.map(h=>`<dd>${esc(h.refined)}${h.shift?` <em>(${esc(h.shift)})</em>`:""}</dd>`).join(""):"");
 }
 
@@ -1581,8 +1336,7 @@ Respond with ONLY JSON: {"refined":"...","shift":"a few words on what changed, o
 }
 async function pivotWithContext(context){
   show("loading");
-  $("loadingMsg").textContent="Taking in what you added...";
-  $("loadingStatement").textContent=`"${S.refined}"`;
+  $("loadingMsg").textContent="Taking in what you added…";
   await refineFromContext(context);
   makeRound("pivot",context);
 }
@@ -1603,7 +1357,7 @@ let asking=false;
 async function ask(q){
   if(asking)return;asking=true;
   const key=curKey,P=curPlace(),M=curMoment(),log=(S.chats[key]=S.chats[key]||[]);
-  const entry={q,a:""};log.push(entry);renderChat();
+  const entry={q,a:""};log.push(entry);renderChat();$("panelScroll").scrollTop=$("panelScroll").scrollHeight;
   const ansEl=$("chatlog").lastElementChild.querySelector(".a");ansEl.textContent="Thinking...";ansEl.classList.add("pending");
   $("askBtn").disabled=true;
   const sample=aiOff?null:await getSample();
@@ -1667,7 +1421,7 @@ Respond with ONLY JSON: {"reaction":"...","question":"...","stuck":false}`,{mode
 
 /* ---------- Check in ---------- */
 async function goCheckin(){
-  tick();refine(S.cur.r,S.cur.p);curKey=null;
+  tick();if(S.cur)refine(S.cur.r,S.cur.p);curKey=null;
   show("checkin");$("missingWrap").classList.add("hidden");renderCheckin();
 }
 function renderCheckin(){
@@ -1680,7 +1434,7 @@ $("optSatisfied").onclick=()=>{S.choices.push({after_round:S.rounds.length,choic
 $("optMore").onclick=()=>{S.choices.push({after_round:S.rounds.length,choice:"keep exploring",statement:S.refined});makeRound("deeper","")};
 $("optNone").onclick=()=>{$("missingWrap").classList.remove("hidden");$("missing").focus()};
 $("pivotBtn").onclick=()=>{const m=$("missing").value.trim();S.choices.push({after_round:S.rounds.length,choice:"none of these",missing:m});pivotWithContext(m)};
-$("backToWalk").onclick=()=>{enterPlace(S.cur.r,S.cur.p,S.cur.m)};
+$("backToWalk").onclick=()=>{if(S.cur)enterPlace(S.cur.r,S.cur.p,S.cur.m);else{show("reveal");renderReveal()}};
 
 /* ---------- Synthesis: observations -> possible causes -> where it points ---------- */
 function synthPrompt(){
@@ -1745,11 +1499,11 @@ function drawSynth(msg){
       <textarea id="elaborateInput" placeholder="There's more to this..." style="min-height:80px"></textarea>
       <div class="row" style="margin-top:10px">
         <button class="btn" id="elaborateUpdate">Update the read with this</button>
-        <button class="btn" id="wrongPlaces">These places got it wrong — show me different ones</button>
+        <button class="btn" id="wrongPlaces">These places got it wrong. Show me different ones</button>
       </div>
     </div>
     <div class="row" style="margin-top:26px">
-      <button class="btn primary" id="tailored">Explore places for this</button>
+      <button class="btn primary lg" id="tailored">Explore places for this</button>
       <button class="btn" id="saveSummary">Save as my working summary</button>
       <button class="textbtn" id="backCheck">Back to check-in</button>
     </div>`;
@@ -1819,7 +1573,7 @@ function finish(){
 }
 $("summaryBody").addEventListener("click",e=>{const c=e.target.closest(".relive");if(!c)return;S.returnToFinal=true;enterPlace(+c.dataset.r,+c.dataset.p,+c.dataset.m)});
 $("finalExplore").onclick=()=>makeRound("tailored","");
-$("restart").onclick=()=>{S=fresh();$("problem").value="";$("startBtn").disabled=true;Backdrop.set(BACKDROP_DEFAULT,"worldmirror");show("intro")};
+$("restart").onclick=()=>{S=fresh();selPlace=0;$("problem").value="";$("problem").dispatchEvent(new Event("input"));show("intro")};
 $("restartTop").onclick=()=>$("restart").onclick();
 
 /* ---------- Self-hosted extras: study code + session logging ---------- */

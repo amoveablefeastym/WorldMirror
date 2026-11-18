@@ -30,6 +30,7 @@ const start = html.indexOf("/* MATCHER:BEGIN");
 const end = html.indexOf("/* MATCHER:END */");
 if (start < 0 || end < 0) throw new Error("MATCHER:BEGIN / MATCHER:END markers not found in index.html");
 const matcherSrc = html.slice(start, end) + "\n;({roundPrompt, cleanRound});";
+const PLACE_PROMPT = fs.readFileSync(path.join(__dirname, "..", "prompts", "place-matching.md"), "utf8");
 
 function loadMatcher(statement) {
   const S = { problem: statement, refined: statement, intake: [], userChain: null, causes: [], feedback: [], synth: null, rounds: [] };
@@ -74,12 +75,10 @@ const SCHEMA = {
     places: { type: "array", min: 3, max: 3, items: {
       type: "object", required: ["name", "country", "lat", "lon", "why", "moment", "internal"], props: {
         name: str, country: str, why: str, lat: { type: "number" }, lon: { type: "number" },
-        moment: { type: "object", required: ["title", "scene", "meaning", "reactions", "questions", "terms", "scene3d", "backdrop"], props: {
+        moment: { type: "object", required: ["title", "scene", "meaning", "reactions", "questions", "backdrop"], props: {
           title: str, scene: str, meaning: str,
           reactions: { type: "array", min: 1, max: 2, items: str },
           questions: { type: "array", min: 3, max: 4, items: str },
-          terms: { type: "array", items: { type: "object", required: ["term", "definition"], props: { term: str, definition: str } } },
-          scene3d: { type: "object" },
           backdrop: { type: "object" }
         } },
         internal: { type: "object", required: ["target_sub_belief", "protagonist", "position_match", "problem_match", "projected_belief", "predicted_outcome", "visible_outcome", "scene_belief", "feeling_cue", "role_clarity", "distance_check", "lever", "place_specific", "reapply_question"], props: {
@@ -129,7 +128,7 @@ async function runOne(c, run) {
   const { roundPrompt, cleanRound } = loadMatcher(c.statement);
   const t0 = Date.now();
   try {
-    const text = await callModel(roundPrompt("initial", ""));
+    const text = await callModel(roundPrompt("initial", "", PLACE_PROMPT));
     const secs = Math.round((Date.now() - t0) / 1000);
     let out;
     try { out = parseJSONText(text); } catch (e) { return { c, run, secs, error: "Response wasn't valid JSON", text }; }
