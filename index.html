@@ -9,23 +9,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>:root{
-  --bg:#E4E9EC; --paper:#F7F9FA; --ink:#1C2733; --muted:#56666F; --line:#C9D2D8;
-  --accent:#9A6608; --accent-soft:#F3E3BF; --btn:#1C2733; --btn-ink:#F7F9FA;
+  --bg:#E4E9EC; --paper:rgba(255,255,255,.5); --ink:#18222D; --muted:#44535D; --line:rgba(28,39,51,.16);
+  --accent:#8A5806; --accent-soft:rgba(243,227,191,.72); --btn:#1C2733; --btn-ink:#F7F9FA;
+  --glass:rgba(244,247,250,.7); --glass-strong:rgba(247,249,251,.82); --glass-edge:rgba(255,255,255,.6);
+  --glass-shadow:0 24px 70px rgba(6,10,22,.32);
   --serif:"Literata", Georgia, "Times New Roman", serif;
   --sans:"Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141B21;--paper:#1C252D;--ink:#E4EAEE;--muted:#95A5B0;--line:#2E3A44;--accent:#E8B64A;--accent-soft:#3A3120;--btn:#E4EAEE;--btn-ink:#141B21}}
-:root[data-theme="dark"]{--bg:#141B21;--paper:#1C252D;--ink:#E4EAEE;--muted:#95A5B0;--line:#2E3A44;--accent:#E8B64A;--accent-soft:#3A3120;--btn:#E4EAEE;--btn-ink:#141B21}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141B21;--paper:rgba(30,40,50,.5);--ink:#E8EDF1;--muted:#A6B4BE;--line:rgba(255,255,255,.14);--accent:#F0C060;--accent-soft:rgba(70,56,30,.6);--btn:#E8EDF1;--btn-ink:#141B21;--glass:rgba(16,22,30,.6);--glass-strong:rgba(18,25,33,.76);--glass-edge:rgba(255,255,255,.14)}}
+:root[data-theme="dark"]{--bg:#141B21;--paper:rgba(30,40,50,.5);--ink:#E8EDF1;--muted:#A6B4BE;--line:rgba(255,255,255,.14);--accent:#F0C060;--accent-soft:rgba(70,56,30,.6);--btn:#E8EDF1;--btn-ink:#141B21;--glass:rgba(16,22,30,.6);--glass-strong:rgba(18,25,33,.76);--glass-edge:rgba(255,255,255,.14)}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+/* painted backdrop behind everything, with frosted-glass panels on top */
+#backdrop{position:fixed;inset:0;z-index:-1;background:radial-gradient(120% 90% at 60% 62%,#C98A78 0%,#5A4E80 38%,#1E2850 70%,#0A1028 100%)}
+#backdrop .bd{position:absolute;inset:0;background-size:cover;background-position:30% 58%;opacity:0;transition:opacity 1.4s ease}
+#backdrop .bd.on{opacity:1}
+#backdrop::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,12,26,.18),rgba(8,12,26,0) 28%,rgba(8,12,26,0) 70%,rgba(8,12,26,.3))}
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(28px) saturate(1.35);backdrop-filter:blur(28px) saturate(1.35);border:1px solid var(--glass-edge);box-shadow:var(--glass-shadow),inset 0 1px 0 rgba(255,255,255,.4);border-radius:32px}
+section.glass{padding:clamp(24px,4.5vw,48px)}
+body{margin:0;background:#141B26;color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,textarea,input{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
-.brand{font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:28px}
-.brand span{color:var(--muted);font-weight:400}
+.brand{font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:22px;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+.brand span{color:rgba(255,255,255,.75);font-weight:400}
 .hidden{display:none!important}
 h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5.4vw,58px);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:17ch}
 h2{font-family:var(--serif);font-weight:400;font-size:clamp(26px,3.6vw,38px);line-height:1.15;letter-spacing:-.01em;margin:0 0 10px}
@@ -45,7 +54,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .statement{font-family:var(--serif);font-style:italic;font-size:19px;line-height:1.55;color:var(--muted);max-width:60ch;margin:0 0 28px}
 
 /* loading */
-#loading{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
+#loading{min-height:min(70vh,640px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px}
 #loading .statement{margin:0}
 .loadglobe{width:120px;height:120px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#17293a,#060b12)}
 .loadglobe canvas{width:100%!important;height:100%!important;display:block;cursor:grab;touch-action:none}
@@ -56,9 +65,11 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 
 /* reveal */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:26px}
-.pcard{text-align:left;padding:0;border:1px solid var(--line);background:var(--paper);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-.pcard:hover{border-color:var(--ink)}
-.thumb{aspect-ratio:16/10;background:#2A3546}
+.pcard{text-align:left;padding:0;border:1px solid var(--glass-edge);background:var(--paper);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s ease,box-shadow .25s ease}
+.pcard:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(6,10,22,.25)}
+.thumb{aspect-ratio:16/10;background:linear-gradient(180deg,#26305A,#B07A78 70%,#1A2140)}
+.thumb img{opacity:0;transition:opacity .6s ease}
+.thumb img.ready{opacity:1}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .pc-body{padding:14px 16px 18px;display:flex;flex-direction:column;gap:2px}
 .pc-body b{font-weight:500;font-size:18px}
@@ -68,12 +79,15 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 /* walk */
 .walkhead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tab{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font-size:14px;display:flex;align-items:center;gap:7px}
-.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab{border:1px solid var(--glass-edge);background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-radius:999px;padding:7px 15px;font-size:14px;display:flex;align-items:center;gap:7px}
+.tab.on{background:var(--glass-strong);font-weight:500;box-shadow:0 4px 18px rgba(6,10,22,.2)}
+.walkhead .textbtn{color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+#tabsHint{color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .seen{width:7px;height:7px;border-radius:50%;background:var(--accent)}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:26px;align-items:start}
 @media (max-width:900px){.grid{grid-template-columns:1fr}}
-.card{background:var(--paper);border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+.card{overflow:hidden;background:var(--glass-strong);border-radius:28px}
+.side.glass{padding:22px 20px;border-radius:28px}
 .viewer{position:relative;aspect-ratio:16/9;background:#1E2836;user-select:none;-webkit-user-select:none}
 @media (max-width:640px){.viewer{aspect-ratio:4/3}}
 .viewer canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
@@ -96,10 +110,6 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .term{position:relative;border-bottom:1px dotted var(--accent);cursor:help}
 .term .termtip{display:none;position:absolute;left:0;bottom:100%;margin-bottom:6px;width:230px;max-width:70vw;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:10px;font-family:var(--sans);font-size:13px;line-height:1.45;font-style:normal;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.28)}
 .term:hover .termtip,.term:focus .termtip,.term.pinned .termtip{display:block}
-.photocard{margin:0 0 18px}
-.photocard img{width:100%;max-height:360px;object-fit:contain;border-radius:12px;display:block;background:var(--paper)}
-.photocard p{margin:6px 0 0}
-.photocard a{color:var(--accent)}
 .ask{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .ask h3{font-size:15px;font-weight:500;margin:0 0 8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
@@ -134,7 +144,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--ink)}
 .research dd{margin:2px 0 0;font-family:var(--serif);font-size:14px}
 
 /* checkin */
-.narrow{max-width:760px}
+.narrow{max-width:760px;margin-inline:auto}
 .intake-q{display:block;font-family:var(--serif);font-size:22px;line-height:1.45;margin:0 0 14px}
 #intakeAnswer{min-height:90px}
 .cmp{display:grid;gap:16px;margin:22px 0 30px}
@@ -180,10 +190,11 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
 </style>
 </head>
 <body>
+<div id="backdrop" aria-hidden="true"><div class="bd"></div><div class="bd"></div></div>
 <div class="wrap">
   <div class="brand">WorldMirror <span>prototype</span></div>
 
-  <section id="intro">
+  <section id="intro" class="glass narrow">
     <h1>What's been on your mind?</h1>
     <p class="lede">Write it however it comes out. It doesn't need to be clear yet. We'll show you a few places in the world that might have something to say about it, and you can walk through them.</p>
     <label for="problem" class="small" style="display:block;margin-bottom:6px">In your own words</label>
@@ -199,7 +210,7 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     <p class="small" style="margin-top:26px;max-width:62ch">What you write here and while walking is sent to Anthropic's Claude AI through this study's server, so it can choose places, answer your questions, and notice what's shifting. Your session, including your notes and questions, is saved for the research team.</p>
   </section>
 
-  <section id="intake" class="hidden narrow">
+  <section id="intake" class="hidden narrow glass">
     <h2>A few questions first</h2>
     <p class="lede" style="margin-bottom:14px">So the places fit what's actually going on. Answer in a few words, or skip any you'd rather not.</p>
     <p class="statement" id="intakeStatement" style="margin-bottom:22px"></p>
@@ -218,7 +229,7 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     <p style="margin-top:26px"><button class="textbtn" id="intakeSkipAll">Skip the questions and show me places</button></p>
   </section>
 
-  <section id="loading" class="hidden">
+  <section id="loading" class="hidden glass narrow">
     <div class="loadglobe" id="loadGlobe" aria-hidden="true"></div>
     <p id="loadingMsg" style="font-size:18px;margin:0;max-width:46ch"></p>
     <p class="statement" id="loadingStatement"></p>
@@ -228,7 +239,7 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     <div id="loadingErr"></div>
   </section>
 
-  <section id="reveal" class="hidden">
+  <section id="reveal" class="hidden glass">
     <h2 id="revealTitle"></h2>
     <p class="statement" id="revealStatement"></p>
     <div class="cards" id="cards"></div>
@@ -239,7 +250,7 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     <div class="walkhead"><div class="tabs" id="tabs"></div><div class="row"><button class="textbtn hidden" id="backToSummary">← Back to your summary</button><button class="textbtn" id="restartTop">Start over</button></div></div>
     <p class="small" id="tabsHint" style="margin:-6px 0 14px"></p>
     <div class="grid">
-      <article class="card">
+      <article class="card glass">
         <div class="viewer" id="viewer">
           <div class="ov vplace" id="placeName"></div>
           <div class="ov vcount" id="mcount"></div>
@@ -256,10 +267,6 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
           <p class="mtitle" id="mtitle"></p>
           <p class="mscene" id="mscene"></p>
           <p class="meaning" id="mmeaning"></p>
-          <div class="photocard hidden" id="photoCard">
-            <img id="photoImg" alt="">
-            <p class="small" id="photoCredit"></p>
-          </div>
           <div class="ask">
             <h3>Ask questions, converse about your thoughts</h3>
             <div class="chips" id="suggest"></div>
@@ -273,7 +280,7 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
           </div>
         </div>
       </article>
-      <aside class="side">
+      <aside class="side glass">
         <div>
           <h3>Where you are</h3>
           <div class="sideglobe" id="sideGlobe"></div>
@@ -295,7 +302,7 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     </div>
   </section>
 
-  <section id="checkin" class="hidden narrow">
+  <section id="checkin" class="hidden narrow glass">
     <h2>Let's check in</h2>
     <p class="lede" style="margin-bottom:0">Here's where you started, and how it reads now based on what you noticed and asked. Edit it if it's not quite right.</p>
     <div class="cmp">
@@ -315,13 +322,13 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--pape
     <p style="margin-top:22px"><button class="textbtn" id="backToWalk">Go back to the places</button></p>
   </section>
 
-  <section id="reflect" class="hidden narrow">
+  <section id="reflect" class="hidden narrow glass">
     <h2>What your walk is pointing to</h2>
     <p class="lede">This isn't an answer yet. It's a working read of what you noticed, and you can push back on any of it.</p>
     <div id="reflectBody"></div>
   </section>
 
-  <section id="final" class="hidden narrow">
+  <section id="final" class="hidden narrow glass">
     <h2>Your working summary</h2>
     <p class="lede">Where things stand for now. You can keep exploring from here whenever you want.</p>
     <div id="summaryBody"></div>
@@ -548,24 +555,13 @@ const Viewer=(()=>{
   return{init,load,reset,setHold};
 })();
 
-let thumbR=null;
-function thumbnail(spec,seed){
-  if(!HAS3D)return"";
-  try{
-    if(!thumbR){thumbR=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});thumbR.setSize(480,300,false);thumbR.outputEncoding=THREE.sRGBEncoding}
-    const {scene}=buildScene(spec,seed);const cam=new THREE.PerspectiveCamera(60,480/300,.1,300);
-    const interior=!!(scene.background&&!scene.fog);cam.position.set(0,1.7,interior?4.5:8.5);cam.lookAt(0,1.1,0);
-    thumbR.render(scene,cam);const url=thumbR.domElement.toDataURL("image/jpeg",.82);disposeScene(scene);return url;
-  }catch(e){return""}
-}
-
 /* ---------- A real shaded 3D globe (reuses the THREE.js already loaded for scenes) ---------- */
 function buildWorldTexture(){
   const w=1024,h=512;
   const c=document.createElement("canvas");c.width=w;c.height=h;
   const ctx=c.getContext("2d");
   const og=ctx.createLinearGradient(0,0,0,h);
-  og.addColorStop(0,"#0C2A42");og.addColorStop(.5,"#155079");og.addColorStop(1,"#0C2A42");
+  og.addColorStop(0,"#070A14");og.addColorStop(.5,"#121A30");og.addColorStop(1,"#070A14");
   ctx.fillStyle=og;ctx.fillRect(0,0,w,h);
   const proj=(lon,lat)=>[(lon+180)/360*w,(90-lat)/180*h];
   const LAND=[
@@ -581,19 +577,21 @@ function buildWorldTexture(){
     [[131,-2],[141,-3],[150,-6],[148,-9],[140,-9]],
     [[172,-41],[175,-37],[178,-38],[176,-42]]
   ];
-  ctx.fillStyle="#5C8257";ctx.strokeStyle="rgba(28,45,34,.55)";ctx.lineWidth=1;
-  LAND.forEach(poly=>{
-    ctx.beginPath();
-    poly.forEach(([lon,lat],i)=>{const [x,y]=proj(lon,lat);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
-    ctx.closePath();ctx.fill();ctx.stroke();
-  });
-  const capN=ctx.createLinearGradient(0,0,0,h*.1);capN.addColorStop(0,"rgba(255,255,255,.85)");capN.addColorStop(1,"rgba(255,255,255,0)");
-  ctx.fillStyle=capN;ctx.fillRect(0,0,w,h*.1);
-  const capS=ctx.createLinearGradient(0,h,0,h*.9);capS.addColorStop(0,"rgba(255,255,255,.85)");capS.addColorStop(1,"rgba(255,255,255,0)");
-  ctx.fillStyle=capS;ctx.fillRect(0,h*.9,w,h*.1);
-  ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=1;
-  for(let lat=-60;lat<=60;lat+=30){const y=proj(0,lat)[1];ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
-  for(let lon=-150;lon<=150;lon+=30){const x=proj(lon,0)[0];ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
+  /* Dotted style from the visuals guide (recipe 1): dots spread evenly over the sphere,
+     bright on land and faint on ocean. Dots are stretched sideways toward the poles so they
+     stay round once wrapped onto the globe. */
+  const mask=document.createElement("canvas");mask.width=w;mask.height=h;
+  const mctx=mask.getContext("2d");mctx.fillStyle="#fff";
+  LAND.forEach(poly=>{mctx.beginPath();poly.forEach(([lon,lat],i)=>{const [x,y]=proj(lon,lat);i?mctx.lineTo(x,y):mctx.moveTo(x,y)});mctx.closePath();mctx.fill()});
+  const md=mctx.getImageData(0,0,w,h).data,step=2.2;
+  for(let lat=-86;lat<=86;lat+=step){
+    const cosl=Math.cos(lat*Math.PI/180),n=Math.max(1,Math.round(360*cosl/step));
+    for(let i=0;i<n;i++){
+      const [x,y]=proj(-180+(i+.5)*360/n,lat),land=md[(Math.min(h-1,y|0)*w+Math.min(w-1,x|0))*4]>128;
+      ctx.fillStyle=land?"rgba(233,238,255,.92)":"rgba(255,255,255,.1)";
+      ctx.beginPath();ctx.ellipse(x,y,(land?1.9:1.3)/Math.max(.15,cosl),land?1.9:1.3,0,0,Math.PI*2);ctx.fill();
+    }
+  }
   return c;
 }
 const Globe3D=(()=>{
@@ -609,13 +607,13 @@ const Globe3D=(()=>{
     const sun=new THREE.DirectionalLight(0xffffff,1.25);sun.position.set(2.4,1.6,3.2);scene.add(sun);
     group=new THREE.Group();scene.add(group);
     const tex=new THREE.CanvasTexture(buildWorldTexture());
-    sphere=new THREE.Mesh(new THREE.SphereGeometry(1.5,48,48),new THREE.MeshPhongMaterial({map:tex,shininess:14,specular:0x3a5a78}));
+    sphere=new THREE.Mesh(new THREE.SphereGeometry(1.5,48,48),new THREE.MeshPhongMaterial({map:tex,shininess:6,specular:0x111522}));
     group.add(sphere);
-    const glow=new THREE.Mesh(new THREE.SphereGeometry(1.64,32,32),new THREE.MeshBasicMaterial({color:0x6FA8E0,transparent:true,opacity:.13,side:THREE.BackSide}));
+    const glow=new THREE.Mesh(new THREE.SphereGeometry(1.64,32,32),new THREE.MeshBasicMaterial({color:0x9DBBFF,transparent:true,opacity:.16,side:THREE.BackSide}));
     scene.add(glow);
-    pin=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xE8622E}));
+    pin=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xFFB866}));
     pin.visible=false;group.add(pin);
-    halo=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xE8622E,transparent:true,opacity:.35}));
+    halo=new THREE.Mesh(new THREE.SphereGeometry(.045,10,10),new THREE.MeshBasicMaterial({color:0xFFA54A,transparent:true,opacity:.35}));
     pin.add(halo);
     clock=new THREE.Clock();
     const c=renderer.domElement;
@@ -701,6 +699,7 @@ const FALLBACK=[
    {title:"The kintsugi workshop",scene:"A craftsman bends over a cracked tea bowl, tracing the break with lacquer. Later the seam will be dusted with gold. The bowl goes back into daily use.",meaning:"Kintsugi repairs broken pottery with lacquer mixed with powdered gold. The repair becomes part of the object's history instead of something hidden.",questions:["Why use gold instead of hiding the crack?","How long does a repair take?"],
     terms:[{term:"Kintsugi",definition:"A Japanese technique for mending broken pottery with lacquer mixed with powdered gold, so the repair becomes part of the object's history instead of something to hide."},{term:"lacquer",definition:"A hard, glossy coating, traditionally made from tree sap, used here to glue and seal the broken pieces before the gold is added."}],
     internal:{target_sub_belief:"",protagonist:"the owner of the cracked bowl, watching the repair",position_match:{shared_relationship:"having something visibly damaged that others will see",surface_difference:"a tea bowl in a repair workshop"},problem_match:"a visible flaw where the standard is unbroken",projected_belief:"a broken thing is worth less and the break should be hidden",predicted_outcome:"the crack gets disguised, or the bowl is put away",visible_outcome:"the crack is traced in gold so it stands out, and the bowl goes back into daily use",scene_belief:"the break is part of the bowl's history, worth showing",feeling_cue:"the cracked bowl on the table, in plain view",role_clarity:"the bowl, or the person it belongs to, not the craftsman",distance_check:{not_too_far:"",not_too_close:""},lever:"meaning",reapply_question:"What would it look like to keep a crack visible instead of hiding it?"},
+    backdrop:{time:"dusk",land:"forest",water:"river",town:"pagodas",mist:.7,clouds:.3,lights:.6},
     scene3d:{setting:"interior",time:"day",palette:{ground:"#7A5E44",walls:"#D9CBB2",accent:"#C9A227"},objects:[{kind:"table_small",x:0,z:0,size:1.4},{kind:"bowl",x:0,z:.1,y:1.07,size:1.6},{kind:"person",pose:"working",x:0,z:-1.1,color:"#4A5560"},{kind:"lantern",x:-1.6,z:-1.2},{kind:"crates",x:3,z:-2.5,count:3,arrange:"row",spread:1},{kind:"bowl",x:-3,z:-2.5,y:.0,size:1.2,color:"#6B4A3A"}]}}
   ]},
  {name:"Pelourinho, Salvador",country:"Brazil",lat:-12.9714,lon:-38.5014,why:"Old streets where music starts without asking.",
@@ -708,6 +707,7 @@ const FALLBACK=[
    {title:"The atabaque drum circle",scene:"Street corners in the old town. Drummers playing for no audience in particular, or for everyone. Nobody asked permission to start. Nobody waited until they were good enough.",meaning:"The atabaque is a tall hand drum central to Afro-Brazilian music and Candomblé. Drum groups have rehearsed in these streets for generations.",questions:["Where does the atabaque come from?","Can anyone join in?"],
     terms:[{term:"atabaque",definition:"A tall, hand-played drum central to Afro-Brazilian music and to Candomblé religious ceremonies."},{term:"Candomblé",definition:"An Afro-Brazilian religion blending West African traditions with elements absorbed during colonization, in which drumming and music play a central role."}],
     internal:{target_sub_belief:"",protagonist:"someone newer to the circle picking up a drum",position_match:{shared_relationship:"being watched by more experienced people while still learning",surface_difference:"drumming on a street corner"},problem_match:"less skill than the people around them",projected_belief:"you have to be good enough before you join in",predicted_outcome:"the newcomer hangs back, or gets waved off",visible_outcome:"the newcomer starts playing and the circle keeps going around them",scene_belief:"anyone can start playing; the circle carries the beat",feeling_cue:"a newer player standing at the edge of the circle",role_clarity:"the newcomer, not the experienced drummers",distance_check:{not_too_far:"",not_too_close:""},lever:"meaning",reapply_question:"What would it look like to start before you feel ready?"},
+    backdrop:{time:"dusk",land:"hills",water:"sea",town:"houses",town_color:"#E8B44A",mist:.3,clouds:.5,lights:.6},
     scene3d:{setting:"street",time:"dusk",palette:{ground:"#8C7B66",walls:"#E8B44A",accent:"#3E8EC0"},objects:[{kind:"person",pose:"drumming",count:5,arrange:"circle",spread:1.6,x:0,z:0},{kind:"drum",count:5,arrange:"circle",spread:1.15,x:0,z:0},{kind:"person",count:7,arrange:"scatter",spread:3,x:0,z:-3.5},{kind:"person",pose:"dancing",x:0,z:0},{kind:"bunting",x:0,z:-2,length:12}]}}
   ]},
  {name:"Copenhagen",country:"Denmark",lat:55.6761,lon:12.5683,why:"A city that makes warmth on purpose.",
@@ -715,6 +715,7 @@ const FALLBACK=[
    {title:"Candles at 4 p.m.",scene:"It's already dark in December. In the café, every table has a candle, and two friends lean in over theirs.",meaning:"Danes burn more candles per person than almost anyone. Warmth, or hygge, is something people make on purpose in the long winter.",questions:["What does hygge actually mean?","Why so many candles?"],
     terms:[{term:"hygge",definition:"A Danish word for a deliberate, cozy sense of warmth and contentment, often built around candles, company, and simple comforts."}],
     internal:{target_sub_belief:"",protagonist:"one of the two friends, tempted to keep pushing through the dark afternoon",position_match:{shared_relationship:"getting through a hard stretch with others around",surface_difference:"a candlelit cafe in a Danish winter"},problem_match:"a heavy stretch of time with no end in sight",projected_belief:"a hard feeling has to be pushed through alone",predicted_outcome:"they keep going on their own until it passes",visible_outcome:"they stop at four in the afternoon, light a candle, and sit together",scene_belief:"a hard stretch can be given a regular, shared time and place",feeling_cue:"the dark outside the window at four in the afternoon",role_clarity:"either friend",distance_check:{not_too_far:"",not_too_close:""},lever:"holding",reapply_question:"What small, repeatable ritual could hold a hard feeling for you?"},
+    backdrop:{time:"night",land:"flat",water:"river",town:"houses",town_color:"#C9852E",mist:.35,clouds:.3,lights:.85},
     scene3d:{setting:"interior",time:"night",palette:{ground:"#5A4636",walls:"#E8DCC8",accent:"#C9852E"},objects:[{kind:"table_small",x:0,z:0},{kind:"candles",x:0,z:0,y:.79},{kind:"person",pose:"seated",count:2,arrange:"circle",spread:.95,x:0,z:0},{kind:"table_small",x:3,z:-2.5},{kind:"candles",x:3,z:-2.5,y:.79},{kind:"person",pose:"seated",x:3,z:-1.6,rot:180},{kind:"lantern",x:-2,z:-1}]}}
   ]}
 ];
@@ -744,70 +745,296 @@ document.addEventListener("click",e=>{
   if(t)t.classList.toggle("pinned");
 });
 
-/* ---------- A real photo, pulled from Wikipedia (free, keyless, CORS-enabled) ----------
-   Collects every photo on the relevant Wikipedia pages with its alt text and caption,
-   then asks the AI which one best lets someone picture themselves in the scene. */
-const photoCache=new Map();
-const NOT_A_SCENE=/\b(\w*map|logo|flag|coat of arms|seal|icon|diagram|chart|plan|signature|locator|emblem)\b/i;
-const THUMB_WIDTHS=[960,500,330]; // Wikimedia only serves standard thumbnail widths
-async function wikiTitle(query){
-  const res=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=1&format=json&origin=*`);
-  const d=res.ok?await res.json():null;
-  return d&&d.query&&d.query.search&&d.query.search[0]&&d.query.search[0].title||null;
-}
-async function wikiPhotos(title){
-  const res=await fetch(`https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&prop=text&redirects=1&format=json&formatversion=2&origin=*`);
-  const d=res.ok?await res.json():null;
-  if(!d||!d.parse)return[];
-  const doc=new DOMParser().parseFromString(d.parse.text,"text/html");
-  const pageUrl=`https://en.wikipedia.org/wiki/${encodeURIComponent(d.parse.title.replace(/ /g,"_"))}`;
-  return[...doc.querySelectorAll("img")].map(img=>{
-    const fileW=Number(img.getAttribute("data-file-width"))||0,src=img.getAttribute("src")||"";
-    const file=decodeURIComponent((src.match(/\/thumb\/[0-9a-f]\/[0-9a-f]{2}\/([^/]+)\//)||[])[1]||"");
-    const holder=img.closest("figure,.gallerybox,.infobox,.thumb");
-    const capEl=holder&&holder.querySelector("figcaption,.gallerytext,.infobox-caption,.thumbcaption");
-    return{page:d.parse.title,pageUrl,file,fileW,alt:(img.getAttribute("alt")||"").trim(),
-      caption:(capEl?capEl.textContent:"").replace(/\s+/g," ").trim().slice(0,220),
-      url:src.startsWith("//")?"https:"+src:src};
-  }).filter(c=>c.file&&c.fileW>=500&&!/\.svg/i.test(c.file)&&!NOT_A_SCENE.test(`${c.file} ${c.caption}`.replace(/_/g," ")))
-    .map(c=>({...c,url:c.url.replace(/\/\d+px-/,`/${THUMB_WIDTHS.find(w=>w<=c.fileW)}px-`)}));
-}
-/* Without the AI: the photo whose description shares the most words with the scene. */
-function photoByWords(cands,P,M){
-  const words=new Set(`${P.name} ${M.title} ${M.scene}`.toLowerCase().match(/[a-z]{4,}/g)||[]);
-  let best=null,bestN=0;
-  cands.forEach(c=>{const n=(`${c.alt} ${c.caption} ${c.file}`.toLowerCase().match(/[a-z]{4,}/g)||[]).filter(w=>words.has(w)).length;if(n>bestN){best=c;bestN=n}});
-  return best||cands[0]||null;
-}
-async function findMomentPhoto(P,M){
-  const key=`${P.name}|${M.title}`;
-  if(photoCache.has(key))return photoCache.get(key);
-  const result=await(async()=>{
-    try{
-      const queries=[P.name,P.name.split(",").slice(-1)[0].trim(),...(M.terms||[]).slice(0,2).map(t=>t.term)];
-      const titles=[...new Set((await Promise.all(queries.map(q=>wikiTitle(q).catch(()=>null)))).filter(Boolean))].slice(0,4);
-      const seen=new Set(),cands=[];
-      (await Promise.all(titles.map(t=>wikiPhotos(t).catch(()=>[])))).flat().forEach(c=>{if(!seen.has(c.file)){seen.add(c.file);cands.push(c)}});
-      const list=cands.slice(0,30);
-      if(!list.length)return null;
-      const sample=aiOff?null:await getSample();
-      if(!sample)return photoByWords(list,P,M);
-      const r=await sample.json(`You pick one photo to show a person exploring a scene in WorldMirror, so they can picture themselves standing there.
-Place: ${P.name}, ${P.country}
-Scene: ${M.title}. ${M.scene}
+/* ---------- Painted backdrops ----------
+   Every place gets a painted landscape instead of a photo, drawn in code the way the
+   "How to Generate the WorldMirror Visuals" guide paints its Lofoten dusk scene (recipe 3):
+   sky, clouds, stars, haze-layered ridgelines, mist, a settlement with lit windows,
+   a rippled reflection, foreground rocks, then bloom, vignette and grain.
+   paintBackdrop() is a pure function, so it runs in a Web Worker and never blocks the page. */
+function paintBackdrop(spec,W,H,seedStr){
+  spec=spec||{};
+  const TIMES={
+    dusk:{stops:[[0,[10,16,40]],[.35,[30,40,86]],[.62,[96,82,138]],[.82,[208,132,120]],[.93,[246,176,122]],[1,[252,206,150]]],glow:[255,170,100],glowK:.55,sunX:.66,horizon:[232,160,128],stars:900,moon:true,sun:false,cloudTop:[60,52,98],cloudLit:[255,168,128],bright:.6,lit:.75,waterFar:[36,40,72],waterNear:[8,10,24],alpen:true},
+    night:{stops:[[0,[3,6,18]],[.4,[8,15,36]],[.72,[18,30,62]],[.9,[34,46,84]],[1,[58,64,100]]],glow:[255,150,80],glowK:.12,sunX:.5,horizon:[52,60,96],stars:1700,moon:true,sun:false,cloudTop:[14,20,40],cloudLit:[44,52,84],bright:.32,lit:.85,waterFar:[16,22,44],waterNear:[3,5,12],alpen:false},
+    dawn:{stops:[[0,[30,38,82]],[.38,[74,86,146]],[.66,[172,146,182]],[.84,[240,184,172]],[.95,[252,214,182]],[1,[255,234,204]]],glow:[255,204,160],glowK:.5,sunX:.3,horizon:[236,198,186],stars:220,moon:false,sun:false,cloudTop:[112,104,152],cloudLit:[255,196,176],bright:.72,lit:.4,waterFar:[92,94,138],waterNear:[18,22,48],alpen:true},
+    golden:{stops:[[0,[64,104,168]],[.4,[118,148,192]],[.7,[220,192,164]],[.88,[250,202,134]],[1,[255,222,164]]],glow:[255,190,110],glowK:.75,sunX:.62,horizon:[242,198,150],stars:0,moon:false,sun:true,cloudTop:[150,142,166],cloudLit:[255,214,156],bright:.9,lit:.15,waterFar:[84,96,120],waterNear:[26,34,54],alpen:true},
+    day:{stops:[[0,[62,122,196]],[.5,[124,170,218]],[.85,[196,220,236]],[1,[226,236,242]]],glow:[255,250,236],glowK:.22,sunX:.7,horizon:[208,222,232],stars:0,moon:false,sun:false,cloudTop:[196,208,224],cloudLit:[255,255,255],bright:1,lit:0,waterFar:[96,138,172],waterNear:[28,58,88],alpen:false}
+  };
+  const pickOf=(v,list,d)=>list.includes(v)?v:d;
+  const time=pickOf(spec.time,Object.keys(TIMES),"dusk"),T=TIMES[time];
+  const land=pickOf(spec.land,["peaks","hills","dunes","forest","flat"],"hills");
+  const water=pickOf(spec.water,["sea","lake","river","none"],"none");
+  const town=pickOf(spec.town,["cabins","houses","flat_roofs","domes","pagodas","tents","none"],"none");
+  const amt=(v,d)=>{v=Number(v);return v===v&&v!==null&&spec!==null&&isFinite(v)?Math.max(0,Math.min(1,v)):d};
+  const mistAmt=amt(spec.mist,.35),cloudAmt=amt(spec.clouds,.5),lightAmt=amt(spec.lights,T.lit);
+  const hexc=(s,d)=>/^#[0-9a-fA-F]{6}$/.test(s||"")?[parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)]:d;
 
-Candidate photos from Wikipedia, with their alt text, caption, and file name:
-${list.map((c,i)=>`${i}. [${c.page}] alt: "${c.alt}" caption: "${c.caption}" file: ${c.file}`).join("\n")}
+  /* seeded randomness */
+  let hs=2166136261;for(const ch of String(seedStr||"worldmirror")){hs^=ch.charCodeAt(0);hs=Math.imul(hs,16777619)}
+  const mkRng=s=>{let a=s>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+  const rng=mkRng(hs),seeded=k=>mkRng(hs^Math.imul(k+1,0x9E3779B1));
 
-Choose the photo that best shows the vibe and the environment of this scene: the actual place, the people and the activity, the light and the atmosphere, as close as possible to what the scene describes. Prefer real photographs of the place or practice as it is today. Avoid maps, plans, old paintings and engravings, portraits of individuals, building facades with no life around them, and close-ups of a single object unless that object is the heart of the scene. If none would help someone picture being there, pick -1.
-Respond with ONLY JSON: {"pick":0}`,{modelTier:"quick",cache:false});
-      const i=Number(r&&r.pick);
-      return Number.isInteger(i)&&i>=0&&i<list.length?list[i]:null;
-    }catch(e){return null}
-  })();
-  photoCache.set(key,result);
-  return result;
+  const S=W/2400,N=W*H;
+  const R=new Float32Array(N),G=new Float32Array(N),B=new Float32Array(N);
+  const c3=a=>[a[0]/255,a[1]/255,a[2]/255];
+  const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+  const mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
+  const cl=v=>v<0?0:v>1?1:v;
+
+  function noise1d(n,scale,k){const r=seeded(k),m=Math.floor(n/scale)+4,pts=new Float32Array(m);for(let i=0;i<m;i++)pts[i]=r();
+    const out=new Float32Array(n);for(let x=0;x<n;x++){const fx=x/scale,i=fx|0;let f=fx-i;f=f*f*(3-2*f);out[x]=pts[i]*(1-f)+pts[i+1]*f}return out}
+  function fbm1d(n,scale,oct,k,ridged){scale*=S;const v=new Float32Array(n);let a=1,tot=0;
+    for(let o=0;o<oct;o++){const nn=noise1d(n,Math.max(1.2,scale),k*17+o);for(let x=0;x<n;x++){let q=nn[x];if(ridged)q=1-Math.abs(q*2-1);v[x]+=q*a}tot+=a;a*=.5;scale/=2.1}
+    for(let x=0;x<n;x++)v[x]/=tot;return v}
+  function fbm2d(h,w,scale,oct,k){scale*=S;const v=new Float32Array(h*w);let a=1,tot=0;
+    for(let o=0;o<oct;o++){const r=seeded(k*31+o),sc=Math.max(1.5,scale);
+      const gh=Math.max(2,Math.floor(h/sc)+2),gw=Math.max(2,Math.floor(w/sc)+2),g=new Float32Array(gh*gw);for(let i=0;i<g.length;i++)g[i]=r();
+      const xi=new Int32Array(w),xf=new Float32Array(w);
+      for(let x=0;x<w;x++){const gx=x*(gw-1)/w,i=Math.min(gw-2,gx|0);let f=gx-i;f=f*f*(3-2*f);xi[x]=i;xf[x]=f}
+      for(let y=0;y<h;y++){const gy=y*(gh-1)/h,j=Math.min(gh-2,gy|0);let fy=gy-j;fy=fy*fy*(3-2*fy);const r0=j*gw,r1=r0+gw,row=y*w;
+        for(let x=0;x<w;x++){const i=xi[x],f=xf[x],a0=g[r0+i]+(g[r0+i+1]-g[r0+i])*f,a1=g[r1+i]+(g[r1+i+1]-g[r1+i])*f;v[row+x]+=(a0+(a1-a0)*fy)*a}}
+      tot+=a;a*=.5;scale/=2}
+    for(let i=0;i<v.length;i++)v[i]/=tot;return v}
+  function blur(src,w,h,sig){const r=Math.max(1,Math.round(sig));let a=Float32Array.from(src),b=new Float32Array(src.length);const d=2*r+1;
+    for(let p=0;p<3;p++){
+      for(let y=0;y<h;y++){const o=y*w;let acc=0;for(let k=-r;k<=r;k++)acc+=a[o+Math.min(w-1,Math.max(0,k))];
+        for(let x=0;x<w;x++){b[o+x]=acc/d;acc+=a[o+Math.min(w-1,x+r+1)]-a[o+Math.max(0,x-r)]}}
+      for(let x=0;x<w;x++){let acc=0;for(let k=-r;k<=r;k++)acc+=b[Math.min(h-1,Math.max(0,k))*w+x];
+        for(let y=0;y<h;y++){a[y*w+x]=acc/d;acc+=b[Math.min(h-1,y+r+1)*w+x]-b[Math.max(0,y-r)*w+x]}}}
+    return a}
+  const put=(i,c)=>{R[i]=c[0];G[i]=c[1];B[i]=c[2]};
+  const blendAt=(i,c,t)=>{R[i]+=(c[0]-R[i])*t;G[i]+=(c[1]-G[i])*t;B[i]+=(c[2]-B[i])*t};
+  const addAt=(i,c,k)=>{R[i]+=c[0]*k;G[i]+=c[1]*k;B[i]+=c[2]*k};
+
+  const hasWater=water!=="none";
+  const HZ=Math.round(H*(hasWater?.6:.64));
+
+  /* 1. sky gradient + sun glow */
+  const stops=T.stops.map(([t,c])=>[t,c3(c)]),sky=[];
+  for(let y=0;y<H;y++){const t=Math.min(1,y/HZ);let c=stops[stops.length-1][1];
+    for(let s=0;s<stops.length-1;s++){const[t0,c0]=stops[s],[t1,c1]=stops[s+1];if(t>=t0&&t<=t1){c=mix(c0,c1,(t-t0)/(t1-t0));break}}sky.push(c)}
+  const sx=W*T.sunX,sy=HZ*1.02,glowC=c3(T.glow);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;put(i,sky[y]);const d=Math.sqrt(((x-sx)/W)**2+((y-sy)/H)**2*3.2);addAt(i,glowC,Math.exp(-d*7.5)*T.glowK)}
+
+  /* 2. clouds */
+  if(cloudAmt>0){const cn=fbm2d(H,W,260,6,5),top=c3(T.cloudTop),lit=c3(T.cloudLit),th=.62-cloudAmt*.2;
+    for(let y=0;y<HZ;y++){const band=Math.exp(-((((y/HZ)-.58)/(.16+cloudAmt*.12))**2)),cc=mix(top,lit,cl((y/HZ-.35)/.5));
+      for(let x=0;x<W;x++){const i=y*W+x,m=cl((cn[i]-th)*4)*band;if(m>0)blendAt(i,cc,m*.75)}}}
+
+  /* 3. stars, moon, sun */
+  if(T.stars){const r=seeded(3),sc=c3([220,228,255]);for(let n=0;n<T.stars;n++){const y=Math.floor(r()**1.7*HZ*.55),x=Math.floor(r()*W),b=(r()*.9+.1)*.9*Math.max(0,1-y/(HZ*.55));
+      const i=y*W+x;addAt(i,sc,b);if(x>0)addAt(i-1,sc,b*.3);if(x<W-1)addAt(i+1,sc,b*.3);if(y>0)addAt(i-W,sc,b*.3);if(y<H-1)addAt(i+W,sc,b*.3)}}
+  if(T.moon){const mx=W*.8,my=H*.14,mr=22*S*1.2,mc=c3([255,246,226]),hc=c3([255,236,210]);
+    for(let y=0;y<HZ;y++)for(let x=0;x<W;x++){const d=Math.hypot(x-mx,y-my),i=y*W+x;if(d<mr+1)blendAt(i,mc,cl(mr+1-d));addAt(i,hc,Math.exp(-d/(90*S))*.18)}}
+  if(T.sun){const mr=34*S,my=HZ-mr*.6,sc=c3([255,244,214]);
+    for(let y=0;y<HZ;y++)for(let x=0;x<W;x++){const d=Math.hypot(x-sx,y-my),i=y*W+x;if(d<mr+1)blendAt(i,sc,cl(mr+1-d));addAt(i,sc,Math.exp(-d/(120*S))*.25)}}
+
+  /* 4. land layers, far -> near */
+  const horizonC=c3(T.horizon);
+  const LAND={
+    peaks:{amps:[.11,.2,.3],scales:[760,640,560],ridged:true,pow:1.35,base:[66,64,92],snow:true,oct:7},
+    hills:{amps:[.05,.085,.13],scales:[900,700,520],ridged:false,pow:1,base:[64,92,66],snow:false,oct:4},
+    forest:{amps:[.045,.075,.11],scales:[900,700,520],ridged:false,pow:1,base:[40,70,52],snow:false,oct:4,trees:true},
+    dunes:{amps:[.05,.09,.14],scales:[1100,800,600],ridged:false,pow:1.6,base:[214,150,96],snow:false,oct:3,dune:true},
+    flat:{amps:[.012,.02,.03],scales:[900,700,500],ridged:false,pow:1,base:[96,106,84],snow:false,oct:3}
+  }[land];
+  const dry=town==="flat_roofs"||town==="domes"||town==="tents";
+  const skyTop=stops[0][1],baseC=c3(hexc(spec.ground,dry&&!LAND.dune&&!LAND.snow?[176,138,96]:LAND.base));
+  const nearC=mix(mul(baseC,T.bright),skyTop,.3);
+  const rocktex=fbm2d(H,W,40,5,77);
+  const streak=LAND.snow?fbm2d(H,W,14,5,88):null;
+  const hazes=[.72,.42,.10],bases=[HZ/H-.035,HZ/H-.025,HZ/H-.002];
+  let nearTop=null;
+  for(let L=0;L<3;L++){
+    let r=fbm1d(W,LAND.scales[L],LAND.oct,31+L*12,LAND.ridged);
+    let mn=Infinity,mxv=-Infinity;for(let x=0;x<W;x++){mn=Math.min(mn,r[x]);mxv=Math.max(mxv,r[x])}
+    for(let x=0;x<W;x++)r[x]=((r[x]-mn)/(mxv-mn+1e-6))**LAND.pow;
+    const env=fbm1d(W,1300-L*200,3,131+L);mn=Infinity;mxv=-Infinity;for(let x=0;x<W;x++){mn=Math.min(mn,env[x]);mxv=Math.max(mxv,env[x])}
+    for(let x=0;x<W;x++)r[x]*=.25+.75*((env[x]-mn)/(mxv-mn+1e-6))**1.5;
+    {let m2=0;for(let x=0;x<W;x++)m2=Math.max(m2,r[x]);for(let x=0;x<W;x++)r[x]/=m2+1e-6}
+    const top=new Float32Array(W);
+    for(let x=0;x<W;x++)top[x]=Math.min((bases[L]-LAND.amps[L]*r[x])*H,HZ-2);
+    if(LAND.trees&&L>0){const tr=seeded(400+L);let x=0;const sz=(L===2?34:20)*S;
+      while(x<W){const w=sz*(.6+tr()*.8),h=w*(1.6+tr()*1.4)*(tr()<.15?.3:1);for(let k=0;k<w&&x+k<W;k++){const f=1-Math.abs(k/w*2-1);top[x+k]=Math.min(top[x+k],top[x+k]-h*f*f*.0+0)-h*f}x+=w*(.5+tr()*.5)}
+      for(let x=0;x<W;x++)top[x]=Math.max(top[x],0)}
+    if(L===2)nearTop=top;
+    const rockC=mix(nearC,mul(baseC,T.bright*(1.15+L*-.05)),L===2?0:.35);
+    const snowC=mix(c3([236,238,246]),skyTop,.25+ (1-T.bright)*.4);
+    const hzC=[];for(let y=0;y<H;y++)hzC.push(mix(mul(horizonC,.62),mul(sky[y],.38),1).map((v,j)=>horizonC[j]*.62+sky[y][j]*.38));
+    const sm=new Float32Array(W);{const rr=Math.max(3,Math.round(36*S));for(let x=0;x<W;x++){let a=0,n=0;for(let k=-rr;k<=rr;k++){const q=x+k;if(q>=0&&q<W){a+=top[q];n++}}sm[x]=a/n}}
+    for(let x=0;x<W;x++){
+      const g=x>0&&x<W-1?(sm[x+1]-sm[x-1])/2:0;
+      const lit0=LAND.dune?cl(-g/S*2.4+.5):cl(-g/S*1.6+.5);
+      const t0=Math.max(0,Math.floor(top[x]));
+      for(let y=t0;y<=HZ&&y<H;y++){const i=y*W+x,depth=cl((y-sm[x])/(HZ-sm[x]+1e-3)),lit=lit0+(.5-lit0)*Math.min(1,depth*1.5);
+        let c=mul(rockC,(.75+.5*rocktex[i])*(LAND.dune?(.55+.8*lit):(.8+.4*lit)));
+        if(LAND.snow&&LAND.amps[L]*r[x]>.05){const sm=cl((1-depth*3.2)+(streak[i]-.5)*2.2-.25)**1.5;
+          if(sm>0){c=mix(c,mul(snowC,(.7+.6*lit)*(.85+.3*streak[i])),sm);if(T.alpen){const ag=sm*lit*cl(1-depth*3);c=[c[0]+ag*90/255,c[1]+ag*40/255,c[2]+ag*30/255]}}}
+        const hz=cl(hazes[L]+depth*.35*(1-hazes[L]));c=mix(c,hzC[y],hz);
+        if(y>=top[x]+1)put(i,c);else blendAt(i,c,cl(y+1-top[x]))}
+    }
+  }
+
+  /* ground below the horizon when there's no water */
+  if(!hasWater){const gt=fbm2d(H-HZ,W,90,4,41),gc=mix(mix(nearC,mul(baseC,T.bright),.5),horizonC,.1);
+    for(let y=HZ;y<H;y++){const d=(y-HZ)/(H-HZ);for(let x=0;x<W;x++){const i=y*W+x,n=gt[(y-HZ)*W+x];
+      let c=mul(gc,(.9+.2*n)*(1-d*.4));
+      if(LAND.dune){const rip=.5+.5*Math.sin((y/S)*.22+n*14+x*.004/S);c=mul(mix(mul(baseC,T.bright),horizonC,.15),(.86+.08*rip+.1*n)*(1-d*.35))}
+      c=mix(c,horizonC,cl(.55-d*2.2)*.8);put(i,c)}}}
+
+  /* 5. mist on the horizon, and a wider fog when mist is high */
+  {const mn=fbm2d(H,W,200,3,9),mc=mix(horizonC,c3([255,255,255]),.18);
+    for(let y=0;y<H;y++){const band=Math.exp(-(((y-HZ)/(18*S*(1+mistAmt*2)))**2)),fog=mistAmt>.4?(mistAmt-.4)*.55*Math.exp(-Math.abs(y-HZ*.92)/(H*.22)):0;
+      if(band<.002&&fog<.002)continue;for(let x=0;x<W;x++){const i=y*W+x;blendAt(i,mc,cl((band*(.6+.4*mn[i])*(.25+mistAmt*.6))+fog*(.7+.3*mn[i])))}}}
+
+  /* 6. a settlement on the horizon */
+  const sR=new Float32Array(N),sG=new Float32Array(N),sB=new Float32Array(N),sA=new Float32Array(N);
+  const windows=[];
+  const dark=time==="day"||time==="golden"?.0:1;
+  const tint=c=>mix(mul(c3(c),T.bright*.95),horizonC,.14);
+  function rect(x0,y0,x1,y1,c){x0=Math.max(0,Math.round(x0));x1=Math.min(W,Math.round(x1));y0=Math.max(0,Math.round(y0));y1=Math.min(H,Math.round(y1));
+    for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=y*W+x;sR[i]=c[0];sG[i]=c[1];sB[i]=c[2];sA[i]=1}}
+  function roof(x0,x1,ybase,h,c,over){const cx=(x0+x1)/2;for(let y=Math.round(ybase-h);y<Math.round(ybase);y++){const half=(x1-x0)/2*(y-(ybase-h))/h+(over||6*S);rect(cx-half,y,cx+half,y+1,c)}}
+  function dome(cx,yb,rad,c){for(let y=Math.round(yb-rad);y<Math.round(yb);y++){const dy=yb-y,half=Math.sqrt(Math.max(0,rad*rad-dy*dy));rect(cx-half,y,cx+half,y+1,c)}}
+  function win(x,y,w,h,lit){if(lit&&dark){rect(x,y,x+w,y+h,c3([255,196,112]));windows.push([x+w/2,y+h/2])}else rect(x,y,x+w,y+h,lit&&!dark?mix(c3([255,214,150]),horizonC,.4):mul(horizonC,.35))}
+  const tr=seeded(500),yb=HZ-4*S;
+  const accent=hexc(spec.town_color,null);
+  if(town==="cabins"){
+    const cc=tint(accent||[150,40,36]);
+    for(const[x0,x1,h,rh]of[[150,300,52,60],[340,470,46,52],[520,610,38,44]].map(a=>a.map(v=>v*S))){
+      if(hasWater)for(let s=x0+6*S;s<x1;s+=22*S)rect(s,yb-2*S,s+4*S,HZ+10*S,c3([20,16,18]));
+      rect(x0,yb-h,x1,yb,cc);for(let bx=x0;bx<x1;bx+=7*S)for(let y=Math.round(yb-h);y<yb;y++){const i=y*W+Math.round(bx);sR[i]*=.75;sG[i]*=.75;sB[i]*=.75}
+      roof(x0,x1,yb-h,rh,mul(c3([26,22,28]),.6+T.bright*.4));
+      const n=x1-x0>100*S?2:1;for(let k=0;k<n;k++){const wx=n===1?(x0+x1)/2-10*S:x0+18*S+k*((x1-38*S)-(x0+18*S));win(wx,yb-h+16*S,20*S,18*S,tr()<Math.max(lightAmt,.5))}}
+  } else if(town==="houses"){
+    const pal=[accent||[176,64,48],[204,154,72],[226,204,164],[74,102,134],[96,124,92],[196,110,64]];
+    let x=W*.04;const end=W*.46;
+    while(x<end){const w=(42+tr()*36)*S,h=(70+tr()*70)*S*(1-(x/W)*.6),c=tint(pal[Math.floor(tr()*pal.length)]);
+      rect(x,yb-h,x+w,yb,c);if(tr()<.7)roof(x,x+w,yb-h,(22+tr()*14)*S,mul(c,.55),1.5*S);else rect(x-1*S,yb-h-6*S,x+w+1*S,yb-h,mul(c,.7));
+      const cols=w>58*S?3:2,rows=Math.max(1,Math.floor(h/(30*S)));
+      for(let rr=0;rr<rows;rr++)for(let cc=0;cc<cols;cc++)win(x+(cc+.5)*w/cols-4*S,yb-h+10*S+rr*28*S,8*S,12*S,tr()<lightAmt);
+      x+=w+1*S}
+  } else if(town==="flat_roofs"||town==="domes"){
+    const base=accent||(town==="domes"?[214,196,166]:[196,146,104]);
+    for(let pass=0;pass<2;pass++){let x=W*(pass?.08:.03);const end=W*(pass?.5:.55);
+      while(x<end){const w=(50+tr()*70)*S,h=(pass?(30+tr()*50):(60+tr()*70))*S,c=tint(mix(c3(base),[0,0,0],pass?0:.12).map(v=>v*255));
+        rect(x,yb-h,x+w,yb,c);rect(x,yb-h-3*S,x+w,yb-h,mul(c,.85));
+        const n=Math.floor(w/(30*S));for(let k=0;k<n;k++)if(tr()<.6)win(x+10*S+k*28*S,yb-h*.6,6*S,9*S,tr()<lightAmt);
+        x+=w*(.7+tr()*.4)}}
+    const mins=town==="domes"?2:1;for(let m=0;m<mins;m++){const mx=W*(.12+m*.28+tr()*.05),mh=230*S,c=tint(base);rect(mx,yb-mh,mx+16*S,yb,c);rect(mx-4*S,yb-mh+30*S,mx+20*S,yb-mh+38*S,mul(c,.8));dome(mx+8*S,yb-mh,10*S,mul(c,.8));win(mx+5*S,yb-mh+12*S,6*S,10*S,dark&&tr()<lightAmt+.3)}
+    if(town==="domes"){for(let d=0;d<2;d++){const cx=W*(.2+d*.14),rad=(54-d*16)*S,bh=(70-d*20)*S,c=tint(base);rect(cx-rad,yb-bh,cx+rad,yb,c);dome(cx,yb-bh,rad,tint(accent?[80,140,150]:[90,150,160]));rect(cx-1.5*S,yb-bh-rad-22*S,cx+1.5*S,yb-bh-rad,mul(c,.7))}}
+  } else if(town==="pagodas"){
+    const wall=tint(accent||[150,52,40]),rf=mul(c3([34,30,34]),.6+T.bright*.4);
+    let x=W*.04;while(x<W*.5){const w=(60+tr()*50)*S,h=(26+tr()*16)*S;rect(x,yb-h,x+w,yb,tint([210,196,170]));roof(x,x+w,yb-h,16*S,rf,10*S);win(x+w/2-6*S,yb-h+8*S,12*S,10*S,tr()<lightAmt);x+=w+8*S}
+    const px=W*.2;let y=yb;for(let t=0;t<5;t++){const w=(120-t*18)*S,h=36*S;rect(px-w/2+10*S,y-h,px+w/2-10*S,y,wall);win(px-6*S,y-h+10*S,12*S,14*S,tr()<lightAmt+.2);
+      for(let k=0;k<10*S;k++){const half=w/2+12*S+k*.0-(10*S-k)*.0;rect(px-w/2-12*S+(k*k)/(10*S)*.0,y-h-k,px+w/2+12*S,y-h-k+1,rf)}
+      rect(px-w/2-16*S,y-h,px-w/2-6*S,y-h+3*S,rf);rect(px+w/2+6*S,y-h,px+w/2+16*S,y-h+3*S,rf);y-=h+10*S}
+    rect(px-2*S,y-50*S,px+2*S,y,rf);
+  } else if(town==="tents"){
+    const c=tint(accent||[214,184,140]);for(let k=0;k<7;k++){const cx=W*(.06+k*.06+tr()*.02),w=(70+tr()*40)*S,h=(48+tr()*26)*S;roof(cx-w/2,cx+w/2,yb,h,mul(c,.85+tr()*.2),0);win(cx-6*S,yb-h*.45,12*S,h*.45,tr()<lightAmt+.3)}
+  }
+  for(let i=0;i<N;i++)if(sA[i]){R[i]=sR[i]*.9;G[i]=sG[i]*.9;B[i]=sB[i]*.9}
+  if(windows.length){const s1=26*S,s2=6*S,rad=Math.ceil(s1*3),wc=c3([255,170,90]),k=.6*Math.sqrt(6/Math.max(6,windows.length));
+    for(const[wx,wy]of windows){for(let y=Math.max(0,Math.round(wy-rad));y<Math.min(H,wy+rad);y++)for(let x=Math.max(0,Math.round(wx-rad));x<Math.min(W,wx+rad);x++){
+      const d2=(x-wx)**2+(y-wy)**2,g=Math.min(1.2,.61*Math.exp(-d2/(2*s1*s1))+1.33*Math.exp(-d2/(2*s2*s2))*.5);addAt(y*W+x,wc,g*k)}}}
+
+  /* 7. water: rippled mirror reflection */
+  if(hasWater){const hh=H-HZ,rip=fbm2d(hh,W,30,4,21),ripy=fbm2d(hh,W,12,3,23),chop=water==="sea"?1.4:water==="river"?.8:1;
+    const rR=new Float32Array(hh*W),rG=new Float32Array(hh*W),rB=new Float32Array(hh*W);
+    for(let j=0;j<hh;j++){const y=HZ+j,dist=j/hh;for(let x=0;x<W;x++){const k=j*W+x;
+      let syy=(HZ-j-1)+(ripy[k]-.5)*(2+dist*24)*2*S*chop,sxx=x+(rip[k]-.5)*(6+dist*40)*2*S*chop;
+      syy=Math.max(0,Math.min(HZ-1,syy));sxx=Math.max(0,Math.min(W-1,sxx));
+      const y0=syy|0,x0=sxx|0,fy=syy-y0,fx=sxx-x0,y1=Math.min(HZ-1,y0+1),x1=Math.min(W-1,x0+1);
+      const i00=y0*W+x0,i01=y0*W+x1,i10=y1*W+x0,i11=y1*W+x1;
+      const bl=(A)=>(A[i00]*(1-fx)+A[i01]*fx)*(1-fy)+(A[i10]*(1-fx)+A[i11]*fx)*fy;
+      rR[k]=bl(R);rG[k]=bl(G);rB[k]=bl(B)}}
+    const bR=blur(rR,W,hh,1.5*S+.5),bG=blur(rG,W,hh,1.5*S+.5),bB=blur(rB,W,hh,1.5*S+.5);
+    const sp=fbm2d(hh,Math.ceil(W/6),4,2,31),far=c3(T.waterFar),near=c3(T.waterNear),spc=c3([255,200,150]);
+    for(let j=0;j<hh;j++){const dist=j/hh,wc=mix(far,near,dist**.8),rk=.82-dist*.45;
+      for(let x=0;x<W;x++){const k=j*W+x,i=(HZ+j)*W+x;
+        R[i]=wc[0]+(bR[k]-wc[0])*rk;G[i]=wc[1]+(bG[k]-wc[1])*rk;B[i]=wc[2]+(bB[k]-wc[2])*rk;
+        const s=.45*cl((sp[j*Math.ceil(W/6)+Math.min(Math.ceil(W/6)-1,Math.floor(x/6))]-.72)*6)*Math.exp(-(((x-sx)/(W*.1))**2))*Math.exp(-dist*2.2)*(T.glowK+.2);
+        if(s>0)addAt(i,spc,s*.9)}}}
+
+  /* 8. foreground framing */
+  {const e1=fbm1d(W,160,6,61),e2=fbm1d(W,120,6,71),ft=fbm2d(H,W,34,4,99);
+    const fgBase=LAND.dune?mul(mix(baseC,horizonC,.1),T.bright*.55):mix(c3([18,18,26]),mul(nearC,.6),.5).map(v=>v*(.6+T.bright*.5));
+    const rimC=mix(glowC,c3([200,140,120]),.5);
+    for(let x=0;x<W;x++){const ed=H*.86+(e1[x]-.5)*90*S+Math.max(0,(x-W*.42)/(W*.1))**2*60*S,ed2=H*.9+(e2[x]-.5)*70*S+Math.max(0,(W*.8-x)/(W*.08))**2*60*S;
+      const top=Math.min(ed,ed2);for(let y=Math.max(0,Math.floor(top-8*S));y<H;y++){const i=y*W+x,e=Math.min(Math.abs(y-ed),Math.abs(y-ed2));
+        const inside=y>=ed||y>=ed2;if(!inside)continue;let c=mul(fgBase,LAND.dune?(.88+.24*ft[i]):(.7+.6*ft[i]));
+        c=[c[0]+Math.exp(-e/(5*S))*.5*rimC[0]*(.4+T.glowK),c[1]+Math.exp(-e/(5*S))*.5*rimC[1]*(.4+T.glowK),c[2]+Math.exp(-e/(5*S))*.5*rimC[2]*(.4+T.glowK)];
+        const a=cl(Math.min(y-ed,y-ed2)<0?Math.max(y-ed,y-ed2)+1:1);blendAt(i,c,cl(Math.max(y-ed,y-ed2)+1))}}}
+
+  /* 9. grade: bloom, vignette, grain, gamma */
+  {const th=.75,bR=new Float32Array(N),bG=new Float32Array(N),bB=new Float32Array(N);
+    for(let i=0;i<N;i++){bR[i]=Math.max(0,R[i]-th);bG[i]=Math.max(0,G[i]-th);bB[i]=Math.max(0,B[i]-th)}
+    const s=14*S+1,xR=blur(bR,W,H,s),xG=blur(bG,W,H,s),xB=blur(bB,W,H,s);
+    const gr=seeded(999),out=new Uint8ClampedArray(N*4);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,v=Math.sqrt(((x-W/2)/(W*.62))**2+((y-H*.48)/(H*.7))**2),vig=1-cl(v-.55)*.75;
+      const n=(gr()+gr()+gr()-1.5)*.02;
+      out[i*4]=255*cl((R[i]+xR[i]*.6)*vig+n)**(1/1.05);out[i*4+1]=255*cl((G[i]+xG[i]*.6)*vig+n)**(1/1.05);out[i*4+2]=255*cl((B[i]+xB[i]*.6)*vig+n)**(1/1.05);out[i*4+3]=255}
+    return out}
 }
+
+const BACKDROP_DEFAULT={time:"dusk",land:"peaks",water:"lake",town:"cabins",mist:.45,clouds:.45};
+const Painter=(()=>{
+  let worker=null,seq=0;const waiting=new Map(),cache=new Map();
+  try{
+    const src=`const paintBackdrop=${paintBackdrop.toString()};
+self.onmessage=e=>{const d=e.data;try{const px=paintBackdrop(d.spec,d.w,d.h,d.seed);self.postMessage({id:d.id,px},[px.buffer])}catch(err){self.postMessage({id:d.id,err:String(err)})}};`;
+    worker=new Worker(URL.createObjectURL(new Blob([src],{type:"text/javascript"})));
+    worker.onmessage=e=>{const w=waiting.get(e.data.id);waiting.delete(e.data.id);if(w)e.data.px?w.res(e.data.px):w.rej(e.data.err)};
+    worker.onerror=()=>{worker=null;waiting.forEach(w=>w.rej("worker"));waiting.clear()};
+  }catch(e){worker=null}
+  const local=(spec,w,h,seed)=>new Promise(r=>setTimeout(()=>r(paintBackdrop(spec,w,h,seed)),0));
+  function pixels(spec,w,h,seed){
+    if(!worker)return local(spec,w,h,seed);
+    return new Promise((res,rej)=>{const id=++seq;waiting.set(id,{res,rej});worker.postMessage({id,spec,w,h,seed})}).catch(()=>local(spec,w,h,seed));
+  }
+  function url(spec,w,h,seed){
+    const key=JSON.stringify([spec,w,h,seed]);
+    if(cache.has(key))return cache.get(key);
+    const p=pixels(spec,w,h,seed).then(px=>{
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").putImageData(new ImageData(px,w,h),0,0);
+      return new Promise(r=>c.toBlob(b=>r(b?URL.createObjectURL(b):c.toDataURL("image/jpeg",.88)),"image/jpeg",.88));
+    });
+    cache.set(key,p);p.catch(()=>cache.delete(key));
+    return p;
+  }
+  return{url};
+})();
+/* The backdrop for a moment: what the AI described, or a best guess from the 3D scene for older data. */
+function backdropFor(P,M){
+  if(M&&M.backdrop&&typeof M.backdrop==="object"&&Object.keys(M.backdrop).length)return M.backdrop;
+  const s=(M&&M.scene3d)||{},set=s.setting;
+  return{time:["dawn","day","dusk","night"].includes(s.time)?s.time:"dusk",
+    land:set==="hillside"?"hills":set==="garden"?"forest":"hills",
+    water:set==="waterfront"?"sea":set==="riverside"?"river":"none",
+    town:set==="garden"||set==="hillside"?"none":set==="courtyard"?"flat_roofs":"houses",
+    town_color:s.palette&&s.palette.walls,mist:.4,clouds:.4};
+}
+const Backdrop=(()=>{
+  let cur="",token=0;
+  function set(spec,seed){
+    const key=JSON.stringify([spec,seed]);if(key===cur)return;cur=key;const my=++token;
+    const w=window.innerWidth*(window.devicePixelRatio||1)>2000?1920:1600,h=Math.round(w*9/16);
+    /* A small, quick render fades in first (it's mostly behind frosted glass anyway); the sharp one replaces it in place. */
+    let layer=null;
+    const show=u=>{if(my!==token)return;
+      if(!layer){const on=document.querySelector("#backdrop .bd.on");layer=[...document.querySelectorAll("#backdrop .bd")].find(l=>l!==on);layer.style.backgroundImage=`url("${u}")`;layer.classList.add("on");if(on)on.classList.remove("on")}
+      else layer.style.backgroundImage=`url("${u}")`};
+    const quick=Painter.url(spec,480,270,seed),full=Painter.url(spec,w,h,seed);let fullDone=false;full.then(()=>{fullDone=true},()=>{});
+    quick.then(u=>{if(!fullDone)show(u)}).catch(()=>{}).then(()=>full).then(show).catch(()=>{});
+  }
+  return{set};
+})();
+/* Paint the small card images for a list of [img element, place, moment]. */
+function paintThumbs(list){
+  list.forEach(([img,P,M])=>{if(!img)return;Painter.url(backdropFor(P,M),480,300,P.name+M.title).then(u=>{img.src=u;img.classList.add("ready")}).catch(()=>{})});
+}
+Backdrop.set(BACKDROP_DEFAULT,"worldmirror");
 let S;
 function fresh(){return{problem:"",refined:"",refHistory:[],rounds:[],cur:null,visited:{},chats:{},dwell:{},choices:[],causes:[],feedback:[],synth:null,synths:[],started:Date.now(),usedFallback:false,returnToFinal:false,elaboration:"",userChain:null,intake:[],nextQs:{},stuck:{}}}
 S=fresh();
@@ -987,6 +1214,16 @@ const VOCAB=`"scene3d": {
 Object kinds: person, table_long, table_small, bench, stool, stall, lanterns, bunting, lantern, candles, fire, tree, maple_tree, building, pagoda, gate, drum, bicycle, motorbike, car, boat, bowl, crates, umbrella, petals, kite, steps, water, fountain, wall, raked_gravel, rock.
 Put the heart of the moment at x=0, z=0 so the viewer sees it first. When a moment involves people, show them doing the thing (drummers in a circle, people seated both sides of a long table). Pick the setting and time that match the moment.
 Match scene3d to the "scene" text closely: the same number of people doing the same thing, the specific objects it names (a drum, a cracked bowl, a bicycle, candles on a table), and a time of day and setting that fit the words used (a dim room at night for candlelight, a street at dawn for an empty market). If a concrete visual detail is in the sentence, it should be an object in scene3d.`;
+const BACKDROP_VOCAB=`"backdrop": {
+  "time": "dawn" | "day" | "golden" | "dusk" | "night",
+  "land": "peaks" (sharp, snowy mountains) | "hills" | "forest" (tree-covered hills) | "dunes" (desert sand) | "flat" (plains, or a city on level ground),
+  "water": "sea" | "lake" | "river" | "none" (water in front, mirroring the view; "none" means dry ground),
+  "town": "cabins" (a few wooden huts) | "houses" (a row of gabled town houses) | "flat_roofs" (a medina or adobe town) | "domes" (domes and minarets) | "pagodas" (tiered East Asian roofs) | "tents" | "none",
+  "town_color": "#hex", the main wall color of the buildings,
+  "ground": "#hex", the color of the land (optional),
+  "mist": 0 to 1, "clouds": 0 to 1, "lights": 0 to 1 (how many windows glow)
+}
+It is a quiet, painted view of the wider place, seen from a little way off, that sits behind the whole screen and sets the mood. Choose what someone would really see looking out over this place: the actual landform, whether there is water, the kind of buildings, and a time of day that fits the moment (a candlelit café at four in a Danish winter is "night"; an early market is "dawn").`;
 
 function scenesUsed(){
   const out=[];
@@ -1130,16 +1367,25 @@ Additional technical requirements for this app, on top of everything above:
 - No em dashes anywhere in user-facing text.
 - The moment also needs a 3D scene description that matches "scene" closely, with the protagonist at the heart of it:
 ${VOCAB}
+- And a painted backdrop of the place around it:
+${BACKDROP_VOCAB}
 
 Respond with ONLY JSON, no markdown:
 {"user_chain":{"position":"","problem":"","belief":"","feeling":"","outcome":"","sub_beliefs":[{"id":"sb1","belief":"","evidence":"","source":"stated | inferred","confidence":"low | medium | high"}]},
-"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","reactions":["..."],"questions":["...","...","..."],"terms":[{"term":"...","definition":"..."}],"scene3d":{...}},"internal":{"target_sub_belief":"sb1","protagonist":"","position_match":{"shared_relationship":"","surface_difference":""},"problem_match":"","projected_belief":"","predicted_outcome":"","visible_outcome":"","scene_belief":"","feeling_cue":"","role_clarity":"","distance_check":{"not_too_far":"","not_too_close":""},"lever":"meaning | holding | setting | scale | direction","place_specific":{"unique_here":"","visitor_notice":"","mood":""},"reapply_question":"One open question, never advice."}}]}`;
+"places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","reactions":["..."],"questions":["...","...","..."],"terms":[{"term":"...","definition":"..."}],"scene3d":{...},"backdrop":{...}},"internal":{"target_sub_belief":"sb1","protagonist":"","position_match":{"shared_relationship":"","surface_difference":""},"problem_match":"","projected_belief":"","predicted_outcome":"","visible_outcome":"","scene_belief":"","feeling_cue":"","role_clarity":"","distance_check":{"not_too_far":"","not_too_close":""},"lever":"meaning | holding | setting | scale | direction","place_specific":{"unique_here":"","visitor_notice":"","mood":""},"reapply_question":"One open question, never advice."}}]}`;
 }
 function cleanChain(c){
   if(!c||typeof c!=="object")return null;
   const s=k=>String(c[k]||"");
   return{position:s("position"),problem:s("problem"),belief:s("belief"),feeling:s("feeling"),outcome:s("outcome"),
     sub_beliefs:(Array.isArray(c.sub_beliefs)?c.sub_beliefs:[]).filter(b=>b&&b.belief).slice(0,4).map((b,n)=>({id:String(b.id||`sb${n+1}`),belief:String(b.belief),evidence:String(b.evidence||""),source:String(b.source||""),confidence:String(b.confidence||"")}))};
+}
+function cleanBackdrop(b){
+  if(!b||typeof b!=="object")return null;
+  const o={};
+  ["time","land","water","town","town_color","ground"].forEach(k=>{if(typeof b[k]==="string")o[k]=b[k]});
+  ["mist","clouds","lights"].forEach(k=>{const v=Number(b[k]);if(b[k]!==null&&b[k]!==undefined&&b[k]!==""&&isFinite(v))o[k]=Math.max(0,Math.min(1,v))});
+  return o;
 }
 function cleanInternal(i,chain){
   if(!i||typeof i!=="object")return{};
@@ -1163,6 +1409,7 @@ function cleanRound(r){
       moments:[{title:String(m.title||""),scene:String(m.scene),meaning:String(m.meaning||""),reactions:(Array.isArray(m.reactions)?m.reactions:[]).slice(0,2).map(String),questions:(Array.isArray(m.questions)?m.questions:[]).slice(0,4).map(String),
         terms:(Array.isArray(m.terms)?m.terms:[]).slice(0,4).filter(t=>t&&t.term&&t.definition).map(t=>({term:String(t.term),definition:String(t.definition)})),
         scene3d:(m.scene3d&&typeof m.scene3d==="object")?m.scene3d:{setting:"street",time:"day",objects:[{kind:"person",count:5,arrange:"scatter",spread:3}]},
+        backdrop:cleanBackdrop(m.backdrop),
         internal:cleanInternal(p.internal,userChain)}]};
   });
   if(places.length<2)return null;
@@ -1207,8 +1454,8 @@ function renderReveal(){
   const ri=S.rounds.length-1,R=S.rounds[ri];
   $("revealTitle").textContent=ri===0?"A few places that might have something to say about this":R.mode==="pivot"?"Somewhere different this time":R.mode==="tailored"?"Places for what you've found so far":"A little further in";
   $("revealStatement").textContent=S.refined;
-  $("cards").innerHTML=R.places.map((P,pi)=>{const th=thumbnail(P.moments[0].scene3d,P.name+P.moments[0].title);
-    return`<button class="pcard" data-p="${pi}"><div class="thumb">${th?`<img src="${th}" alt="">`:""}</div><div class="pc-body"><b>${esc(P.name)}</b><small>${esc(P.country)}</small><span>${esc(P.why)}</span></div></button>`}).join("");
+  $("cards").innerHTML=R.places.map((P,pi)=>`<button class="pcard" data-p="${pi}"><div class="thumb"><img alt=""></div><div class="pc-body"><b>${esc(P.name)}</b><small>${esc(P.country)}</small><span>${esc(P.why)}</span></div></button>`).join("");
+  paintThumbs(R.places.map((P,pi)=>[$("cards").querySelector(`[data-p="${pi}"] img`),P,P.moments[0]]));
 }
 $("cards").addEventListener("click",e=>{const c=e.target.closest(".pcard");if(c)enterPlace(S.rounds.length-1,+c.dataset.p,0)});
 $("walkBtn").onclick=()=>enterPlace(S.rounds.length-1,0,0);
@@ -1236,14 +1483,7 @@ function renderWalk(newScene){
   Globe3D.attach($("sideGlobe"));Globe3D.point(P.lat,P.lon);$("sideGlobeLabel").textContent=`${P.name}, ${P.country}`;
   if(newScene){if(viewerOK){Viewer.load(M.scene3d,P.name+M.title);$("viewer").classList.remove("no3d")}else{$("viewer").classList.add("no3d")}
     const h=$("viewer").querySelector(".hint3d");if(h&&S.cur.m===0&&ri===0&&pi===0)h.classList.remove("gone")
-    $("photoCard").classList.add("hidden");
-    const myKey=k;
-    findMomentPhoto(P,M).then(r=>{
-      if(curKey!==myKey||!r)return;
-      $("photoImg").src=r.url;$("photoImg").alt=r.alt||r.caption||r.page;
-      $("photoCredit").innerHTML=`${r.caption?`${esc(r.caption)}<br>`:""}Real photo via <a href="${esc(r.pageUrl)}" target="_blank" rel="noopener">Wikipedia: ${esc(r.page)}</a>`;
-      $("photoCard").classList.remove("hidden");
-    });}
+    Backdrop.set(backdropFor(P,M),P.name+M.title);}
   $("mtitle").textContent=M.title;$("mscene").innerHTML=highlightTerms(M.scene,M.terms);$("mmeaning").innerHTML=highlightTerms(M.meaning,M.terms);
   renderChat();
   const last=mi===P.moments.length-1, allSeen=R.places.every((_,j)=>S.visited[`${ri}.${j}`]);
@@ -1553,8 +1793,8 @@ function visitedMoments(){
 function renderVisited(){
   const items=visitedMoments();
   if(!items.length)return `<p class="small">You didn't stay long enough anywhere yet to relive it. Walk through a moment, then come back here.</p>`;
-  return `<div class="cards">${items.map(it=>{const th=thumbnail(it.M.scene3d,it.P.name+it.M.title);
-    return `<button class="pcard relive" data-r="${it.ri}" data-p="${it.pi}" data-m="${it.mi}"><div class="thumb">${th?`<img src="${th}" alt="">`:""}</div><div class="pc-body"><b>${esc(it.M.title)}</b><small>${esc(it.P.name)}, ${esc(it.P.country)}</small><em>Relive this moment →</em></div></button>`}).join("")}</div>`;
+  return `<div class="cards">${items.map(it=>{
+    return `<button class="pcard relive" data-r="${it.ri}" data-p="${it.pi}" data-m="${it.mi}"><div class="thumb"><img alt=""></div><div class="pc-body"><b>${esc(it.M.title)}</b><small>${esc(it.P.name)}, ${esc(it.P.country)}</small><em>Relive this moment →</em></div></button>`}).join("")}</div>`;
 }
 function challengesHtml(){
   const rejected=S.causes.filter(c=>c.verdict==="no");
@@ -1573,12 +1813,13 @@ function finish(){
     ${challengesHtml()}
     <h3 class="sec">Where this points</h3>${pointsHtml(r)}
     <h3 class="sec">What you noticed</h3>${obsList(r)}`;
+  paintThumbs([...$("summaryBody").querySelectorAll(".relive")].map(b=>{const P=S.rounds[+b.dataset.r].places[+b.dataset.p];return[b.querySelector("img"),P,P.moments[+b.dataset.m]]}));
   $("log").textContent=JSON.stringify({initial_statement:S.problem,intake:S.intake,current_statement:S.refined,user_chain:S.userChain,refinements:S.refHistory,causes:S.causes,synthesis_versions:S.synths,choices:S.choices,rounds:S.rounds.map(R=>({mode:R.mode,missing:R.missing,places:R.places.map(placeLog)})),journey:journey(),qa:qaLog(),stats:computeStats(),minutes_total:Math.round((Date.now()-S.started)/6000)/10},null,2);
   show("final");
 }
 $("summaryBody").addEventListener("click",e=>{const c=e.target.closest(".relive");if(!c)return;S.returnToFinal=true;enterPlace(+c.dataset.r,+c.dataset.p,+c.dataset.m)});
 $("finalExplore").onclick=()=>makeRound("tailored","");
-$("restart").onclick=()=>{S=fresh();$("problem").value="";$("startBtn").disabled=true;show("intro")};
+$("restart").onclick=()=>{S=fresh();$("problem").value="";$("startBtn").disabled=true;Backdrop.set(BACKDROP_DEFAULT,"worldmirror");show("intro")};
 $("restartTop").onclick=()=>$("restart").onclick();
 
 /* ---------- Self-hosted extras: study code + session logging ---------- */
