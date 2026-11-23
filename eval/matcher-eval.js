@@ -62,8 +62,8 @@ const str = { type: "string" };
 const SCHEMA = {
   type: "object", required: ["user_chain", "places"], props: {
     user_chain: {
-      type: "object", required: ["position", "problem", "belief", "feeling", "outcome", "sub_beliefs"], props: {
-        position: str, problem: str, belief: str, feeling: str, outcome: str,
+      type: "object", required: ["at_stake", "position", "problem", "belief", "feeling", "outcome", "sub_beliefs"], props: {
+        at_stake: str, position: str, problem: str, belief: str, feeling: str, outcome: str,
         sub_beliefs: { type: "array", min: 2, max: 4, items: {
           type: "object", required: ["id", "belief", "evidence", "source", "confidence"], props: {
             id: str, belief: str, evidence: str,
@@ -147,7 +147,7 @@ function report(r) {
   L.push(`Schema: ${r.schemaErrors.length ? "FAIL" : "ok"}   App parser accepts it: ${r.appParses ? "yes" : "NO"}`);
   r.schemaErrors.forEach(e => L.push(`  - ${e}`));
   r.notes.forEach(n => L.push(`  ! ${n}`));
-  L.push(`\nChain\n  position: ${ch.position}\n  problem:  ${ch.problem}\n  belief:   ${ch.belief}\n  feeling:  ${ch.feeling}\n  outcome:  ${ch.outcome}`);
+  L.push(`\nChain\n  at stake: ${ch.at_stake}\n  position: ${ch.position}\n  problem:  ${ch.problem}\n  belief:   ${ch.belief}\n  feeling:  ${ch.feeling}\n  outcome:  ${ch.outcome}`);
   L.push(`Sub-beliefs`);
   (ch.sub_beliefs || []).forEach(b => L.push(`  ${b.id} [${b.source}, ${b.confidence}] ${b.belief}\n      evidence: ${b.evidence}`));
   (r.out.places || []).forEach((p, i) => {

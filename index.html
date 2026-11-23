@@ -198,6 +198,7 @@ body.walking #topbar{display:none}
 .qa+.qa{margin-top:12px}
 .qa .q{margin:0 0 4px;font-size:14px;font-weight:500;color:var(--accent-text)}
 .qa .a{margin:0;font-size:15px;line-height:1.55;color:var(--ink2)}
+.qa.guide .a{font-family:var(--serif);font-size:19px;line-height:1.35;color:var(--ink)}
 .qa .a.pending{color:var(--dim);font-style:italic}
 #askForm{display:flex;flex-direction:column;gap:8px}
 #askForm .field{border-radius:12px;padding:6px 6px 6px 14px;background:rgba(255,255,255,.06);align-items:center}
@@ -410,8 +411,8 @@ details.log pre{white-space:pre-wrap;word-break:break-word;background:var(--card
       <p class="mtitle" id="mtitle"></p>
       <p class="mscene" id="mscene"></p>
       <p class="meaning" id="mmeaning"></p>
-      <div class="chips" id="suggest"></div>
       <div id="chatlog" aria-live="polite"></div>
+      <div class="chips" id="suggest"></div>
     </div>
     <form id="askForm">
       <label for="askInput" class="lbl" style="padding:0;font-size:12px">Ask or respond</label>
@@ -966,13 +967,13 @@ function journey(){
   tick();
   const out=[];
   S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>{if(!S.visited[`${ri}.${pi}`])return;
-    out.push({place:`${P.name}, ${P.country}`,moments:P.moments.map((m,mi)=>{const k=mk(ri,pi,mi);return{moment:m.title,seen:S.dwell[k]!==undefined,seconds:Math.round((S.dwell[k]||0)/1000),questions_asked:(S.chats[k]||[]).map(c=>c.q)}}).filter(x=>x.seen)})}));
+    out.push({place:`${P.name}, ${P.country}`,moments:P.moments.map((m,mi)=>{const k=mk(ri,pi,mi);return{moment:m.title,seen:S.dwell[k]!==undefined,seconds:Math.round((S.dwell[k]||0)/1000),questions_asked:(S.chats[k]||[]).filter(c=>c.q).map(c=>c.q)}}).filter(x=>x.seen)})}));
   return out;
 }
 function qaLog(){
   const out=[];
   S.rounds.forEach((R,ri)=>R.places.forEach((P,pi)=>P.moments.forEach((M,mi)=>{
-    (S.chats[mk(ri,pi,mi)]||[]).forEach(c=>out.push({place:`${P.name}, ${P.country}`,moment:M.title,question:c.q,answer:c.a}));
+    (S.chats[mk(ri,pi,mi)]||[]).forEach(c=>out.push({place:`${P.name}, ${P.country}`,moment:M.title,question:c.q||"(guide spoke first)",answer:c.a}));
   })));
   return out;
 }
@@ -995,9 +996,10 @@ $("justShow").onclick=()=>begin(true);
 $("exampleBtn").onclick=()=>{$("problem").value="I keep putting off starting things until I feel ready, and I'm starting to feel like everyone around me is further along.";$("problem").dispatchEvent(new Event("input"));$("problem").focus()};
 
 /* ---------- Intake: adaptive questions that fill in the user's chain and separate the sub-beliefs ---------- */
-const INTAKE_DIMS=["position","problem","belief","feeling","outcome","sub_beliefs"];
+const INTAKE_DIMS=["at_stake","position","problem","belief","feeling","outcome","sub_beliefs"];
 const INTAKE_MAX=5;
 const INTAKE_FALLBACK=[
+  {targets:["at_stake"],question:"If this goes the way you fear, what would you lose?",options:["My freedom","All my hard work","My sense of direction"]},
   {targets:["position"],question:"Where does this tend to happen, and who's around when it does?",options:["At school or work","In front of friends","On my own"]},
   {targets:["problem"],question:"What does the situation seem to ask of you that feels out of reach?",options:["Better results","Being confident","Keeping up"]},
   {targets:["belief","sub_beliefs"],question:"If it goes badly, what would that say about you?",options:["That I'm not good enough","That people will judge me","I'm not sure"]},
@@ -1007,7 +1009,8 @@ function intakePrompt(asked){
   return `You help WorldMirror, a reflection tool, understand a person before it picks places in the world for them to explore. They wrote: "${S.problem}"
 ${asked.length?`Questions asked so far and their answers (an empty answer means they skipped it): ${JSON.stringify(asked.map(x=>({question:x.question,answer:x.answer})))}`:"No questions asked yet."}
 
-WorldMirror will look for scenes where someone is in a similar position, facing a similar problem, but reading it differently. To choose them, it needs a usable sense of five things:
+WorldMirror will look for scenes where someone is in a similar position, facing a similar problem, but reading it differently. To choose them, it needs a usable sense of six things:
+- at_stake: what they are most afraid of losing, or most want to protect, if this goes badly (their freedom or independence, the work they've already put in, their sense of direction, being needed, a relationship, their security). This is usually the heart of it, and every scene has to speak to it.
 - position: where this happens, their role there, and who is around, watching, choosing, or comparing
 - problem: the gap they notice between what they have or can do and what the situation asks of them
 - belief: what that gap seems to mean about them, and why it would be bad
@@ -1016,16 +1019,18 @@ WorldMirror will look for scenes where someone is in a similar position, facing 
 
 The belief often rests on more than one separate worry (the sub-beliefs). "I'm not good enough" might rest on "my effort should equal the outcome," "a mistake makes my work worth less," or "being watched means being measured on everything." Each needs a different scene, so it matters which ones are really there. When their answers point to more than one, or you can't tell which, ask a question that tells them apart, for example: "Is it more about how the work turns out, or about who sees it?"
 
+Don't assume the worry is social (being judged, awkwardness, reading other people's signals) unless they say so. Many worries are about something else entirely: losing freedom, wasting effort, being stuck on the wrong path, not having enough. Follow what they actually say matters to them. In one real session, a person's main fear was losing her freedom by moving back home, but the questions and places drifted toward social awkwardness, and none of the places fit.
+
 Judge what you actually know from their own words, not from guesses. An answer that is vague, generic, or sidesteps the question doesn't count as knowing it. Then decide:
-- If something important is still missing or unclear, ask one more question aimed at it. A question doesn't have to cover one thing at a time: it can reach two together if that's natural ("when it happens, who's around, and what goes through your head?"), or follow up on something they said that hints at more. The belief and the worries under it matter most; the position comes next, since a scene has to put someone where they are.
+- If something important is still missing or unclear, ask one more question aimed at it. A question doesn't have to cover one thing at a time: it can reach two together if that's natural ("when it happens, who's around, and what goes through your head?"), or follow up on something they said that hints at more. What's at stake and the belief (with the worries under it) matter most; the position comes next, since a scene has to put someone where they are.
 - If something was skipped, don't ask it again the same way. Try a different, gentler angle once, then let it go.
 - If you have enough to choose places well, stop. "Enough" means a usable sense of each and of the main worries under the belief, not certainty: a few honest words per thing is plenty, and most people are ready after 2 to 4 questions. Each extra question costs them patience, so don't ask for the sake of it or to polish what you already know. ${asked.length>=INTAKE_MAX-1?"This is the last question you may ask, so ask the one that matters most, or stop.":""}
 
-A question is one plain sentence, warm and curious, in second person, easy to answer in a few words. Build on their own words. Use everyday language: never use words like position, problem, belief, outcome, or sub-belief in the question. Don't ask about their past or why they became this way. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
+A question is one plain sentence, warm and curious, in second person, easy to answer in a few words. Build on their own words. Use everyday language: never use words like position, problem, belief, outcome, at stake, or sub-belief in the question. Don't ask about their past or why they became this way. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
 Give 2 or 3 short example answers (2 to 6 words, in their voice) they can tap, varied enough that none feels like the expected one.
 
 Respond with ONLY JSON:
-{"known":{"position":"what you know, or empty","problem":"...","belief":"...","feeling":"...","outcome":"...","sub_beliefs":["separate worries under the belief that you can see so far"]},"done":false,"question":{"targets":["position | problem | belief | feeling | outcome | sub_beliefs"],"question":"...","options":["...","..."]}}
+{"known":{"at_stake":"what you know, or empty","position":"...","problem":"...","belief":"...","feeling":"...","outcome":"...","sub_beliefs":["separate worries under the belief that you can see so far"]},"done":false,"question":{"targets":["at_stake | position | problem | belief | feeling | outcome | sub_beliefs"],"question":"...","options":["...","..."]}}
 When done is true, set "question" to null.`;
 }
 function cleanIntakeQ(r){
@@ -1133,7 +1138,7 @@ function roundPrompt(mode,missing,template){
 function cleanChain(c){
   if(!c||typeof c!=="object")return null;
   const s=k=>String(c[k]||"");
-  return{position:s("position"),problem:s("problem"),belief:s("belief"),feeling:s("feeling"),outcome:s("outcome"),
+  return{at_stake:s("at_stake"),position:s("position"),problem:s("problem"),belief:s("belief"),feeling:s("feeling"),outcome:s("outcome"),
     sub_beliefs:(Array.isArray(c.sub_beliefs)?c.sub_beliefs:[]).filter(b=>b&&b.belief).slice(0,4).map((b,n)=>({id:String(b.id||`sb${n+1}`),belief:String(b.belief),evidence:String(b.evidence||""),source:String(b.source||""),confidence:String(b.confidence||"")}))};
 }
 function cleanBackdrop(b){
@@ -1267,6 +1272,7 @@ function renderWalk(newScene){
   if(newScene){World.set(backdropFor(P,M),P.name+M.title);$("panelScroll").scrollTop=0}
   $("mtitle").textContent=M.title;$("mscene").textContent=M.scene;$("mmeaning").textContent=M.meaning;
   renderChat();
+  if(newScene)openGuide();
   $("nextM").textContent=pi<R.places.length-1?"Next place":"Pause and check in";
   $("prevM").textContent=S.returnToFinal?"← Summary":"← Back";
   renderSide();
@@ -1286,7 +1292,7 @@ function renderSide(){
 function renderResearch(){
   const R=S.rounds[S.cur?S.cur.r:S.rounds.length-1];if(!R)return;
   const ch=S.userChain;
-  $("readout").innerHTML=(ch?`<dt>User chain</dt><dd>${esc(ch.belief)}</dd>${ch.sub_beliefs.map(b=>`<dd>${esc(b.id)}: ${esc(b.belief)} (${esc(b.source)}, ${esc(b.confidence)})</dd>`).join("")}`:"")+
+  $("readout").innerHTML=(ch?`<dt>User chain</dt>${ch.at_stake?`<dd>At stake: ${esc(ch.at_stake)}</dd>`:""}<dd>${esc(ch.belief)}</dd>${ch.sub_beliefs.map(b=>`<dd>${esc(b.id)}: ${esc(b.belief)} (${esc(b.source)}, ${esc(b.confidence)})</dd>`).join("")}`:"")+
     R.places.map(p=>{const intl=(p.moments[0]&&p.moments[0].internal)||{};
       return `<dt>${esc(p.name)}</dt><dd>${esc(p.why)}</dd>${intl.target_sub_belief||intl.lever?`<dd>Targets ${esc(intl.target_sub_belief_text||intl.target_sub_belief)}${intl.lever?` · lever: ${esc(intl.lever)}`:""}</dd>`:""}${intl.visible_outcome?`<dd>Predicted: ${esc(intl.predicted_outcome)} → Shows: ${esc(intl.visible_outcome)}</dd>`:""}`;
     }).join("")+(S.refHistory.length?`<dt>Refinements</dt>`+S.refHistory.map(h=>`<dd>${esc(h.refined)}${h.shift?` <em>(${esc(h.shift)})</em>`:""}</dd>`).join(""):"");
@@ -1297,9 +1303,9 @@ let refining=null;
 function refine(ri,pi){
   if(aiOff)return;
   const P=S.rounds[ri].places[pi];
-  const touched=P.moments.some((_,mi)=>{const k=mk(ri,pi,mi);return(S.chats[k]||[]).length});
+  const touched=P.moments.some((_,mi)=>{const k=mk(ri,pi,mi);return(S.chats[k]||[]).some(c=>c.q)});
   if(!touched)return;
-  const sig=JSON.stringify(P.moments.map((_,mi)=>(S.chats[mk(ri,pi,mi)]||[]).map(c=>c.q)));
+  const sig=JSON.stringify(P.moments.map((_,mi)=>(S.chats[mk(ri,pi,mi)]||[]).filter(c=>c.q).map(c=>c.q)));
   S.refSig=S.refSig||{};if(S.refSig[`${ri}.${pi}`]===sig)return;S.refSig[`${ri}.${pi}`]=sig;
   const run=async()=>{const sample=await getSample();if(!sample){aiOff=true;return}
     $("refStatus").textContent="Updating as you go...";
@@ -1342,75 +1348,105 @@ async function pivotWithContext(context){
 }
 
 /* ---------- Ask about the moment ---------- */
+/* The guide leads each moment through a loop: project onto the person in the scene,
+   show the outcome, project back onto their own life, then let them compare.
+   A chat entry with an empty q is the guide speaking first. */
 const CONNECT_Q="Help me see the connection";
+const said=log=>log.filter(c=>c.q);
+function transcript(log){return log.map(c=>`${c.q?`Person: ${c.q}\n`:""}Guide: ${c.a}`).join("\n")}
 function renderChat(){
   const M=curMoment(),log=S.chats[curKey]||[];
   const nx=S.nextQs[curKey]||{reactions:M.reactions||[],questions:M.questions},unasked=q=>!log.some(c=>c.q===q);
   $("suggest").innerHTML=nx.reactions.filter(unasked).map(q=>`<button class="chip react" data-q="${esc(q)}">${esc(q)}</button>`).join("")+
     nx.questions.filter(unasked).map(q=>`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")+
-    (log.length>=3&&S.stuck[curKey]&&!log.some(c=>c.q===CONNECT_Q)?`<button class="chip" data-q="${esc(CONNECT_Q)}">${esc(CONNECT_Q)}</button>`:"");
-  $("chatlog").innerHTML=log.map(c=>`<div class="qa"><p class="q">${esc(c.q)}</p><p class="a">${esc(c.a)}</p></div>`).join("");
+    (said(log).length>=2&&S.stuck[curKey]&&!log.some(c=>c.q===CONNECT_Q)?`<button class="chip" data-q="${esc(CONNECT_Q)}">${esc(CONNECT_Q)}</button>`:"");
+  $("chatlog").innerHTML=log.map(c=>`<div class="qa${c.q?"":" guide"}">${c.q?`<p class="q">${esc(c.q)}</p>`:""}<p class="a">${esc(c.a)}</p></div>`).join("");
 }
 $("suggest").addEventListener("click",e=>{const c=e.target.closest(".chip");if(c)ask(c.dataset.q)});
 $("askForm").addEventListener("submit",e=>{e.preventDefault();const q=$("askInput").value.trim();if(q){$("askInput").value="";ask(q)}});
-let asking=false;
-async function ask(q){
-  if(asking)return;asking=true;
-  const key=curKey,P=curPlace(),M=curMoment(),log=(S.chats[key]=S.chats[key]||[]);
-  const entry={q,a:""};log.push(entry);renderChat();$("panelScroll").scrollTop=$("panelScroll").scrollHeight;
-  const ansEl=$("chatlog").lastElementChild.querySelector(".a");ansEl.textContent="Thinking...";ansEl.classList.add("pending");
-  $("askBtn").disabled=true;
-  const sample=aiOff?null:await getSample();
-  if(!sample){entry.a="Asking questions needs the AI, which isn't available in this view.";ansEl.textContent=entry.a;ansEl.classList.remove("pending");$("askBtn").disabled=false;asking=false;return}
-  const convo=log.slice(0,-1).map(c=>`Q: ${c.q}\nA: ${c.a}`).join("\n");
-  try{
-    const I=M.internal||{};
-    await sample(`You are a local guide inside WorldMirror: curious, warm, and specific, like a friend who lives here and loves showing people around. Respectful, never exoticizing, and honest when something varies between people or regions. The person is standing in this moment:
+function guidePrompt(P,M,log,q){
+  const I=M.internal||{},ch=S.userChain||{};
+  return `You are the guide inside WorldMirror, a reflection tool. You walk a person through one moment in a real place so they can notice, in their own words, a different way to see what's on their mind. You never give advice.
 Place: ${P.name}, ${P.country}
 Moment: ${M.title}. ${M.scene}
 Background: ${M.meaning}
-They came to WorldMirror with this on their mind: "${S.refined}". Don't bring that up unless their question invites it.
-${I.visible_outcome?`Hidden context, which you must never reveal, quote, or paraphrase directly. It only helps you point at the right detail: the person in the scene they're meant to identify with: "${I.protagonist}"; the belief they might project onto that person: "${I.projected_belief}"; what actually happens in the scene: "${I.visible_outcome}"; the rule that explains it: "${I.scene_belief}".
-`:""}
-How to answer:
-- If they put themselves in the scene or project a worry onto someone there ("I would freeze up", "Wouldn't people judge you?", "No one would want that one"), answer with one specific, visible detail from the scene that bears on the worry they just expressed: what that person does next, how others react, what's physically there. Don't reassure ("Totally understandable!"), don't coach ("Try a short, confident opener"), and don't state the lesson.
-- If they ask how this relates to their issue or what it means for them (including "${CONNECT_Q}"), don't supply the metaphor. Point them back at what happens in the scene with a question, for example: "What did you expect would happen to the mug on the seconds shelf? What happened instead?"
-- Otherwise, when they share a reaction or ask out of curiosity: start by acknowledging the feeling or what they noticed, by saying where it comes from ("That calm comes from..."), not by praising it. Explain the cultural, historical, or practical reason plainly. Mention one small detail in the moment they might have missed, taken from the scene as described or from well-documented facts.
-- Follow-up suggestions are shown to them separately, so don't add any to your answer.
-- Stick to well-documented facts about this place and practice. Don't invent local details (how groups form, what regulars do, what someone said) to make a point. If you're not sure, say so.
-- No flattery ("Exactly!", "That's a lovely perspective").
-- No advice, tips, or action plans.
-${convo?`Conversation so far:\n${convo}\n`:""}Their question: ${q}
+What they came in with: "${S.refined}"${ch.at_stake?`\nWhat's at stake for them: "${ch.at_stake}"`:""}
+${I.visible_outcome?`
+How this moment is designed (for you only; never read it out, quote it, or name it as a lesson):
+- The person in the scene they're meant to picture themselves as: ${I.protagonist}
+- The expectation you are testing (the belief they may project onto that person): ${I.projected_belief}
+- What that belief would make them expect: ${I.predicted_outcome}
+- What actually happens in the scene: ${I.visible_outcome}
+- The project-back question: ${I.reapply_question}
 
-Answer in 2 to 4 sentences of plain conversational prose. No lists, no markdown, no em dashes.`,
-      {modelTier:"quick",cache:false,onText:({text})=>{entry.a=text;if(curKey===key){ansEl.textContent=text;ansEl.classList.remove("pending")}}});
-  }catch(e){entry.a=e&&e.text?e.text:(e&&e.code==="rate_limited"?"Too many questions at once. Try again in a moment.":e&&e.code==="bad_code"?"The study code wasn't accepted.":"That question didn't go through. Try asking again.");if(e&&e.code==="not_granted")aiOff=true;if(curKey===key)ansEl.textContent=entry.a}
-  ansEl.classList.remove("pending");$("askBtn").disabled=false;asking=false;if(curKey===key)renderChat();
-  if(entry.a&&sample)suggestNext(key,P,M);
+Follow this loop. Work out from the conversation which step you're on, and only move on once they've answered the current step.
+1. PROJECT ONTO: Ask what they expect will happen to the person in the scene. Use the expectation above as the one you are testing. Example: "What do you think will happen to the part while they're on break?"
+2. SHOW THE OUTCOME: Point to one concrete detail from what actually happens. Describe it. Don't explain what it means.
+3. PROJECT BACK: Ask them to apply it to their own life, using the project-back question, in your own words and fitted to what they've said. Example: "When you step away from an assignment, what actually happens when you come back to it?"
+4. LET THEM COMPARE: Wait for them to say the difference in their own words. Don't say the lesson for them. Once they've said it, repeat it back in their words and ask one open question that lets them go further.
+`:`
+There is no designed loop for this moment. Answer what they ask about the place briefly and plainly, and end with one question about what they notice.
+`}
+Rules:
+- Keep replies to 2 to 3 sentences. End with one question.
+- Don't explain facts unless asked, and then answer in one sentence and return to the loop.
+- Don't correct the user. If they say something about the scene, ask about it.
+- If they push back ("but school is different"), use it to ask the project-back question.
+- If they say "I don't know", "I don't see the connection", or similar (including "${CONNECT_Q}"), don't repeat your question. Ask a smaller, more concrete one, or connect it to something they already said.
+- Repeat their answers back accurately. Never put words in their mouth.
+- If their question links to their own life (for example "who does the food go to?"), use it as a bridge to project back.
+- Stick to well-documented facts about this place and practice; don't invent details. No flattery, no reassurance, no advice.
+- Plain conversational prose. No lists, no markdown, no em dashes.
+${log.length?`\nConversation so far:\n${transcript(log)}\n`:""}
+${q?`Their latest message: ${q}`:`They have just arrived at this moment and haven't said anything yet. Start the loop at step 1: in one short sentence, point them to the person in the scene they should picture themselves as, then ask what they expect will happen to that person.`}`;
+}
+let asking=false;
+async function runGuide(key,P,M,q){
+  asking=true;
+  const log=(S.chats[key]=S.chats[key]||[]);
+  const before=log.slice();
+  const entry={q,a:""};log.push(entry);
+  if(curKey===key){renderChat();$("panelScroll").scrollTop=$("panelScroll").scrollHeight}
+  const el=()=>curKey===key?$("chatlog").lastElementChild&&$("chatlog").lastElementChild.querySelector(".a"):null;
+  const put=(t,pending)=>{entry.a=pending?"":t;const a=el();if(a){a.textContent=t;a.classList.toggle("pending",!!pending)}};
+  put("Thinking…",true);$("askBtn").disabled=true;
+  const sample=aiOff?null:await getSample();
+  if(!sample){put(q?"Talking with the guide needs the AI, which isn't available in this view.":"");if(!q)log.pop();$("askBtn").disabled=false;asking=false;if(curKey===key)renderChat();return}
+  try{await sample(guidePrompt(P,M,before,q),{modelTier:"quick",cache:false,onText:({text})=>put(text)})}
+  catch(e){if(e&&e.code==="not_granted")aiOff=true;
+    if(!q){log.pop()}else put(e&&e.code==="rate_limited"?"Too many messages at once. Try again in a moment.":e&&e.code==="bad_code"?"The study code wasn't accepted.":"That didn't go through. Try again.")}
+  $("askBtn").disabled=false;asking=false;
+  if(curKey===key){renderChat();$("panelScroll").scrollTop=$("panelScroll").scrollHeight}
+  if(entry.a&&sample&&log.includes(entry))suggestNext(key,P,M);
+}
+function ask(q){if(asking||!curKey)return;runGuide(curKey,curPlace(),curMoment(),q)}
+/* The guide speaks first when a moment opens (step 1 of the loop). */
+function openGuide(){
+  const key=curKey,M=curMoment();
+  if(asking||aiOff||!key||(S.chats[key]||[]).length||!(M.internal&&M.internal.visible_outcome))return;
+  runGuide(key,curPlace(),M,"");
 }
 
-/* After each answer, suggest the next step toward noticing the shift on their own. */
+/* After each guide turn, suggest things the person might say next. */
 async function suggestNext(key,P,M){
   const log=S.chats[key]||[],i=M.internal||{};
   if(!i.visible_outcome)return;
+  const lastGuide=(log[log.length-1]||{}).a||"";
   try{
-    const r=await (await getSample()).json(`You suggest the next questions a person might tap while exploring a place in WorldMirror, a reflection tool that never gives advice. The person came in with: "${S.refined}"
+    const r=await (await getSample()).json(`You suggest short replies a person might tap while talking with the guide in WorldMirror, a reflection tool that never gives advice. The person came in with: "${S.refined}"
 Place: ${P.name}, ${P.country}
 Moment: ${M.title}. ${M.scene}
-Background: ${M.meaning}
-What this moment is designed to do (never shown to them): they're meant to step into the place of "${i.protagonist}" (${i.role_clarity}), project their own belief "${i.projected_belief}", expect "${i.predicted_outcome}", and then see what actually happens: "${i.visible_outcome}". The rule that explains it: "${i.scene_belief}".
-Conversation with the local guide so far:
-${log.map(c=>`Q: ${c.q}\nA: ${c.a}`).join("\n")}
+The guide walks them through a loop: picture themselves as "${i.protagonist}" and say what they expect will happen (the belief being tested: "${i.projected_belief}"), see what actually happens ("${i.visible_outcome}"), then apply it to their own life. None of this is shown to them.
+Conversation so far:
+${transcript(log)}
 
-Write one reaction and one question in their voice, to the guide, that each move them one step along this path. The reaction is a short first-person comment they might be feeling right now, after the last answer, that names a feeling or a surprise ("I didn't expect anyone to go for the stamped ones."). The question moves them from what they see to why. Work out where they are and take the next step, not several at once:
-1. Understand the scene and find their role: if their questions show confusion about what's happening or who's who, clarify that first, pointing them toward the person they're meant to identify with.
-2. Step into that person's place: questions that invite them to imagine being that person and say what they expect will happen to them.
-3. See what actually happens, and why: questions that bring the visible outcome into view, then ask what explains it, staying inside the scene. Don't ask them to find a similar moment in their own life.
-If the scene offers both the judge's role and the judged role, once they understand the scene, a question that lets them swap sides is the strongest step.
-Never state or hint at the rule that explains the outcome. For example, in a pottery seconds shop, a user who asked "Why are these ones cheaper?" understands the scene. Good next steps: "Would anyone actually pick the mug with the wonky handle?" and "Which shelf do shoppers go to first?" Then: "If I were that mug, what would being on this shelf mean?" Bad: "So flaws make things more valuable?" because it hands them the conclusion.
-Tie both to something specific in this moment. Build on what they just asked and how they reacted. Don't repeat anything already asked. Keep each under about 12 words, the way a person would talk.
+The guide's last message was: "${lastGuide}"
+Write one reply and one question, in the person's voice, each under about 12 words, the way a person would talk:
+- "reaction": a plausible, honest answer to the guide's last question. It can be a guess, a worry, or uncertainty ("I'd guess they throw it out."). Don't make it the right or insightful answer, and never state or hint at the lesson.
+- "question": something they might ask the guide about what they see in the scene.
+Don't repeat anything already said.
 
-Finally, judge "stuck": true if, from their questions and reactions, they still don't seem to see what the scene has to do with what they came in with (they're circling the mechanics, asking why it matters, or saying they don't get it); false if they're engaging with the meaning or making connections of their own.
+Finally, judge "stuck": true if they still don't seem to see what the scene has to do with what they came in with (circling the mechanics, asking why it matters, saying they don't get it); false if they're engaging with it.
 No em dashes.
 Respond with ONLY JSON: {"reaction":"...","question":"...","stuck":false}`,{modelTier:"quick",cache:false});
     const nx={reactions:r&&r.reaction?[String(r.reaction)]:[],questions:r&&r.question?[String(r.question)]:[]};
@@ -1528,7 +1564,7 @@ function computeStats(){
     placesOffered++;if(S.visited[`${ri}.${pi}`])placesVisited++;
     P.moments.forEach((M,mi)=>{momentsOffered++;const k=mk(ri,pi,mi);
       if(S.dwell[k]!==undefined){momentsVisited++;ms+=S.dwell[k]||0}
-      questions+=(S.chats[k]||[]).length;
+      questions+=(S.chats[k]||[]).filter(c=>c.q).length;
     });
   }));
   return{placesOffered,placesVisited,momentsOffered,momentsVisited,questions,minutes:Math.round(ms/6000)/10};

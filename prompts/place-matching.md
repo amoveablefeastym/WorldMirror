@@ -56,13 +56,19 @@ The position match has to be clear enough at the start to begin projection. The 
 
 ## Step 1: Map the user's chain
 
-From everything you know about the person below, fill in their position, problem, belief, feeling, and outcome. Apply the tests: the problem must not be about who they are, and the belief must be something someone else could think differently about.
+From everything you know about the person below, first name what's at stake: the thing they are most afraid of losing, or most want to protect, if this goes badly (their freedom, the work they've already put in, their direction, their security...). Use their own words. This is their primary concern, and everything else is secondary: if they said their fear is losing their freedom by moving home, the places are about freedom and independence, not about social awkwardness or reading public signals.
+
+Then fill in their position, problem, belief, feeling, and outcome. Apply the tests: the problem must not be about who they are, and the belief must be something someone else could think differently about.
 
 Then break the belief into 2 to 4 candidate sub-beliefs: the separate rules that hold up the root belief. "I'm not good enough" can rest on "my effort should equal the outcome," "a mistake makes my work worth less," and "being watched means being measured on everything." For each, give the evidence (their own words, quoted, or what you inferred it from), whether it is stated or inferred, and your confidence.
 
 Don't invent a cause the user didn't hint at. Never speculate about their past ("it seems possible you've been judged before"). If the challenge is mostly a feeling with nowhere to go rather than a belief, keep the sub-beliefs modest and mark them low confidence instead of forcing a distorted belief onto them.
 
 ## Step 2: Design each scene around one sub-belief
+
+Every scene must speak to what's at stake. The user's problem has to visibly happen in the scene, to someone they can step in for: if they fear being trapped by moving home, the protagonist faces a real loss of independence; if they fear a bad grade means all their work is lost, the protagonist's work visibly fails. In a real session, a person worried about life after graduation was shown a hawker food centre, a commuter ferry, and a capsule hotel. She said "none of these places allowed me to see the problem manifest in the scene" and found them random. Moving through a public space is not the same as facing the problem.
+
+The scene belief has to answer the specific consequence they fear with a constructive way forward, at stakes that feel comparable to theirs. The same student who believed a bad grade means all is lost responded strongly to Murano glassblowing: a piece that fails is melted down and its glass is used again, "so not all work is lost". She found a torn pizza crust "tacky", because the stakes were far below her grades, and a knife-sharpening cut irrelevant. Prefer practices where something is transformed, reused, recovered, rebuilt, or continues on a new path. Avoid bare "flaws are fine" or "imperfection is beautiful" scenes and trivial mishaps, which only say the setback doesn't matter instead of showing what can come of it.
 
 Each place targets one sub-belief. Across the three places, cover different sub-beliefs where possible. A scene aimed at the wrong sub-belief fails even if it is well built: a fish auction showing "there's always a next tub" didn't help a user who wasn't afraid of missing chances; she was afraid of being judged. Our most successful session addressed each sub-belief with a different scene. If there are only two sub-beliefs, give the one with stronger evidence two clearly different scenes.
 
@@ -82,6 +88,9 @@ Lever: the kind of change the scene offers, for the research team: meaning (the 
 ## Step 3: Reject places that fail
 
 Reject a place if any of these are true:
+The user's problem doesn't visibly happen in the scene, or the scene speaks to a secondary concern (for example, social awkwardness) instead of what's at stake for them (for example, losing their freedom).
+It is generic navigation of a public space (a food court, a ferry, transit, a hotel) with no practice that touches their concern.
+The stakes are trivial next to theirs, or the scene only shows that a flaw is acceptable without showing what can come of the setback.
 The moment isn't built on a specific, real cultural practice, or its outcome depends on someone's facial expression or mood rather than on how the practice works.
 No one in the scene is in the user's position.
 The kind of gap doesn't match, so the user's belief wouldn't apply.
@@ -163,5 +172,5 @@ Additional technical requirements for this app, on top of everything above:
 It is a quiet, painted view of the wider place, seen from a little way off, that sits behind the whole screen and sets the mood. Choose what someone would really see looking out over this place: the actual landform, whether there is water, the kind of buildings, and a time of day that fits the moment (a candlelit café at four in a Danish winter is "night"; an early market is "dawn").
 
 Respond with ONLY JSON, no markdown:
-{"user_chain":{"position":"","problem":"","belief":"","feeling":"","outcome":"","sub_beliefs":[{"id":"sb1","belief":"","evidence":"","source":"stated | inferred","confidence":"low | medium | high"}]},
+{"user_chain":{"at_stake":"","position":"","problem":"","belief":"","feeling":"","outcome":"","sub_beliefs":[{"id":"sb1","belief":"","evidence":"","source":"stated | inferred","confidence":"low | medium | high"}]},
 "places":[{"name":"...","country":"...","lat":0,"lon":0,"why":"One or two sentences, user-facing, descriptive only.","moment":{"title":"Short name for the scene","scene":"...","meaning":"...","reactions":["..."],"questions":["...","...","..."],"backdrop":{...}},"internal":{"target_sub_belief":"sb1","protagonist":"","position_match":{"shared_relationship":"","surface_difference":""},"problem_match":"","projected_belief":"","predicted_outcome":"","visible_outcome":"","scene_belief":"","feeling_cue":"","role_clarity":"","distance_check":{"not_too_far":"","not_too_close":""},"lever":"meaning | holding | setting | scale | direction","place_specific":{"unique_here":"","visitor_notice":"","mood":""},"reapply_question":"One open question, never advice."}}]}
