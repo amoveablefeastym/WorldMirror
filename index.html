@@ -999,25 +999,24 @@ $("exampleBtn").onclick=()=>{$("problem").value="I keep putting off starting thi
 const INTAKE_DIMS=["at_stake","position","problem","belief","feeling","outcome","sub_beliefs"];
 const INTAKE_MAX=5;
 const INTAKE_FALLBACK=[
-  {targets:["at_stake"],question:"If this goes the way you fear, what would you lose?",options:["My freedom","All my hard work","My sense of direction"]},
-  {targets:["position"],question:"Where does this tend to happen, and who's around when it does?",options:["At school or work","In front of friends","On my own"]},
-  {targets:["problem"],question:"What does the situation seem to ask of you that feels out of reach?",options:["Better results","Being confident","Keeping up"]},
-  {targets:["belief","sub_beliefs"],question:"If it goes badly, what would that say about you?",options:["That I'm not good enough","That people will judge me","I'm not sure"]},
-  {targets:["feeling","outcome"],question:"When it happens, how do you feel, and what do you end up doing?",options:["Anxious, so I avoid it","Tired, so I lose focus","Tense, so I push harder"]}
+  {targets:["problem","position"],question:"Can you tell me a bit more about what's been going on?",options:[]},
+  {targets:["belief","feeling"],question:"When this comes up, what goes through your mind?",options:[]},
+  {targets:["at_stake"],question:"What matters most to you in all of this?",options:[]},
+  {targets:["outcome"],question:"What do you usually end up doing when it comes up?",options:[]}
 ];
 function intakePrompt(asked){
   return `You help WorldMirror, a reflection tool, understand a person before it picks places in the world for them to explore. They wrote: "${S.problem}"
 ${asked.length?`Questions asked so far and their answers (an empty answer means they skipped it): ${JSON.stringify(asked.map(x=>({question:x.question,answer:x.answer})))}`:"No questions asked yet."}
 
 WorldMirror will look for scenes where someone is in a similar position, facing a similar problem, but reading it differently. To choose them, it needs a usable sense of six things:
-- at_stake: what they are most afraid of losing, or most want to protect, if this goes badly (their freedom or independence, the work they've already put in, their sense of direction, being needed, a relationship, their security). This is usually the heart of it, and every scene has to speak to it.
+- at_stake: what they are most afraid of losing, or most want to protect, if this goes badly (their freedom or independence, the work they've already put in, their sense of direction, being needed, a relationship, their security). This is usually the heart of it, and every scene has to speak to it. These examples are for you to recognize it, never to offer to the person.
 - position: where this happens, their role there, and who is around, watching, choosing, or comparing
 - problem: the gap they notice between what they have or can do and what the situation asks of them
 - belief: what that gap seems to mean about them, and why it would be bad
 - feeling: what it feels like in the moment
 - outcome: what they end up doing as a result (avoid it, push through, withdraw, lose focus...)
 
-The belief often rests on more than one separate worry (the sub-beliefs). "I'm not good enough" might rest on "my effort should equal the outcome," "a mistake makes my work worth less," or "being watched means being measured on everything." Each needs a different scene, so it matters which ones are really there. When their answers point to more than one, or you can't tell which, ask a question that tells them apart, for example: "Is it more about how the work turns out, or about who sees it?"
+The belief often rests on more than one separate worry (the sub-beliefs). "I'm not good enough" might rest on "my effort should equal the outcome," "a mistake makes my work worth less," or "being watched means being measured on everything." Each needs a different scene, so it matters which ones are really there. When you can't tell which worries are there, ask an open question that lets them say it in their own words ("What about that worries you most?"). Never offer them a choice between possibilities you've guessed.
 
 Don't assume the worry is social (being judged, awkwardness, reading other people's signals) unless they say so. Many worries are about something else entirely: losing freedom, wasting effort, being stuck on the wrong path, not having enough. Follow what they actually say matters to them. In one real session, a person's main fear was losing her freedom by moving back home, but the questions and places drifted toward social awkwardness, and none of the places fit.
 
@@ -1026,11 +1025,17 @@ Judge what you actually know from their own words, not from guesses. An answer t
 - If something was skipped, don't ask it again the same way. Try a different, gentler angle once, then let it go.
 - If you have enough to choose places well, stop. "Enough" means a usable sense of each and of the main worries under the belief, not certainty: a few honest words per thing is plenty, and most people are ready after 2 to 4 questions. Each extra question costs them patience, so don't ask for the sake of it or to polish what you already know. ${asked.length>=INTAKE_MAX-1?"This is the last question you may ask, so ask the one that matters most, or stop.":""}
 
-A question is one plain sentence, warm and curious, in second person, easy to answer in a few words. Build on their own words. Use everyday language: never use words like position, problem, belief, outcome, at stake, or sub-belief in the question. Don't ask about their past or why they became this way. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
-Give 2 or 3 short example answers (2 to 6 words, in their voice) they can tap, varied enough that none feels like the expected one.
+Let them talk. Ask open questions only, and don't assume anything they haven't said:
+- Never ask "is it more X or Y?", never list possibilities, and never put a possible answer inside the question. Every guess you offer narrows what they might have said, and they tend to just pick one.
+- Don't guess at what they fear, feel, want, or would lose. Use only what they've actually said.
+- The first question especially: simply invite them to say more about what they wrote, in their own words, without pointing in any direction.
+Bad: "When you picture them not answering, is it more that you lose the person forever, or that you lose the feeling of being needed and close?" It assumes what they would lose and makes them choose between two guesses.
+Better: "When you picture them not answering, what goes through your mind?"
+
+A question is one plain sentence, warm and curious, in second person. Build on their own words. Use everyday language: never use words like position, problem, belief, outcome, at stake, or sub-belief in the question. Don't ask about their past or why they became this way. Never give advice, never suggest an answer is right, never use clinical language, never ask leading questions. No em dashes.
 
 Respond with ONLY JSON:
-{"known":{"at_stake":"what you know, or empty","position":"...","problem":"...","belief":"...","feeling":"...","outcome":"...","sub_beliefs":["separate worries under the belief that you can see so far"]},"done":false,"question":{"targets":["at_stake | position | problem | belief | feeling | outcome | sub_beliefs"],"question":"...","options":["...","..."]}}
+{"known":{"at_stake":"what you know, or empty","position":"...","problem":"...","belief":"...","feeling":"...","outcome":"...","sub_beliefs":["separate worries under the belief that you can see so far"]},"done":false,"question":{"targets":["at_stake | position | problem | belief | feeling | outcome | sub_beliefs"],"question":"..."}}
 When done is true, set "question" to null.`;
 }
 function cleanIntakeQ(r){
@@ -1038,7 +1043,7 @@ function cleanIntakeQ(r){
   if(r.done)return{done:true};
   const q=r.question;
   if(!q||!q.question)return null;
-  return{targets:(Array.isArray(q.targets)?q.targets:[]).map(String).filter(t=>INTAKE_DIMS.includes(t)),question:String(q.question),options:(Array.isArray(q.options)?q.options:[]).slice(0,3).map(String)};
+  return{targets:(Array.isArray(q.targets)?q.targets:[]).map(String).filter(t=>INTAKE_DIMS.includes(t)),question:String(q.question),options:[]};
 }
 let intakeQs=[],intakeI=0,intakeToken=0,intakeAI=true;
 async function startIntake(){
